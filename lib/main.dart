@@ -46,6 +46,8 @@ class _MainPageState extends State<MainPage> {
   Map<int, List<Ayat>> _paraAyats = {};
   int _currentPara = 1;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+  bool _multipleSelectMode = false;
+  final Set<int> _ayatsIndexesToRemoveInMultiSelectMode = {};
 
   @override
   void initState() {
@@ -60,6 +62,8 @@ class _MainPageState extends State<MainPage> {
   void _setCurrentPara(int index) {
     setState(() {
       _currentPara = index;
+      // changing the para exits multi select mode
+      _multipleSelectMode = false;
       _scaffoldKey.currentState?.closeDrawer();
     });
   }
@@ -144,18 +148,71 @@ class _MainPageState extends State<MainPage> {
     _saveToDisk();
   }
 
+  void _onAyahTapped(int index, bool isSelected) {
+    if (_multipleSelectMode == false) return;
+    if (isSelected) {
+      if (index < (_paraAyats[_currentPara]?.length ?? 0)) {
+        _ayatsIndexesToRemoveInMultiSelectMode.add(index);
+      }
+    } else {
+      _ayatsIndexesToRemoveInMultiSelectMode.remove(index);
+    }
+  }
+
+  void _onAyahLongPress() {
+    setState(() {
+      _multipleSelectMode = true;
+    });
+  }
+
+  void _onMultiSelectDeletePress() {
+    if (_multipleSelectMode) {
+      List<Ayat>? ayats = _paraAyats[_currentPara];
+      if (ayats == null) return;
+      for (final int index in _ayatsIndexesToRemoveInMultiSelectMode) {
+        ayats.removeAt(index);
+      }
+      setState(() {
+        _paraAyats[_currentPara] = ayats;
+      });
+
+      // update the db
+      _saveToDisk();
+    }
+  }
+
+  void _onExitMultiSelectMode() {
+    assert(_multipleSelectMode == true);
+    setState(() {
+      _multipleSelectMode = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      appBar: AppBar(),
+      appBar: AppBar(actions: [
+        if (_multipleSelectMode) ...[
+          IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: _onMultiSelectDeletePress),
+          IconButton(
+              icon: const Icon(Icons.close), onPressed: _onExitMultiSelectMode),
+        ]
+      ]),
       body: ListView.separated(
         separatorBuilder: (BuildContext context, int index) =>
             const Divider(indent: 8, endIndent: 8, color: Colors.grey),
         itemCount: _paraAyats[_currentPara]?.length ?? 0,
         itemBuilder: (context, index) {
           final text = _paraAyats[_currentPara]?.elementAt(index).text ?? "";
-          return AyatListItem(text: text);
+          return AyatListItem(
+              text: text,
+              idx: index,
+              onTap: _onAyahTapped,
+              onLongPress: _onAyahLongPress,
+              selectionMode: _multipleSelectMode);
         },
       ),
       drawer: Drawer(
@@ -191,34 +248,53 @@ class _MainPageState extends State<MainPage> {
 }
 
 class AyatListItem extends StatefulWidget {
-  const AyatListItem({super.key, required this.text});
+  const AyatListItem({
+    super.key,
+    required this.idx,
+    required this.text,
+    required this.onTap,
+    required this.onLongPress,
+    required this.selectionMode,
+  });
 
+  final int idx;
   final String text;
+  final void Function(int index, bool isSelected) onTap;
+  final VoidCallback onLongPress;
+  final bool selectionMode;
 
   @override
   State<AyatListItem> createState() => _AyatListItemState();
 }
 
 class _AyatListItemState extends State<AyatListItem> {
+  bool _selected = false;
+
   void _longPress() {
-    print("TODO Long press\n");
+    widget.onLongPress();
+  }
+
+  void _onTap() {
+    setState(() {
+      _selected = !_selected;
+    });
+    widget.onTap(widget.idx, _selected);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          ListTile(
-            title: Text(
-              widget.text,
-              softWrap: true,
-              textAlign: TextAlign.right,
-              style: const TextStyle(fontFamily: "Al Mushaf", fontSize: 24),
-            ),
-            onLongPress: _longPress,
-          ),
-        ]);
+    return ListTile(
+      leading: widget.selectionMode
+          ? Icon(_selected ? Icons.check_box : Icons.check_box_outline_blank)
+          : const Padding(padding: EdgeInsets.zero),
+      title: Text(
+        widget.text,
+        softWrap: true,
+        textAlign: TextAlign.right,
+        style: const TextStyle(fontFamily: "Al Mushaf", fontSize: 24),
+      ),
+      onLongPress: widget.selectionMode ? null : _longPress,
+      onTap: widget.selectionMode ? _onTap : null,
+    );
   }
 }
