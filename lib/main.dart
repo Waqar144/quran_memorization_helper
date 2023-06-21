@@ -193,13 +193,28 @@ class _MainPageState extends State<MainPage> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(actions: [
+        // In Multiselect mode show delete + close
         if (_multipleSelectMode) ...[
           IconButton(
               icon: const Icon(Icons.delete),
               onPressed: _onMultiSelectDeletePress),
           IconButton(
               icon: const Icon(Icons.close), onPressed: _onExitMultiSelectMode),
-        ]
+        ] else
+          // Otherwise show three dot menu
+          PopupMenuButton<String>(
+            onSelected: _handleClick,
+            icon: const Icon(Icons.more_vert),
+            itemBuilder: (BuildContext context) {
+              return {'Import Ayahs...', 'Import Json DB File'}
+                  .map((String choice) {
+                return PopupMenuItem<String>(
+                  value: choice,
+                  child: Text(choice),
+                );
+              }).toList();
+            },
+          ),
       ]),
       body: ListView.separated(
         separatorBuilder: (BuildContext context, int index) =>
@@ -224,23 +239,6 @@ class _MainPageState extends State<MainPage> {
               onTap: () => _setCurrentPara(index + 1),
             );
           },
-        ),
-      ),
-      floatingActionButton: PopupMenuButton<String>(
-        onSelected: _handleClick,
-        surfaceTintColor: Colors.red,
-        itemBuilder: (BuildContext context) {
-          return {'Import Ayahs...', 'Import Json DB File'}
-              .map((String choice) {
-            return PopupMenuItem<String>(
-              value: choice,
-              child: Text(choice),
-            );
-          }).toList();
-        },
-        child: const FloatingActionButton(
-          onPressed: null,
-          child: Icon(Icons.add),
         ),
       ),
     );
