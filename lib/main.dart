@@ -47,12 +47,18 @@ class _MainPageState extends State<MainPage> {
   int _currentPara = 1;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   bool _multipleSelectMode = false;
+  final ValueNotifier<bool> _multipleSelectMode = ValueNotifier(false);
   final Set<int> _ayatsIndexesToRemoveInMultiSelectMode = {};
 
   @override
   void initState() {
+    _multipleSelectMode.addListener(onMultiSelectChange);
     _readJsonFromDisk();
     super.initState();
+  }
+
+  void onMultiSelectChange() {
+    _ayatsIndexesToRemoveInMultiSelectMode.clear();
   }
 
   void _importExistingJson() {
@@ -60,10 +66,15 @@ class _MainPageState extends State<MainPage> {
   }
 
   void _setCurrentPara(int index) {
+    if (index == _currentPara) return;
+
+    // para changed, clear the remove list
+    _ayatsIndexesToRemoveInMultiSelectMode.clear();
+
     setState(() {
       _currentPara = index;
       // changing the para exits multi select mode
-      _multipleSelectMode = false;
+      _multipleSelectMode.value = false;
       _scaffoldKey.currentState?.closeDrawer();
     });
   }
@@ -150,6 +161,7 @@ class _MainPageState extends State<MainPage> {
 
   void _onAyahTapped(int index, bool isSelected) {
     if (_multipleSelectMode == false) return;
+    if (_multipleSelectMode.value == false) return;
     if (isSelected) {
       if (index < (_paraAyats[_currentPara]?.length ?? 0)) {
         _ayatsIndexesToRemoveInMultiSelectMode.add(index);
@@ -161,17 +173,18 @@ class _MainPageState extends State<MainPage> {
 
   void _onAyahLongPress() {
     setState(() {
-      _multipleSelectMode = true;
+      _multipleSelectMode.value = true;
     });
   }
 
   void _onMultiSelectDeletePress() {
-    if (_multipleSelectMode) {
+    if (_multipleSelectMode.value) {
       List<Ayat>? ayats = _paraAyats[_currentPara];
       if (ayats == null) return;
       for (final int index in _ayatsIndexesToRemoveInMultiSelectMode) {
         ayats.removeAt(index);
       }
+      _ayatsIndexesToRemoveInMultiSelectMode.clear();
       setState(() {
         _paraAyats[_currentPara] = ayats;
       });
@@ -182,9 +195,9 @@ class _MainPageState extends State<MainPage> {
   }
 
   void _onExitMultiSelectMode() {
-    assert(_multipleSelectMode == true);
+    assert(_multipleSelectMode.value == true);
     setState(() {
-      _multipleSelectMode = false;
+      _multipleSelectMode.value = false;
     });
   }
 
@@ -194,7 +207,7 @@ class _MainPageState extends State<MainPage> {
       key: _scaffoldKey,
       appBar: AppBar(actions: [
         // In Multiselect mode show delete + close
-        if (_multipleSelectMode) ...[
+        if (_multipleSelectMode.value) ...[
           IconButton(
               icon: const Icon(Icons.delete),
               onPressed: _onMultiSelectDeletePress),
@@ -227,7 +240,7 @@ class _MainPageState extends State<MainPage> {
               idx: index,
               onTap: _onAyahTapped,
               onLongPress: _onAyahLongPress,
-              selectionMode: _multipleSelectMode);
+              selectionMode: _multipleSelectMode.value);
         },
       ),
       drawer: Drawer(
