@@ -44,38 +44,23 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   Map<int, List<Ayat>> _paraAyats = {};
-  int _currentPara = 1;
+  final ValueNotifier<int> _currentPara = ValueNotifier<int>(1);
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   final ValueNotifier<bool> _multipleSelectMode = ValueNotifier(false);
   final Set<int> _ayatsIndexesToRemoveInMultiSelectMode = {};
 
   @override
   void initState() {
-    _multipleSelectMode.addListener(onMultiSelectChange);
+    _multipleSelectMode
+        .addListener(() => _ayatsIndexesToRemoveInMultiSelectMode.clear());
+    _currentPara.addListener(() => _multipleSelectMode.value = false);
+
     _readJsonFromDisk();
     super.initState();
   }
 
-  void onMultiSelectChange() {
-    _ayatsIndexesToRemoveInMultiSelectMode.clear();
-  }
-
   void _importExistingJson() {
     // TODO -> use file picker to get file and import
-  }
-
-  void _setCurrentPara(int index) {
-    if (index == _currentPara) return;
-
-    // para changed, clear the remove list
-    _ayatsIndexesToRemoveInMultiSelectMode.clear();
-
-    setState(() {
-      _currentPara = index;
-      // changing the para exits multi select mode
-      _multipleSelectMode.value = false;
-      _scaffoldKey.currentState?.closeDrawer();
-    });
   }
 
   void _handleClick(String value) {
@@ -143,25 +128,25 @@ class _MainPageState extends State<MainPage> {
 
   void _import() async {
     final dynamic result = await Navigator.pushNamed(context, importTextRoute,
-        arguments: _currentPara);
+        arguments: _currentPara.value);
     if (!mounted) return;
 
     List<Ayat>? importedAyats = result as List<Ayat>?;
     if (importedAyats == null) return;
 
     // merge new and old ayahs
-    final existingAyahs = _paraAyats[_currentPara];
+    final existingAyahs = _paraAyats[_currentPara.value];
     Set<Ayat> newAyahs = {};
     if (existingAyahs != null) newAyahs.addAll(existingAyahs);
     newAyahs.addAll(importedAyats);
     if (newAyahs.isEmpty) return;
 
     setState(() {
-      _paraAyats[_currentPara] = newAyahs.toList();
+      _paraAyats[_currentPara.value] = newAyahs.toList();
     });
 
     _showSnackBarMessage(
-        "Imported ${importedAyats.length} ayahs into $_currentPara");
+        "Imported ${importedAyats.length} ayahs into Para ${_currentPara.value}");
 
     _saveToDisk();
   }
@@ -169,7 +154,7 @@ class _MainPageState extends State<MainPage> {
   void _onAyahTapped(int index, bool isSelected) {
     if (_multipleSelectMode.value == false) return;
     if (isSelected) {
-      if (index < (_paraAyats[_currentPara]?.length ?? 0)) {
+      if (index < (_paraAyats[_currentPara.value]?.length ?? 0)) {
         _ayatsIndexesToRemoveInMultiSelectMode.add(index);
       }
     } else {
@@ -185,14 +170,14 @@ class _MainPageState extends State<MainPage> {
 
   void _onMultiSelectDeletePress() {
     if (_multipleSelectMode.value) {
-      List<Ayat>? ayats = _paraAyats[_currentPara];
+      List<Ayat>? ayats = _paraAyats[_currentPara.value];
       if (ayats == null) return;
       for (final int index in _ayatsIndexesToRemoveInMultiSelectMode) {
         ayats.removeAt(index);
       }
       _ayatsIndexesToRemoveInMultiSelectMode.clear();
       setState(() {
-        _paraAyats[_currentPara] = ayats;
+        _paraAyats[_currentPara.value] = ayats;
       });
 
       // update the db
@@ -209,43 +194,47 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
+    print("Main Build");
     return Scaffold(
       key: _scaffoldKey,
-      appBar: AppBar(actions: [
-        // In Multiselect mode show delete + close
-        if (_multipleSelectMode.value) ...[
-          IconButton(
-              icon: const Icon(Icons.delete),
-              onPressed: _onMultiSelectDeletePress),
-          IconButton(
-              icon: const Icon(Icons.close), onPressed: _onExitMultiSelectMode),
-        ] else
-          // Otherwise show three dot menu
-          PopupMenuButton<String>(
-            onSelected: _handleClick,
-            icon: const Icon(Icons.more_vert),
-            itemBuilder: (BuildContext context) {
-              return {'Add Ayahs...', 'Import Json DB File'}
-                  .map((String choice) {
-                return PopupMenuItem<String>(
-                  value: choice,
-                  child: Text(choice),
-                );
-              }).toList();
+      appBar: AppBar(
+          title: ValueListenableBuilder(
+            valueListenable: _currentPara,
+            builder: (context, para, _) {
+              return Text("Para $para");
             },
           ),
-      ]),
-      body: ListView.separated(
-        separatorBuilder: (BuildContext context, int index) =>
-            const Divider(indent: 8, endIndent: 8, color: Colors.grey),
-        itemCount: _paraAyats[_currentPara]?.length ?? 0,
-        itemBuilder: (context, index) {
-          final ayat = _paraAyats[_currentPara]?.elementAt(index);
-          final text = ayat?.text ?? "";
-          return AyatListItem(
-              key: ObjectKey(ayat),
-              text: text,
-              idx: index,
+          actions: [
+            // In Multiselect mode show delete + close
+            if (_multipleSelectMode.value) ...[
+              IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: _onMultiSelectDeletePress),
+              IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: _onExitMultiSelectMode),
+            ] else
+              // Otherwise show three dot menu
+              PopupMenuButton<String>(
+                onSelected: _handleClick,
+                icon: const Icon(Icons.more_vert),
+                itemBuilder: (BuildContext context) {
+                  return {'Add Ayahs...', 'Import Json DB File'}
+                      .map((String choice) {
+                    return PopupMenuItem<String>(
+                      value: choice,
+                      child: Text(choice),
+                    );
+                  }).toList();
+                },
+              ),
+          ]),
+      body: ListenableBuilder(
+        listenable: Listenable.merge([_multipleSelectMode, _currentPara]),
+        builder: (context, child) {
+          print("Listabneelraw");
+          return AyatListView(
+              paraAyats: _paraAyats[_currentPara.value] ?? [],
               onTap: _onAyahTapped,
               onLongPress: _onAyahLongPress,
               selectionMode: _multipleSelectMode.value);
@@ -257,7 +246,10 @@ class _MainPageState extends State<MainPage> {
           itemBuilder: (context, index) {
             return ListTile(
               title: Text("Para ${index + 1}"),
-              onTap: () => _setCurrentPara(index + 1),
+              onTap: () {
+                _currentPara.value = index + 1;
+                _scaffoldKey.currentState?.closeDrawer();
+              },
             );
           },
         ),
@@ -314,6 +306,40 @@ class _AyatListItemState extends State<AyatListItem> {
       ),
       onLongPress: widget.selectionMode ? null : _longPress,
       onTap: widget.selectionMode ? _onTap : null,
+    );
+  }
+}
+
+class AyatListView extends StatelessWidget {
+  const AyatListView(
+      {super.key,
+      required this.paraAyats,
+      required this.onTap,
+      required this.onLongPress,
+      required this.selectionMode});
+
+  final List<Ayat> paraAyats;
+  final void Function(int index, bool isSelected) onTap;
+  final VoidCallback onLongPress;
+  final bool selectionMode;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      separatorBuilder: (BuildContext context, int index) =>
+          const Divider(indent: 8, endIndent: 8, color: Colors.grey),
+      itemCount: paraAyats.length,
+      itemBuilder: (context, index) {
+        final ayat = paraAyats.elementAt(index);
+        final text = ayat.text;
+        return AyatListItem(
+            key: ObjectKey(ayat),
+            text: text,
+            idx: index,
+            onTap: onTap,
+            onLongPress: onLongPress,
+            selectionMode: selectionMode);
+      },
     );
   }
 }
