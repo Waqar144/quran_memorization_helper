@@ -43,8 +43,7 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  Map<int, List<Ayat>> _paraAyats = {};
-  final ValueNotifier<int> _currentPara = ValueNotifier<int>(1);
+  final ParaAyatModel _paraModel = ParaAyatModel();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   final ValueNotifier<bool> _multipleSelectMode = ValueNotifier(false);
   final Set<int> _ayatsIndexesToRemoveInMultiSelectMode = {};
@@ -53,7 +52,7 @@ class _MainPageState extends State<MainPage> {
   void initState() {
     _multipleSelectMode
         .addListener(() => _ayatsIndexesToRemoveInMultiSelectMode.clear());
-    _currentPara.addListener(() => _multipleSelectMode.value = false);
+    _paraModel.onParaChange = ((_) => _multipleSelectMode.value = false);
 
     _readJsonFromDisk();
     super.initState();
@@ -92,7 +91,6 @@ class _MainPageState extends State<MainPage> {
     if (!await jsonFile.exists()) return;
 
     final Map<int, List<Ayat>> paraAyats = {};
-    _paraAyats.clear();
     final String contents = await jsonFile.readAsString();
     final Map<String, dynamic> jsonObj = jsonDecode(contents);
     for (final MapEntry<String, dynamic> entry in jsonObj.entries) {
@@ -107,18 +105,13 @@ class _MainPageState extends State<MainPage> {
       paraAyats[para] = ayats;
     }
 
-    setState(() {
-      _paraAyats = paraAyats;
-    });
+    _paraModel.setData(paraAyats);
   }
 
   void _saveToDisk() async {
     Directory dir = await getApplicationDocumentsDirectory();
     String path = "${dir.path}${Platform.pathSeparator}ayatsdb.json";
-    Map<String, dynamic> out = {};
-    _paraAyats.forEach((int para, List<Ayat> ayats) {
-      out.putIfAbsent(para.toString(), () => ayats);
-    });
+    Map<String, dynamic> out = _paraModel.toJson();
     String json = const JsonEncoder.withIndent("  ").convert(out);
     File f = File(path);
     await f.writeAsString(json);
@@ -128,25 +121,22 @@ class _MainPageState extends State<MainPage> {
 
   void _import() async {
     final dynamic result = await Navigator.pushNamed(context, importTextRoute,
-        arguments: _currentPara.value);
+        arguments: _paraModel.currentPara);
     if (!mounted) return;
 
     List<Ayat>? importedAyats = result as List<Ayat>?;
     if (importedAyats == null) return;
 
     // merge new and old ayahs
-    final existingAyahs = _paraAyats[_currentPara.value];
+    final existingAyahs = _paraModel.ayahs;
     Set<Ayat> newAyahs = {};
-    if (existingAyahs != null) newAyahs.addAll(existingAyahs);
+    newAyahs.addAll(existingAyahs);
     newAyahs.addAll(importedAyats);
     if (newAyahs.isEmpty) return;
-
-    setState(() {
-      _paraAyats[_currentPara.value] = newAyahs.toList();
-    });
+    _paraModel.setAyahs(newAyahs.toList());
 
     _showSnackBarMessage(
-        "Imported ${importedAyats.length} ayahs into Para ${_currentPara.value}");
+        "Imported ${importedAyats.length} ayahs into Para ${_paraModel.currentPara}");
 
     _saveToDisk();
   }
@@ -154,9 +144,7 @@ class _MainPageState extends State<MainPage> {
   void _onAyahTapped(int index, bool isSelected) {
     if (_multipleSelectMode.value == false) return;
     if (isSelected) {
-      if (index < (_paraAyats[_currentPara.value]?.length ?? 0)) {
-        _ayatsIndexesToRemoveInMultiSelectMode.add(index);
-      }
+      _ayatsIndexesToRemoveInMultiSelectMode.add(index);
     } else {
       _ayatsIndexesToRemoveInMultiSelectMode.remove(index);
     }
@@ -170,16 +158,7 @@ class _MainPageState extends State<MainPage> {
 
   void _onMultiSelectDeletePress() {
     if (_multipleSelectMode.value) {
-      List<Ayat>? ayats = _paraAyats[_currentPara.value];
-      if (ayats == null) return;
-      for (final int index in _ayatsIndexesToRemoveInMultiSelectMode) {
-        ayats.removeAt(index);
-      }
-      _ayatsIndexesToRemoveInMultiSelectMode.clear();
-      setState(() {
-        _paraAyats[_currentPara.value] = ayats;
-      });
-
+      _paraModel.removeAyahs(_ayatsIndexesToRemoveInMultiSelectMode);
       // update the db
       _saveToDisk();
     }
@@ -198,10 +177,10 @@ class _MainPageState extends State<MainPage> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-          title: ValueListenableBuilder(
-            valueListenable: _currentPara,
-            builder: (context, para, _) {
-              return Text("Para $para");
+          title: ListenableBuilder(
+            listenable: _paraModel,
+            builder: (context, _) {
+              return Text("Para ${_paraModel.currentPara}");
             },
           ),
           actions: [
@@ -230,11 +209,11 @@ class _MainPageState extends State<MainPage> {
               ),
           ]),
       body: ListenableBuilder(
-        listenable: Listenable.merge([_multipleSelectMode, _currentPara]),
+        listenable: Listenable.merge([_multipleSelectMode, _paraModel]),
         builder: (context, child) {
           print("Listabneelraw");
           return AyatListView(
-              paraAyats: _paraAyats[_currentPara.value] ?? [],
+              paraAyats: _paraModel.ayahs,
               onTap: _onAyahTapped,
               onLongPress: _onAyahLongPress,
               selectionMode: _multipleSelectMode.value);
@@ -247,7 +226,7 @@ class _MainPageState extends State<MainPage> {
             return ListTile(
               title: Text("Para ${index + 1}"),
               onTap: () {
-                _currentPara.value = index + 1;
+                _paraModel.setCurrentPara(index + 1);
                 _scaffoldKey.currentState?.closeDrawer();
               },
             );
