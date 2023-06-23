@@ -60,7 +60,6 @@ class _MainPageState extends State<MainPage> {
   }
 
   void _importExistingJson() async {
-    // TODO -> use file picker to get file and import
     FilePickerResult? result = await FilePicker.platform.pickFiles(
         dialogTitle: "Select JSON File",
         type: FileType.custom,
