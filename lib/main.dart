@@ -192,7 +192,6 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
-    print("Main Build");
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
@@ -230,7 +229,6 @@ class _MainPageState extends State<MainPage> {
       body: ListenableBuilder(
         listenable: Listenable.merge([_multipleSelectMode, _paraModel]),
         builder: (context, child) {
-          print("Listabneelraw");
           return AyatListView(
               paraAyats: _paraModel.ayahs,
               onTap: _onAyahTapped,
