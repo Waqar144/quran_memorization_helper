@@ -46,7 +46,6 @@ class _MainPageState extends State<MainPage> {
   Map<int, List<Ayat>> _paraAyats = {};
   int _currentPara = 1;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
-  bool _multipleSelectMode = false;
   final ValueNotifier<bool> _multipleSelectMode = ValueNotifier(false);
   final Set<int> _ayatsIndexesToRemoveInMultiSelectMode = {};
 
@@ -81,7 +80,7 @@ class _MainPageState extends State<MainPage> {
 
   void _handleClick(String value) {
     switch (value) {
-      case 'Import Ayahs...':
+      case 'Add Ayahs...':
         _import();
         break;
       case 'Import Json DB File':
@@ -150,17 +149,24 @@ class _MainPageState extends State<MainPage> {
     List<Ayat>? importedAyats = result as List<Ayat>?;
     if (importedAyats == null) return;
 
+    // merge new and old ayahs
+    final existingAyahs = _paraAyats[_currentPara];
+    Set<Ayat> newAyahs = {};
+    if (existingAyahs != null) newAyahs.addAll(existingAyahs);
+    newAyahs.addAll(importedAyats);
+    if (newAyahs.isEmpty) return;
+
+    setState(() {
+      _paraAyats[_currentPara] = newAyahs.toList();
+    });
+
     _showSnackBarMessage(
         "Imported ${importedAyats.length} ayahs into $_currentPara");
-    setState(() {
-      _paraAyats[_currentPara] = importedAyats;
-    });
 
     _saveToDisk();
   }
 
   void _onAyahTapped(int index, bool isSelected) {
-    if (_multipleSelectMode == false) return;
     if (_multipleSelectMode.value == false) return;
     if (isSelected) {
       if (index < (_paraAyats[_currentPara]?.length ?? 0)) {
@@ -219,7 +225,7 @@ class _MainPageState extends State<MainPage> {
             onSelected: _handleClick,
             icon: const Icon(Icons.more_vert),
             itemBuilder: (BuildContext context) {
-              return {'Import Ayahs...', 'Import Json DB File'}
+              return {'Add Ayahs...', 'Import Json DB File'}
                   .map((String choice) {
                 return PopupMenuItem<String>(
                   value: choice,
