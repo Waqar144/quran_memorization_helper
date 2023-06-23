@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
@@ -58,8 +59,20 @@ class _MainPageState extends State<MainPage> {
     super.initState();
   }
 
-  void _importExistingJson() {
+  void _importExistingJson() async {
     // TODO -> use file picker to get file and import
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+        dialogTitle: "Select JSON File",
+        type: FileType.custom,
+        allowedExtensions: ["json"]);
+    if (result != null && result.paths.isNotEmpty) {
+      String? path = result.paths.first;
+      if (path == null) return;
+      if (await _readJsonFromDisk(path: path)) {
+        _showSnackBarMessage("${result.names.first} imported successfully");
+        _saveToDisk();
+      }
+    }
   }
 
   void _handleClick(String value) {
@@ -73,22 +86,27 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  void _showSnackBarMessage(String message) {
+  void _showSnackBarMessage(String message, {bool error = false}) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(message),
       duration: const Duration(seconds: 2),
-      backgroundColor: Colors.green,
+      backgroundColor: error ? Colors.red : Colors.green,
     ));
   }
 
-  void _readJsonFromDisk({String path = ""}) async {
+  Future<bool> _readJsonFromDisk({String path = ""}) async {
+    bool showError = true;
     if (path.isEmpty) {
+      showError = false;
       final Directory dir = await getApplicationDocumentsDirectory();
       path = dir.path;
+      path = "$path${Platform.pathSeparator}ayatsdb.json";
     }
-    final String jsonFilePath = "$path${Platform.pathSeparator}ayatsdb.json";
-    final jsonFile = File(jsonFilePath);
-    if (!await jsonFile.exists()) return;
+    final jsonFile = File(path);
+    if (!await jsonFile.exists()) {
+      if (showError) _showSnackBarMessage("$path doesn't exist", error: true);
+      return false;
+    }
 
     final Map<int, List<Ayat>> paraAyats = {};
     final String contents = await jsonFile.readAsString();
@@ -106,6 +124,7 @@ class _MainPageState extends State<MainPage> {
     }
 
     _paraModel.setData(paraAyats);
+    return true;
   }
 
   void _saveToDisk() async {
