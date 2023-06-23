@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.quran_mem_helper">
+    package="com.wqar.quran_mem_helper">
    <application
         android:label="Quran Memorization Helper"
         android:name="${applicationName}"
