@@ -234,8 +234,10 @@ class _MainPageState extends State<MainPage> {
             const Divider(indent: 8, endIndent: 8, color: Colors.grey),
         itemCount: _paraAyats[_currentPara]?.length ?? 0,
         itemBuilder: (context, index) {
-          final text = _paraAyats[_currentPara]?.elementAt(index).text ?? "";
+          final ayat = _paraAyats[_currentPara]?.elementAt(index);
+          final text = ayat?.text ?? "";
           return AyatListItem(
+              key: ObjectKey(ayat),
               text: text,
               idx: index,
               onTap: _onAyahTapped,
