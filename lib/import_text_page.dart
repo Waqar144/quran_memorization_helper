@@ -39,6 +39,12 @@ class ImportTextPage extends StatelessWidget {
               minLines: 10,
               keyboardType: TextInputType.multiline,
               textDirection: TextDirection.rtl,
+              style: const TextStyle(
+                fontFamily: "Al Mushaf",
+                fontSize: 24,
+                letterSpacing: 0.0,
+                height: 1.1,
+              ),
               decoration: const InputDecoration(border: OutlineInputBorder()),
             ),
             const SizedBox(height: 8),
