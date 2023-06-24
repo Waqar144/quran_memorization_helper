@@ -148,7 +148,8 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   }
 
   void _onMultiSelectDeletePress() {
-    if (_multipleSelectMode.value) {
+    if (_multipleSelectMode.value &&
+        _ayatsIndexesToRemoveInMultiSelectMode.isNotEmpty) {
       _paraModel.removeAyahs(_ayatsIndexesToRemoveInMultiSelectMode);
       // update the db
       _saveToDisk();
