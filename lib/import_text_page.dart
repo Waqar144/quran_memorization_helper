@@ -32,7 +32,8 @@ class ImportTextPage extends StatelessWidget {
           children: [
             Text("Import newline separated ayats in $_para"),
             const SizedBox(height: 8),
-            TextFormField(
+            Expanded(
+                child: TextFormField(
               controller: _controller,
               autocorrect: false,
               maxLines: null,
@@ -46,7 +47,7 @@ class ImportTextPage extends StatelessWidget {
                 height: 1.1,
               ),
               decoration: const InputDecoration(border: OutlineInputBorder()),
-            ),
+            )),
             const SizedBox(height: 8),
             Row(
               children: [
