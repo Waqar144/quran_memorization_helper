@@ -115,6 +115,7 @@ class ParaAyatModel extends ChangeNotifier {
     _paraAyats.forEach((int para, List<Ayat> ayats) {
       out.putIfAbsent(para.toString(), () => ayats);
     });
+    out["currentPara"] = currentParaNotifier.value;
     return out;
   }
 }
