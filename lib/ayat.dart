@@ -111,10 +111,8 @@ class ParaAyatModel extends ChangeNotifier {
   }
 
   Map<String, dynamic> toJson() {
-    Map<String, dynamic> out = {};
-    _paraAyats.forEach((int para, List<Ayat> ayats) {
-      out.putIfAbsent(para.toString(), () => ayats);
-    });
+    Map<String, dynamic> out =
+        _paraAyats.map((para, ayats) => MapEntry(para.toString(), ayats));
     out["currentPara"] = currentParaNotifier.value;
     return out;
   }
