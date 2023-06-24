@@ -17,13 +17,13 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Quran Memorization Helper',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        useMaterial3: true,
+        colorSchemeSeed: Colors.blue,
       ),
       home: const MainPage(),
       onGenerateRoute: ((settings) {
@@ -187,6 +187,9 @@ class _MainPageState extends State<MainPage> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
+        elevation: 1,
+        scrolledUnderElevation: 2,
+        shadowColor: Theme.of(context).shadowColor,
         title: ListenableBuilder(
           listenable: _paraModel,
           builder: (context, _) {
