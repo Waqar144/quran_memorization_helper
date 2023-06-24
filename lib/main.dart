@@ -9,6 +9,12 @@ import 'import_text_page.dart';
 
 const String importTextRoute = "ImportTextRoute";
 
+extension ValueNotifierToggle on ValueNotifier<bool> {
+  void toggle() {
+    value = !value;
+  }
+}
+
 void main() {
   runApp(const MyApp());
 }
@@ -168,12 +174,6 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  void _onAyahLongPress() {
-    setState(() {
-      _multipleSelectMode.value = true;
-    });
-  }
-
   void _onMultiSelectDeletePress() {
     if (_multipleSelectMode.value) {
       _paraModel.removeAyahs(_ayatsIndexesToRemoveInMultiSelectMode);
@@ -184,9 +184,7 @@ class _MainPageState extends State<MainPage> {
 
   void _onExitMultiSelectMode() {
     assert(_multipleSelectMode.value == true);
-    setState(() {
-      _multipleSelectMode.value = false;
-    });
+    _multipleSelectMode.toggle();
   }
 
   @override
@@ -194,45 +192,52 @@ class _MainPageState extends State<MainPage> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-          title: ListenableBuilder(
-            listenable: _paraModel,
-            builder: (context, _) {
-              return Text("Para ${_paraModel.currentPara}");
+        title: ListenableBuilder(
+          listenable: _paraModel,
+          builder: (context, _) {
+            return Text("Para ${_paraModel.currentPara}");
+          },
+        ),
+        actions: [
+          ValueListenableBuilder<bool>(
+            valueListenable: _multipleSelectMode,
+            builder: (context, value, threeDotMenu) {
+              if (value) {
+                return Row(children: [
+                  IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: _onMultiSelectDeletePress),
+                  IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: _onExitMultiSelectMode),
+                ]);
+              } else {
+                return threeDotMenu!;
+              }
             },
+            child: PopupMenuButton<String>(
+              onSelected: _handleClick,
+              icon: const Icon(Icons.more_vert),
+              itemBuilder: (BuildContext context) {
+                return {'Add Ayahs...', 'Import Json DB File'}
+                    .map((String choice) {
+                  return PopupMenuItem<String>(
+                    value: choice,
+                    child: Text(choice),
+                  );
+                }).toList();
+              },
+            ),
           ),
-          actions: [
-            // In Multiselect mode show delete + close
-            if (_multipleSelectMode.value) ...[
-              IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: _onMultiSelectDeletePress),
-              IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: _onExitMultiSelectMode),
-            ] else
-              // Otherwise show three dot menu
-              PopupMenuButton<String>(
-                onSelected: _handleClick,
-                icon: const Icon(Icons.more_vert),
-                itemBuilder: (BuildContext context) {
-                  return {'Add Ayahs...', 'Import Json DB File'}
-                      .map((String choice) {
-                    return PopupMenuItem<String>(
-                      value: choice,
-                      child: Text(choice),
-                    );
-                  }).toList();
-                },
-              ),
-          ]),
+        ],
+      ),
       body: ListenableBuilder(
         listenable: Listenable.merge([_multipleSelectMode, _paraModel]),
         builder: (context, child) {
           return AyatListView(
               paraAyats: _paraModel.ayahs,
               onTap: _onAyahTapped,
-              onLongPress: _onAyahLongPress,
-              selectionMode: _multipleSelectMode.value);
+              selectionMode: _multipleSelectMode);
         },
       ),
       drawer: Drawer(
@@ -280,6 +285,15 @@ class _AyatListItemState extends State<AyatListItem> {
     widget.onLongPress();
   }
 
+  @override
+  void didUpdateWidget(covariant AyatListItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // entering selection mode
+    if (oldWidget.selectionMode == false) {
+      _selected = false;
+    }
+  }
+
   void _onTap() {
     setState(() {
       _selected = !_selected;
@@ -310,13 +324,11 @@ class AyatListView extends StatelessWidget {
       {super.key,
       required this.paraAyats,
       required this.onTap,
-      required this.onLongPress,
       required this.selectionMode});
 
   final List<Ayat> paraAyats;
   final void Function(int index, bool isSelected) onTap;
-  final VoidCallback onLongPress;
-  final bool selectionMode;
+  final ValueNotifier<bool> selectionMode;
 
   @override
   Widget build(BuildContext context) {
@@ -332,8 +344,8 @@ class AyatListView extends StatelessWidget {
             text: text,
             idx: index,
             onTap: onTap,
-            onLongPress: onLongPress,
-            selectionMode: selectionMode);
+            onLongPress: selectionMode.toggle,
+            selectionMode: selectionMode.value);
       },
     );
   }
