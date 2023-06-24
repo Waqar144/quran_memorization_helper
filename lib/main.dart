@@ -1,8 +1,5 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
-import 'dart:convert';
 
 import 'ayat.dart';
 import 'ayat_list_view.dart';
@@ -95,46 +92,17 @@ class _MainPageState extends State<MainPage> {
   }
 
   Future<bool> _readJsonFromDisk({String path = ""}) async {
-    bool showError = true;
-    if (path.isEmpty) {
-      showError = false;
-      final Directory dir = await getApplicationDocumentsDirectory();
-      path = dir.path;
-      path = "$path${Platform.pathSeparator}ayatsdb.json";
-    }
-    final jsonFile = File(path);
-    if (!await jsonFile.exists()) {
-      if (showError) _showSnackBarMessage("$path doesn't exist", error: true);
+    final bool showError = path.isEmpty;
+    final ImportDBResult result = await _paraModel.readJsonDB(path: path);
+    if (result == ImportDBResult.PathDoesntExist && showError) {
+      _showSnackBarMessage("$path doesn't exist", error: true);
       return false;
     }
-
-    final Map<int, List<Ayat>> paraAyats = {};
-    final String contents = await jsonFile.readAsString();
-    final Map<String, dynamic> jsonObj = jsonDecode(contents);
-    for (final MapEntry<String, dynamic> entry in jsonObj.entries) {
-      final int? para = int.tryParse(entry.key);
-      if (para == null || para > 30 || para < 1) continue;
-
-      var ayahJsons = entry.value as List<dynamic>?;
-      if (ayahJsons == null) continue;
-      final List<Ayat> ayats = [
-        for (final dynamic a in ayahJsons) Ayat.fromJson(a)
-      ];
-      paraAyats[para] = ayats;
-    }
-
-    _paraModel.setData(paraAyats);
     return true;
   }
 
   void _saveToDisk() async {
-    Directory dir = await getApplicationDocumentsDirectory();
-    String path = "${dir.path}${Platform.pathSeparator}ayatsdb.json";
-    Map<String, dynamic> out = _paraModel.toJson();
-    String json = const JsonEncoder.withIndent("  ").convert(out);
-    File f = File(path);
-    await f.writeAsString(json);
-
+    String path = await _paraModel.saveToDisk();
     _showSnackBarMessage("Saved to file $path");
   }
 
