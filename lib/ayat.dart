@@ -28,14 +28,13 @@ class Ayat {
 
 class ParaAyatModel extends ChangeNotifier {
   Map<int, List<Ayat>> _paraAyats = {};
-  int _currentPara = 1;
-  ValueChanged<int>? _paraChanged;
+  ValueNotifier<int> currentParaNotifier = ValueNotifier<int>(1);
 
-  set onParaChange(ValueChanged<int> paraChanged) => _paraChanged = paraChanged;
+  set onParaChange(VoidCallback cb) => currentParaNotifier.addListener(cb);
 
-  List<Ayat> get ayahs => _paraAyats[_currentPara] ?? [];
+  List<Ayat> get ayahs => _paraAyats[currentPara] ?? [];
 
-  int get currentPara => _currentPara;
+  int get currentPara => currentParaNotifier.value;
 
   void setData(Map<int, List<Ayat>> data) {
     _paraAyats = data;
@@ -43,20 +42,19 @@ class ParaAyatModel extends ChangeNotifier {
   }
 
   void setAyahs(List<Ayat> ayahs) {
-    _paraAyats[_currentPara] = ayahs;
+    _paraAyats[currentPara] = ayahs;
     notifyListeners();
   }
 
   void setCurrentPara(int para) {
-    if (para == _currentPara) return;
-    _currentPara = para;
-    _paraChanged?.call(para);
+    if (para == currentPara) return;
+    currentParaNotifier.value = para;
     notifyListeners();
   }
 
   void removeAyahs(Set<int> indices) {
     if (indices.isEmpty) return;
-    List<Ayat> ayahs = _paraAyats[_currentPara] ?? [];
+    List<Ayat> ayahs = _paraAyats[currentPara] ?? [];
     for (final int index in indices) {
       ayahs.removeAt(index);
     }

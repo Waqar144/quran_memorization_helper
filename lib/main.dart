@@ -54,7 +54,7 @@ class _MainPageState extends State<MainPage> {
   void initState() {
     _multipleSelectMode
         .addListener(() => _ayatsIndexesToRemoveInMultiSelectMode.clear());
-    _paraModel.onParaChange = ((_) => _multipleSelectMode.value = false);
+    _paraModel.onParaChange = (() => _multipleSelectMode.value = false);
 
     _readJsonFromDisk();
     super.initState();
@@ -190,10 +190,10 @@ class _MainPageState extends State<MainPage> {
         elevation: 1,
         scrolledUnderElevation: 2,
         shadowColor: Theme.of(context).shadowColor,
-        title: ListenableBuilder(
-          listenable: _paraModel,
-          builder: (context, _) {
-            return Text("Para ${_paraModel.currentPara}");
+        title: ValueListenableBuilder(
+          valueListenable: _paraModel.currentParaNotifier,
+          builder: (context, value, _) {
+            return Text("Para $value");
           },
         ),
         actions: [
