@@ -44,7 +44,7 @@ class ImportTextPage extends StatelessWidget {
                 fontFamily: "Al Mushaf",
                 fontSize: 24,
                 letterSpacing: 0.0,
-                height: 1.1,
+                height: 1.5,
               ),
               decoration: const InputDecoration(border: OutlineInputBorder()),
             )),
