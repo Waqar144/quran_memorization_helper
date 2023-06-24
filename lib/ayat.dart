@@ -38,6 +38,7 @@ class ParaAyatModel extends ChangeNotifier {
 
   void setAyahs(List<Ayat> ayahs) {
     _paraAyats[_currentPara] = ayahs;
+    notifyListeners();
   }
 
   void setCurrentPara(int para) {
