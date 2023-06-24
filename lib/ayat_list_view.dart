@@ -55,7 +55,7 @@ class _AyatListItemState extends State<AyatListItem> {
         softWrap: true,
         textAlign: TextAlign.right,
         style: const TextStyle(
-            fontFamily: "Al Mushaf", fontSize: 32, letterSpacing: 0.0),
+            fontFamily: "Al Mushaf", fontSize: 24, letterSpacing: 0.0),
       ),
       onLongPress: widget.selectionMode ? null : _longPress,
       onTap: widget.selectionMode ? _onTap : null,
