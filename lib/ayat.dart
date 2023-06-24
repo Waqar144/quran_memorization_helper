@@ -1,5 +1,11 @@
 import 'package:flutter/foundation.dart';
 
+extension ValueNotifierToggle on ValueNotifier<bool> {
+  void toggle() {
+    value = !value;
+  }
+}
+
 class Ayat {
   Ayat(this.text);
   String text = "";
