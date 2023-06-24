@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'ayat.dart';
 import 'ayat_list_view.dart';
 import 'import_text_page.dart';
+import 'settings_page.dart';
 
 const String importTextRoute = "ImportTextRoute";
+const String settingsPageRoute = "SettingsPageRoute";
 
 void main() {
   runApp(const MyApp());
@@ -27,6 +29,10 @@ class MyApp extends StatelessWidget {
         if (settings.name == importTextRoute) {
           return MaterialPageRoute(
               builder: (context) => ImportTextPage(settings.arguments as int));
+        } else if (settings.name == settingsPageRoute) {
+          return MaterialPageRoute(
+              builder: (context) =>
+                  SettingsPage(settings.arguments as ParaAyatModel));
         }
         return MaterialPageRoute(builder: (context) => const MainPage());
       }),
@@ -126,6 +132,12 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     _saveToDisk();
   }
 
+  void _openSettings() async {
+    final dynamic result = await Navigator.pushNamed(context, settingsPageRoute,
+        arguments: _paraModel);
+    if (!mounted) return;
+  }
+
   void _onAyahTapped(int index, bool isSelected) {
     if (_multipleSelectMode.value == false) return;
     if (isSelected) {
@@ -187,6 +199,9 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
                     break;
                   case 'Import Json DB File':
                     _importExistingJson();
+                    break;
+                  case 'Settings':
+                    _openSettings();
                     break;
                 }
               },

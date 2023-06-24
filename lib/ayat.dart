@@ -106,8 +106,15 @@ class ParaAyatModel extends ChangeNotifier {
     return ImportDBResult.Success;
   }
 
-  Future<String> saveToDisk() async {
-    Directory dir = await getApplicationDocumentsDirectory();
+  Future<String> backup() async {
+    Directory? dir = await getDownloadsDirectory();
+    if (dir == null) return "";
+    final path = await saveToDisk(dir: dir);
+    return path;
+  }
+
+  Future<String> saveToDisk({Directory? dir}) async {
+    dir ??= await getApplicationDocumentsDirectory();
     String path = "${dir.path}${Platform.pathSeparator}ayatsdb.json";
     String json = const JsonEncoder.withIndent("  ").convert(toJson());
     File f = File(path);
