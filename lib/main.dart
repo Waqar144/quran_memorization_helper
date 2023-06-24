@@ -41,7 +41,7 @@ class MainPage extends StatefulWidget {
   State<MainPage> createState() => _MainPageState();
 }
 
-class _MainPageState extends State<MainPage> {
+class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   final ParaAyatModel _paraModel = ParaAyatModel();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   final ValueNotifier<bool> _multipleSelectMode = ValueNotifier(false);
@@ -55,6 +55,15 @@ class _MainPageState extends State<MainPage> {
 
     _readJsonFromDisk();
     super.initState();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
+      _saveToDisk();
+    }
+    super.didChangeAppLifecycleState(state);
   }
 
   void _importExistingJson() async {
