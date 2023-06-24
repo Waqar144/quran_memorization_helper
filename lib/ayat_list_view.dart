@@ -78,7 +78,7 @@ class AyatListView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView.separated(
       separatorBuilder: (BuildContext context, int index) =>
-          const Divider(indent: 8, endIndent: 8, color: Colors.grey),
+          const Divider(indent: 8, endIndent: 8, color: Colors.grey, height: 2),
       itemCount: paraAyats.length,
       itemBuilder: (context, index) {
         final ayat = paraAyats.elementAt(index);
