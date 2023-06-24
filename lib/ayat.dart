@@ -55,6 +55,11 @@ class ParaAyatModel extends ChangeNotifier {
     if (para == currentPara) return;
     currentParaNotifier.value = para;
     notifyListeners();
+
+    // trigger a save
+    Future.delayed(Duration(seconds: 5), () {
+      saveToDisk();
+    });
   }
 
   void removeAyahs(Set<int> indices) {
