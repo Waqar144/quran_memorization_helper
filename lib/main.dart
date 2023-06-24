@@ -81,17 +81,6 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     }
   }
 
-  void _handleClick(String value) {
-    switch (value) {
-      case 'Add Ayahs...':
-        _import();
-        break;
-      case 'Import Json DB File':
-        _importExistingJson();
-        break;
-    }
-  }
-
   void _showSnackBarMessage(String message, {bool error = false}) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(message),
@@ -191,10 +180,19 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
               }
             },
             child: PopupMenuButton<String>(
-              onSelected: _handleClick,
+              onSelected: (String value) {
+                switch (value) {
+                  case 'Add Ayahs...':
+                    _import();
+                    break;
+                  case 'Import Json DB File':
+                    _importExistingJson();
+                    break;
+                }
+              },
               icon: const Icon(Icons.more_vert),
               itemBuilder: (BuildContext context) {
-                return {'Add Ayahs...', 'Import Json DB File'}
+                return {'Add Ayahs...', 'Import Json DB File', 'Settings'}
                     .map((String choice) {
                   return PopupMenuItem<String>(
                     value: choice,
