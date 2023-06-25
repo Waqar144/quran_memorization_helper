@@ -60,11 +60,11 @@ class ParaAyatModel extends ChangeNotifier {
     });
   }
 
-  void removeAyahs(Set<int> indices) {
-    if (indices.isEmpty) return;
+  void removeSelectedAyahs() {
+    if (selection.isEmpty) return;
     List<Ayat> ayahs = _paraAyats[currentPara] ?? [];
-    for (final int index in indices) {
-      ayahs.removeAt(index);
+    for (int i = 0; i < selection.length; ++i) {
+      if (selection[i] ?? false) ayahs.removeAt(i);
     }
     setAyahs(ayahs);
   }
@@ -72,13 +72,10 @@ class ParaAyatModel extends ChangeNotifier {
   void resetSelection() {
     selection.clear();
     selection.length = ayahs.length;
-    print(
-        "resetSelection(): ${selection.length} - ${ayahs.length}: $currentPara");
   }
 
   void setIndexSelected(int index, bool select) {
     if (ayahs.isNotEmpty && index < ayahs.length) {
-      print("$index ----- $select .... ${selection.length}");
       selection[index] = select;
     } else {
       throw "Invalid index to select: $index";

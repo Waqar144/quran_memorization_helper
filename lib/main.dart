@@ -51,12 +51,10 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   final ParaAyatModel _paraModel = ParaAyatModel();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   final ValueNotifier<bool> _multipleSelectMode = ValueNotifier(false);
-  final Set<int> _ayatsIndexesToRemoveInMultiSelectMode = {};
 
   @override
   void initState() {
-    _multipleSelectMode
-        .addListener(() => _ayatsIndexesToRemoveInMultiSelectMode.clear());
+    _multipleSelectMode.addListener(() => _paraModel.resetSelection());
     _paraModel.onParaChange = (() => _multipleSelectMode.value = false);
 
     _readJsonFromDisk();
@@ -138,22 +136,11 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     if (!mounted) return;
   }
 
-  void _onAyahTapped(int index, bool isSelected) {
-    if (_multipleSelectMode.value == false) return;
-    if (isSelected) {
-      _ayatsIndexesToRemoveInMultiSelectMode.add(index);
-    } else {
-      _ayatsIndexesToRemoveInMultiSelectMode.remove(index);
-    }
-  }
-
-  void _onMultiSelectDeletePress() {
-    if (_multipleSelectMode.value &&
-        _ayatsIndexesToRemoveInMultiSelectMode.isNotEmpty) {
-      _paraModel.removeAyahs(_ayatsIndexesToRemoveInMultiSelectMode);
-      // update the db
-      _saveToDisk();
-    }
+  void _onDeletePress() {
+    assert(_multipleSelectMode.value);
+    _paraModel.removeSelectedAyahs();
+    // update the db
+    _saveToDisk();
   }
 
   void _onExitMultiSelectMode() {
@@ -183,7 +170,7 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
                 return Row(children: [
                   IconButton(
                       icon: const Icon(Icons.delete),
-                      onPressed: _onMultiSelectDeletePress),
+                      onPressed: _onDeletePress),
                   IconButton(
                       icon: const Icon(Icons.close),
                       onPressed: _onExitMultiSelectMode),
@@ -223,8 +210,7 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
       body: ListenableBuilder(
         listenable: Listenable.merge([_multipleSelectMode, _paraModel]),
         builder: (context, child) {
-          return AyatListView(_paraModel,
-              onTap: _onAyahTapped, selectionMode: _multipleSelectMode);
+          return AyatListView(_paraModel, selectionMode: _multipleSelectMode);
         },
       ),
       drawer: Drawer(

@@ -7,17 +7,12 @@ class AyatListItem extends StatefulWidget {
     required this.model,
     required this.idx,
     required this.text,
-    required this.onTap,
     required this.onLongPress,
     required this.selectionMode,
   });
 
-  bool isSelected() => model.isIndexSelected(idx);
-  void setSelected(bool selected) => model.setIndexSelected(idx, selected);
-
   final int idx;
   final String text;
-  final void Function(int index, bool isSelected) onTap;
   final VoidCallback onLongPress;
   final bool selectionMode;
   final ParaAyatModel model;
@@ -27,31 +22,20 @@ class AyatListItem extends StatefulWidget {
 }
 
 class _AyatListItemState extends State<AyatListItem> {
-  late bool _selected;
+  void _longPress() => widget.onLongPress();
+  void _onTap() => setState(() {
+        setSelected(!isSelected());
+      });
 
-  @override
-  void initState() {
-    super.initState();
-    _selected = widget.isSelected();
-  }
-
-  void _longPress() {
-    widget.onLongPress();
-  }
-
-  void _onTap() {
-    widget.setSelected(!_selected);
-    setState(() {
-      _selected = !_selected;
-    });
-    widget.onTap(widget.idx, _selected);
-  }
+  bool isSelected() => widget.model.isIndexSelected(widget.idx);
+  void setSelected(bool selected) =>
+      widget.model.setIndexSelected(widget.idx, selected);
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       leading: widget.selectionMode
-          ? Icon(_selected ? Icons.check_box : Icons.check_box_outline_blank)
+          ? Icon(isSelected() ? Icons.check_box : Icons.check_box_outline_blank)
           : const SizedBox.shrink(),
       title: Text(
         widget.text,
@@ -68,10 +52,9 @@ class _AyatListItemState extends State<AyatListItem> {
 
 class AyatListView extends StatelessWidget {
   const AyatListView(this._paraAyatModel,
-      {super.key, required this.onTap, required this.selectionMode});
+      {super.key, required this.selectionMode});
 
   final ParaAyatModel _paraAyatModel;
-  final void Function(int index, bool isSelected) onTap;
   final ValueNotifier<bool> selectionMode;
 
   @override
@@ -88,7 +71,6 @@ class AyatListView extends StatelessWidget {
             model: _paraAyatModel,
             text: text,
             idx: index,
-            onTap: onTap,
             onLongPress: selectionMode.toggle,
             selectionMode: selectionMode.value);
       },
