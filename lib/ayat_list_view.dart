@@ -4,6 +4,7 @@ import 'ayat.dart';
 class AyatListItem extends StatefulWidget {
   const AyatListItem({
     super.key,
+    required this.model,
     required this.idx,
     required this.text,
     required this.onTap,
@@ -11,33 +12,35 @@ class AyatListItem extends StatefulWidget {
     required this.selectionMode,
   });
 
+  bool isSelected() => model.isIndexSelected(idx);
+  void setSelected(bool selected) => model.setIndexSelected(idx, selected);
+
   final int idx;
   final String text;
   final void Function(int index, bool isSelected) onTap;
   final VoidCallback onLongPress;
   final bool selectionMode;
+  final ParaAyatModel model;
 
   @override
   State<AyatListItem> createState() => _AyatListItemState();
 }
 
 class _AyatListItemState extends State<AyatListItem> {
-  bool _selected = false;
+  late bool _selected;
+
+  @override
+  void initState() {
+    super.initState();
+    _selected = widget.isSelected();
+  }
 
   void _longPress() {
     widget.onLongPress();
   }
 
-  @override
-  void didUpdateWidget(covariant AyatListItem oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // entering selection mode
-    if (oldWidget.selectionMode == false) {
-      _selected = false;
-    }
-  }
-
   void _onTap() {
+    widget.setSelected(!_selected);
     setState(() {
       _selected = !_selected;
     });
@@ -64,13 +67,10 @@ class _AyatListItemState extends State<AyatListItem> {
 }
 
 class AyatListView extends StatelessWidget {
-  const AyatListView(
-      {super.key,
-      required this.paraAyats,
-      required this.onTap,
-      required this.selectionMode});
+  const AyatListView(this._paraAyatModel,
+      {super.key, required this.onTap, required this.selectionMode});
 
-  final List<Ayat> paraAyats;
+  final ParaAyatModel _paraAyatModel;
   final void Function(int index, bool isSelected) onTap;
   final ValueNotifier<bool> selectionMode;
 
@@ -79,12 +79,13 @@ class AyatListView extends StatelessWidget {
     return ListView.separated(
       separatorBuilder: (BuildContext context, int index) =>
           const Divider(indent: 8, endIndent: 8, color: Colors.grey, height: 2),
-      itemCount: paraAyats.length,
+      itemCount: _paraAyatModel.ayahs.length,
       itemBuilder: (context, index) {
-        final ayat = paraAyats.elementAt(index);
+        final ayat = _paraAyatModel.ayahs.elementAt(index);
         final text = ayat.text;
         return AyatListItem(
             key: ObjectKey(ayat),
+            model: _paraAyatModel,
             text: text,
             idx: index,
             onTap: onTap,

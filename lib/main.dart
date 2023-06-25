@@ -223,10 +223,8 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
       body: ListenableBuilder(
         listenable: Listenable.merge([_multipleSelectMode, _paraModel]),
         builder: (context, child) {
-          return AyatListView(
-              paraAyats: _paraModel.ayahs,
-              onTap: _onAyahTapped,
-              selectionMode: _multipleSelectMode);
+          return AyatListView(_paraModel,
+              onTap: _onAyahTapped, selectionMode: _multipleSelectMode);
         },
       ),
       drawer: Drawer(
