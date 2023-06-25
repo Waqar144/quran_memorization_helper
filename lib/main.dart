@@ -59,6 +59,8 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     _paraModel.onParaChange = (() => _multipleSelectMode.value = false);
 
     _readJsonFromDisk();
+    Settings.instance.readSettings();
+
     super.initState();
   }
 
