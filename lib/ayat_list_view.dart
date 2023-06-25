@@ -49,7 +49,7 @@ class _AyatListItemState extends State<AyatListItem> {
     return ListTile(
       leading: widget.selectionMode
           ? Icon(_selected ? Icons.check_box : Icons.check_box_outline_blank)
-          : const Padding(padding: EdgeInsets.zero),
+          : const SizedBox.shrink(),
       title: Text(
         widget.text,
         softWrap: true,
