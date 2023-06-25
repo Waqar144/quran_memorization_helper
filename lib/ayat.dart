@@ -13,6 +13,7 @@ class Ayat {
   Ayat(this.text);
   String text = "";
   int count = 0;
+  bool? selected;
 
   Ayat.fromJson(Map<String, dynamic> json)
       : text = json["text"],
@@ -34,7 +35,6 @@ enum ImportDBResult { Success, PathDoesntExist }
 class ParaAyatModel extends ChangeNotifier {
   Map<int, List<Ayat>> _paraAyats = {};
   ValueNotifier<int> currentParaNotifier = ValueNotifier<int>(1);
-  List<bool?> selection = [];
 
   set onParaChange(VoidCallback cb) => currentParaNotifier.addListener(cb);
 
@@ -61,29 +61,27 @@ class ParaAyatModel extends ChangeNotifier {
   }
 
   void removeSelectedAyahs() {
-    if (selection.isEmpty) return;
     List<Ayat> ayahs = _paraAyats[currentPara] ?? [];
-    for (int i = 0; i < selection.length; ++i) {
-      if (selection[i] ?? false) ayahs.removeAt(i--);
-    }
+    ayahs.removeWhere((final Ayat ayah) => ayah.selected ?? false);
     setAyahs(ayahs);
   }
 
   void resetSelection() {
-    selection.clear();
-    selection.length = ayahs.length;
+    for (var i = 0; i < ayahs.length; i++) {
+      ayahs[i].selected = null;
+    }
   }
 
   void setIndexSelected(int index, bool select) {
     if (ayahs.isNotEmpty && index < ayahs.length) {
-      selection[index] = select;
+      ayahs[index].selected = select ? select : null;
     } else {
       throw "Invalid index to select: $index";
     }
   }
 
   bool isIndexSelected(int index) =>
-      index < selection.length && (selection[index] ?? false);
+      index < ayahs.length && (ayahs[index].selected ?? false);
 
   void _resetfromJson(Map<String, dynamic> json) {
     final Map<int, List<Ayat>> paraAyats = {};
