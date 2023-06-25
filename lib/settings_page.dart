@@ -19,7 +19,7 @@ class _SettingsPageState extends State<SettingsPage> {
       title: const Text("Backup"),
       subtitle: _backupPath != null
           ? Text("Backed up at $_backupPath")
-          : const Text("Backup your data to Downloads"),
+          : const Text("Backup your data"),
       trailing: ElevatedButton(
         onPressed: () async {
           String path = await widget.paraModel.backup();
