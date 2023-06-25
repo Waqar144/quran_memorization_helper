@@ -72,6 +72,13 @@ class ParaAyatModel extends ChangeNotifier {
     }
   }
 
+  void selectAll() {
+    for (var i = 0; i < ayahs.length; i++) {
+      ayahs[i].selected = true;
+    }
+    notifyListeners();
+  }
+
   void setIndexSelected(int index, bool select) {
     if (ayahs.isNotEmpty && index < ayahs.length) {
       ayahs[index].selected = select ? select : null;

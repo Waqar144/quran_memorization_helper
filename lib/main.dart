@@ -172,6 +172,9 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
                       icon: const Icon(Icons.delete),
                       onPressed: _onDeletePress),
                   IconButton(
+                      icon: const Icon(Icons.select_all),
+                      onPressed: () => _paraModel.selectAll()),
+                  IconButton(
                       icon: const Icon(Icons.close),
                       onPressed: _onExitMultiSelectMode),
                 ]);
