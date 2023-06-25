@@ -64,7 +64,7 @@ class ParaAyatModel extends ChangeNotifier {
     if (selection.isEmpty) return;
     List<Ayat> ayahs = _paraAyats[currentPara] ?? [];
     for (int i = 0; i < selection.length; ++i) {
-      if (selection[i] ?? false) ayahs.removeAt(i);
+      if (selection[i] ?? false) ayahs.removeAt(i--);
     }
     setAyahs(ayahs);
   }
