@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'dart:convert';
+import 'utils.dart' as utils;
 
 extension ValueNotifierToggle on ValueNotifier<bool> {
   void toggle() {
@@ -110,37 +111,22 @@ class ParaAyatModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<ImportDBResult> readJsonDB({String path = ""}) async {
-    if (path.isEmpty) {
-      final Directory dir = await getApplicationDocumentsDirectory();
-      path = dir.path;
-      path = "$path${Platform.pathSeparator}ayatsdb.json";
+  Future<bool> readJsonDB({String? path}) async {
+    final Map<String, dynamic>? json = path == null
+        ? await utils.readJsonFile("ayatsdb")
+        : await utils.readJsonFromFilePath(path);
+    if (json == null) {
+      return false;
     }
-    final jsonFile = File(path);
-    if (!await jsonFile.exists()) {
-      return ImportDBResult.PathDoesntExist;
-    }
-
-    final String contents = await jsonFile.readAsString();
-    final Map<String, dynamic> jsonObj = jsonDecode(contents);
-    _resetfromJson(jsonObj);
-    return ImportDBResult.Success;
+    _resetfromJson(json);
+    return true;
   }
 
   Future<String> backup() async => await saveToDisk(fileName: "ayatsdb_backup");
 
   Future<String> saveToDisk({String? fileName}) async {
-    Directory dir = await getApplicationDocumentsDirectory();
-    String path;
-    if (fileName != null) {
-      path = "${dir.path}${Platform.pathSeparator}$fileName.json";
-    } else {
-      path = "${dir.path}${Platform.pathSeparator}ayatsdb.json";
-    }
     String json = const JsonEncoder.withIndent("  ").convert(toJson());
-    File f = File(path);
-    await f.writeAsString(json);
-    return path;
+    return utils.saveJsonToDisk(json, fileName ?? "ayatsdb");
   }
 
   Map<String, dynamic> toJson() {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'ayat.dart';
+import 'settings.dart';
 
 class AyatListItem extends StatefulWidget {
   const AyatListItem({
@@ -41,9 +42,9 @@ class _AyatListItemState extends State<AyatListItem> {
         widget.text,
         softWrap: true,
         textAlign: TextAlign.right,
-        style: const TextStyle(
+        style: TextStyle(
             fontFamily: "Al Mushaf",
-            fontSize: 24,
+            fontSize: Settings.instance.fontSize.toDouble(),
             letterSpacing: 0.0,
             wordSpacing: 1),
       ),

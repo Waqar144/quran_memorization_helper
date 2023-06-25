@@ -5,6 +5,7 @@ import 'ayat.dart';
 import 'ayat_list_view.dart';
 import 'import_text_page.dart';
 import 'settings_page.dart';
+import 'settings.dart';
 
 const String importTextRoute = "ImportTextRoute";
 const String settingsPageRoute = "SettingsPageRoute";
@@ -93,10 +94,10 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     ));
   }
 
-  Future<bool> _readJsonFromDisk({String path = ""}) async {
-    final bool showError = path.isNotEmpty;
-    final ImportDBResult result = await _paraModel.readJsonDB(path: path);
-    if (result == ImportDBResult.PathDoesntExist && showError) {
+  Future<bool> _readJsonFromDisk({String? path}) async {
+    final bool showError = path != null;
+    final bool result = await _paraModel.readJsonDB(path: path);
+    if (!result && showError) {
       _showSnackBarMessage("$path doesn't exist", error: true);
       return false;
     }
@@ -211,8 +212,10 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
         ],
       ),
       body: ListenableBuilder(
-        listenable: Listenable.merge([_multipleSelectMode, _paraModel]),
+        listenable: Listenable.merge(
+            [_multipleSelectMode, _paraModel, Settings.instance]),
         builder: (context, child) {
+          print("rebuild list view");
           return AyatListView(_paraModel, selectionMode: _multipleSelectMode);
         },
       ),

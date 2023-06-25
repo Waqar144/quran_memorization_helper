@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'ayat.dart';
+import 'settings.dart';
 
 class SettingsPage extends StatefulWidget {
   final List<int> fontSizes = [16, 24, 28, 32];
@@ -11,7 +12,7 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  int initialValue = 16;
+  int initialValue = Settings.instance.fontSize;
   String? _backupPath;
 
   Widget _backupWidget() {
@@ -47,9 +48,12 @@ class _SettingsPageState extends State<SettingsPage> {
             trailing: SizedBox(
               width: 100,
               child: DropdownButtonFormField(
-                value: widget.fontSizes.first,
+                value: initialValue,
                 onChanged: (int? val) {
-                  if (val != null) {}
+                  if (val != null) {
+                    Settings.instance.fontSize = val;
+                    initialValue = val;
+                  }
                 },
                 padding: EdgeInsets.zero,
                 items: [
