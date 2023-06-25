@@ -94,7 +94,7 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   }
 
   Future<bool> _readJsonFromDisk({String path = ""}) async {
-    final bool showError = path.isEmpty;
+    final bool showError = path.isNotEmpty;
     final ImportDBResult result = await _paraModel.readJsonDB(path: path);
     if (result == ImportDBResult.PathDoesntExist && showError) {
       _showSnackBarMessage("$path doesn't exist", error: true);
