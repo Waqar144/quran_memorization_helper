@@ -134,9 +134,8 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   }
 
   void _openSettings() async {
-    final dynamic result = await Navigator.pushNamed(context, settingsPageRoute,
+    await Navigator.pushNamed(context, settingsPageRoute,
         arguments: _paraModel);
-    if (!mounted) return;
   }
 
   void _onDeletePress() {
@@ -217,7 +216,6 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
         listenable: Listenable.merge(
             [_multipleSelectMode, _paraModel, Settings.instance]),
         builder: (context, child) {
-          print("rebuild list view");
           return AyatListView(_paraModel, selectionMode: _multipleSelectMode);
         },
       ),

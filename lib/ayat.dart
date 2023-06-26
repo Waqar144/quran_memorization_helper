@@ -1,6 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
 import 'dart:convert';
 import 'utils.dart' as utils;
 
@@ -31,8 +29,6 @@ class Ayat {
   int get hashCode => text.hashCode;
 }
 
-enum ImportDBResult { Success, PathDoesntExist }
-
 class ParaAyatModel extends ChangeNotifier {
   Map<int, List<Ayat>> _paraAyats = {};
   ValueNotifier<int> currentParaNotifier = ValueNotifier<int>(1);
@@ -56,7 +52,7 @@ class ParaAyatModel extends ChangeNotifier {
     notifyListeners();
 
     // trigger a save
-    Future.delayed(Duration(seconds: 5), () {
+    Future.delayed(const Duration(seconds: 5), () {
       saveToDisk();
     });
   }
