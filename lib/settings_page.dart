@@ -13,9 +13,10 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   int initialValue = Settings.instance.fontSize;
+  double wordSpacing = Settings.instance.wordSpacing.toDouble();
   String? _backupPath;
 
-  Widget _backupWidget() {
+  Widget _createBackupWidget() {
     return ListTile(
       title: const Text("Backup"),
       subtitle: _backupPath != null
@@ -33,6 +34,56 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  Widget _createFontSizeTile() {
+    return ListTile(
+      title: const Text("Ayat font size"),
+      subtitle: const Text("Font size in the ayats list (not implemented)"),
+      trailing: SizedBox(
+        width: 100,
+        child: DropdownButtonFormField(
+          value: initialValue,
+          onChanged: (int? val) {
+            if (val != null) {
+              Settings.instance.fontSize = val;
+              initialValue = val;
+            }
+          },
+          padding: EdgeInsets.zero,
+          items: [
+            for (final size in widget.fontSizes)
+              DropdownMenuItem(
+                value: size,
+                child: Text(size.toString()),
+              )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _createWordSpacingTile() {
+    return ListTile(
+      title: const Text("Word spacing"),
+      subtitle: const Text("Space between words of an ayah"),
+      trailing: SizedBox(
+        width: 300,
+        child: Slider(
+          value: wordSpacing,
+          min: 0,
+          max: 5,
+          divisions: 5,
+          label: wordSpacing.toString(),
+          onChanged: (double val) {
+            setState(() {
+              wordSpacing = val;
+              Settings.instance.wordSpacing = val.toInt();
+            });
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,33 +92,10 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
       body: Column(
         children: [
-          ListTile(
-            title: const Text("Ayat font size"),
-            subtitle:
-                const Text("Font size in the ayats list (not implemented)"),
-            trailing: SizedBox(
-              width: 100,
-              child: DropdownButtonFormField(
-                value: initialValue,
-                onChanged: (int? val) {
-                  if (val != null) {
-                    Settings.instance.fontSize = val;
-                    initialValue = val;
-                  }
-                },
-                padding: EdgeInsets.zero,
-                items: [
-                  for (final size in widget.fontSizes)
-                    DropdownMenuItem(
-                      value: size,
-                      child: Text(size.toString()),
-                    )
-                ],
-              ),
-            ),
-          ),
+          _createFontSizeTile(),
           const SizedBox(height: 16),
-          _backupWidget()
+          _createWordSpacingTile(),
+          _createBackupWidget()
         ],
       ),
     );

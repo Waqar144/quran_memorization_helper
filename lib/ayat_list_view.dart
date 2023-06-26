@@ -46,7 +46,7 @@ class _AyatListItemState extends State<AyatListItem> {
             fontFamily: "Al Mushaf",
             fontSize: Settings.instance.fontSize.toDouble(),
             letterSpacing: 0.0,
-            wordSpacing: 1),
+            wordSpacing: Settings.instance.wordSpacing.toDouble()),
       ),
       onLongPress: widget.selectionMode ? null : _longPress,
       onTap: widget.selectionMode ? _onTap : null,

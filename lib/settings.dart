@@ -8,10 +8,20 @@ class Settings extends ChangeNotifier {
   static Settings get instance => _instance;
   Timer? timer;
 
+  // The font size of ayahs
   int _fontSize = 24;
   int get fontSize => _fontSize;
   set fontSize(int val) {
     _fontSize = val;
+    notifyListeners();
+    persist();
+  }
+
+  // The word spacing between words of ayah
+  int _wordSpacing = 1;
+  int get wordSpacing => _wordSpacing;
+  set wordSpacing(int val) {
+    _wordSpacing = val;
     notifyListeners();
     persist();
   }
@@ -21,7 +31,10 @@ class Settings extends ChangeNotifier {
   }
 
   void saveToDisk() async {
-    Map<String, dynamic> map = {'fontSize': fontSize};
+    Map<String, dynamic> map = {
+      'fontSize': fontSize,
+      'wordSpacing': wordSpacing
+    };
     String json = const JsonEncoder.withIndent("  ").convert(map);
     await utils.saveJsonToDisk(json, "settings");
   }
@@ -30,6 +43,7 @@ class Settings extends ChangeNotifier {
     final Map<String, dynamic>? json = await utils.readJsonFile("settings");
     if (json == null) return;
     _fontSize = json["fontSize"] ?? 24;
+    _wordSpacing = json["wordSpacing"] ?? 1;
   }
 
   void persist() {
