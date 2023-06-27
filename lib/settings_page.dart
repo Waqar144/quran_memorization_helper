@@ -39,8 +39,10 @@ class _SettingsPageState extends State<SettingsPage> {
       title: const Text("Ayat font size"),
       subtitle: const Text("Font size in the ayats list (not implemented)"),
       trailing: SizedBox(
-        width: 100,
+        width: 80,
         child: DropdownButtonFormField(
+          borderRadius: const BorderRadius.all(Radius.circular(5)),
+          decoration: const InputDecoration(contentPadding: EdgeInsets.all(8)),
           value: initialValue,
           onChanged: (int? val) {
             if (val != null) {
@@ -65,8 +67,8 @@ class _SettingsPageState extends State<SettingsPage> {
     return ListTile(
       title: const Text("Word spacing"),
       subtitle: const Text("Space between words of an ayah"),
-      trailing: SizedBox(
-        width: 300,
+      trailing: FittedBox(
+        fit: BoxFit.contain,
         child: Slider(
           value: wordSpacing,
           min: 0,
