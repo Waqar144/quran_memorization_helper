@@ -71,7 +71,7 @@ class ParaAyatModel extends ChangeNotifier {
 
   void selectAll() {
     for (var i = 0; i < ayahs.length; i++) {
-      ayahs[i].selected = true;
+      ayahs[i].selected = !(ayahs[i].selected ?? false);
     }
     notifyListeners();
   }
