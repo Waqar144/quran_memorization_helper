@@ -6,9 +6,8 @@ import 'ayat_list_view.dart';
 import 'import_text_page.dart';
 import 'settings_page.dart';
 import 'settings.dart';
-
-const String importTextRoute = "ImportTextRoute";
-const String settingsPageRoute = "SettingsPageRoute";
+import 'page_constants.dart';
+import 'para_ayah_selection_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -34,6 +33,10 @@ class MyApp extends StatelessWidget {
           return MaterialPageRoute(
               builder: (context) =>
                   SettingsPage(settings.arguments as ParaAyatModel));
+        } else if (settings.name == paraAyahSelectionPage) {
+          return MaterialPageRoute(
+              builder: (context) =>
+                  ParaAyahSelectionPage(settings.arguments as int));
         }
         return MaterialPageRoute(builder: (context) => const MainPage());
       }),

@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'ayat.dart';
+import 'page_constants.dart';
 
 class ImportTextPage extends StatelessWidget {
   final List<Ayat> _ayats = [];
   get ayats => _ayats;
   final TextEditingController _controller = TextEditingController();
   final String _para;
+  final int _currentPara;
 
-  ImportTextPage(int paraNum, {super.key})
-      : _para = "Para ${paraNum.toString()}";
+  ImportTextPage(this._currentPara, {super.key})
+      : _para = "Para ${_currentPara.toString()}";
 
   void _onImport(BuildContext context) {
     if (_controller.text.isEmpty) return;
@@ -18,6 +20,22 @@ class ImportTextPage extends StatelessWidget {
       if (line.isNotEmpty) _ayats.add(Ayat(line));
     }
     Navigator.pop(context, _ayats);
+  }
+
+  void _onSelectAyahs(BuildContext context) async {
+    final ret = await Navigator.pushNamed(
+      context,
+      paraAyahSelectionPage,
+      arguments: _currentPara,
+    );
+    if (ret == null) return;
+    List<Ayat> ayahs = ret as List<Ayat>;
+    String s = "";
+    for (final a in ayahs) {
+      s += a.text;
+      s += "\n";
+    }
+    _controller.text = s;
   }
 
   @override
@@ -31,6 +49,11 @@ class ImportTextPage extends StatelessWidget {
         child: Column(
           children: [
             Text("Import newline separated ayats in $_para"),
+            const SizedBox(height: 8),
+            ElevatedButton(
+              onPressed: () => _onSelectAyahs(context),
+              child: const Text("Select from para..."),
+            ),
             const SizedBox(height: 8),
             Expanded(
                 child: TextFormField(
