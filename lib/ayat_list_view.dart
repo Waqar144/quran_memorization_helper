@@ -16,7 +16,10 @@ class AyatListItem extends StatefulWidget {
   final String text;
   final VoidCallback onLongPress;
   final bool selectionMode;
-  final ParaAyatModel model;
+  final List<Ayat> model;
+
+  bool _isSelected() => model[idx].selected ?? false;
+  void toggleSelected() => model[idx].selected = !_isSelected();
 
   @override
   State<AyatListItem> createState() => _AyatListItemState();
@@ -25,18 +28,16 @@ class AyatListItem extends StatefulWidget {
 class _AyatListItemState extends State<AyatListItem> {
   void _longPress() => widget.onLongPress();
   void _onTap() => setState(() {
-        setSelected(!isSelected());
+        widget.toggleSelected();
       });
-
-  bool isSelected() => widget.model.isIndexSelected(widget.idx);
-  void setSelected(bool selected) =>
-      widget.model.setIndexSelected(widget.idx, selected);
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       leading: widget.selectionMode
-          ? Icon(isSelected() ? Icons.check_box : Icons.check_box_outline_blank)
+          ? Icon(widget._isSelected()
+              ? Icons.check_box
+              : Icons.check_box_outline_blank)
           : const SizedBox.shrink(),
       title: Text(
         widget.text,
@@ -73,7 +74,7 @@ class AyatListView extends StatelessWidget {
         final text = ayat.text;
         return AyatListItem(
             key: ObjectKey(ayat),
-            model: _paraAyatModel,
+            model: _paraAyatModel.ayahs,
             text: text,
             idx: index,
             onLongPress: selectionMode.toggle,
