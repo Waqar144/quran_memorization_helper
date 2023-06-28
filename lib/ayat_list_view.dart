@@ -42,6 +42,7 @@ class _AyatListItemState extends State<AyatListItem> {
         widget.text,
         softWrap: true,
         textAlign: TextAlign.right,
+        textDirection: TextDirection.rtl,
         style: TextStyle(
             fontFamily: "Al Mushaf",
             fontSize: Settings.instance.fontSize.toDouble(),
