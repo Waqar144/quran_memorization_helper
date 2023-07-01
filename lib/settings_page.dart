@@ -3,7 +3,8 @@ import 'ayat.dart';
 import 'settings.dart';
 
 class SettingsPage extends StatefulWidget {
-  final List<int> fontSizes = [16, 24, 28, 32];
+  final List<int> fontSizes = [24, 28, 32];
+  final List<double> wordSpacings = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0];
   final ParaAyatModel paraModel;
   SettingsPage(this.paraModel, {super.key});
 
@@ -67,20 +68,26 @@ class _SettingsPageState extends State<SettingsPage> {
     return ListTile(
       title: const Text("Word spacing"),
       subtitle: const Text("Space between words of an ayah"),
-      trailing: FittedBox(
-        fit: BoxFit.contain,
-        child: Slider(
+      trailing: SizedBox(
+        width: 80,
+        child: DropdownButtonFormField<double>(
+          borderRadius: const BorderRadius.all(Radius.circular(5)),
+          decoration: const InputDecoration(contentPadding: EdgeInsets.all(8)),
           value: wordSpacing,
-          min: 0,
-          max: 5,
-          divisions: 5,
-          label: wordSpacing.toString(),
-          onChanged: (double val) {
-            setState(() {
+          onChanged: (double? val) {
+            if (val != null) {
               wordSpacing = val;
               Settings.instance.wordSpacing = val.toInt();
-            });
+            }
           },
+          padding: EdgeInsets.zero,
+          items: [
+            for (final size in widget.wordSpacings)
+              DropdownMenuItem(
+                value: size,
+                child: Text(size.toString()),
+              )
+          ],
         ),
       ),
     );
