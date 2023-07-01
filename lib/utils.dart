@@ -16,13 +16,17 @@ Future<Map<String, dynamic>?> readJsonFile(String fileName) async {
   final Directory dir = await getApplicationDocumentsDirectory();
   String path = dir.path;
   path = "$path${Platform.pathSeparator}$fileName.json";
-  return readJsonFromFilePath(path);
+  try {
+    return await readJsonFromFilePath(path);
+  } catch (e) {
+    return {};
+  }
 }
 
 Future<Map<String, dynamic>?> readJsonFromFilePath(String path) async {
   final jsonFile = File(path);
   if (!await jsonFile.exists()) {
-    throw "file doesn't exits!!!!! $path";
+    throw "file: '$path' doesn't exits!";
   }
 
   final String contents = await jsonFile.readAsString();
