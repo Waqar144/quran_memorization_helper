@@ -1,5 +1,5 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 import 'ayat.dart';
 import 'ayat_list_view.dart';
@@ -66,8 +66,8 @@ class _ParaAyahSelectionPageState extends State<ParaAyahSelectionPage> {
   }
 
   void _importParaText(int para) async {
-    final f = File("assets/quran.txt");
-    List<String> lines = await f.readAsLines();
+    final str = await rootBundle.loadString("assets/quran.txt", cache: false);
+    final List<String> lines = str.split('\n');
     int start = _paraBounds[para - 1].start - 1;
     int end = _paraBounds[para - 1].end;
     _ayats = <Ayat>[for (int i = start; i < end; ++i) Ayat(lines[i])];
@@ -104,7 +104,7 @@ class _ParaAyahSelectionPageState extends State<ParaAyahSelectionPage> {
                     indent: 8, endIndent: 8, color: Colors.grey, height: 2),
             itemCount: _ayats.length,
             itemBuilder: (context, index) {
-              final ayat = _ayats.elementAt(index);
+              final ayat = _ayats[index];
               final text = ayat.text;
               return AyatListItem(
                 key: ObjectKey(ayat),
