@@ -140,12 +140,9 @@ class _ParaAyahSelectionPageState extends State<ParaAyahSelectionPage> {
             itemCount: _ayats.length,
             itemBuilder: (context, index) {
               final ayat = _ayats[index];
-              final text = ayat.text;
               return AyatListItem(
                 key: ObjectKey(ayat),
-                model: _ayats,
-                text: text,
-                idx: index,
+                ayah: ayat,
                 onLongPress: () {},
                 selectionMode: true,
               );

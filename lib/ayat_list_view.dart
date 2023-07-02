@@ -5,21 +5,17 @@ import 'settings.dart';
 class AyatListItem extends StatefulWidget {
   const AyatListItem({
     super.key,
-    required this.model,
-    required this.idx,
-    required this.text,
+    required this.ayah,
     required this.onLongPress,
     required this.selectionMode,
   });
 
-  final int idx;
-  final String text;
   final VoidCallback onLongPress;
   final bool selectionMode;
-  final List<Ayat> model;
+  final Ayat ayah;
 
-  bool _isSelected() => model[idx].selected ?? false;
-  void toggleSelected() => model[idx].selected = !_isSelected();
+  bool _isSelected() => ayah.selected ?? false;
+  void toggleSelected() => ayah.selected = !_isSelected();
 
   @override
   State<AyatListItem> createState() => _AyatListItemState();
@@ -40,7 +36,7 @@ class _AyatListItemState extends State<AyatListItem> {
               : Icons.check_box_outline_blank)
           : const SizedBox.shrink(),
       title: Text(
-        widget.text,
+        widget.ayah.text,
         softWrap: true,
         textAlign: TextAlign.right,
         textDirection: TextDirection.rtl,
@@ -70,13 +66,10 @@ class AyatListView extends StatelessWidget {
           const Divider(indent: 8, endIndent: 8, color: Colors.grey, height: 2),
       itemCount: _paraAyatModel.ayahs.length,
       itemBuilder: (context, index) {
-        final ayat = _paraAyatModel.ayahs.elementAt(index);
-        final text = ayat.text;
+        final ayat = _paraAyatModel.ayahs[index];
         return AyatListItem(
             key: ObjectKey(ayat),
-            model: _paraAyatModel.ayahs,
-            text: text,
-            idx: index,
+            ayah: ayat,
             onLongPress: selectionMode.toggle,
             selectionMode: selectionMode.value);
       },
