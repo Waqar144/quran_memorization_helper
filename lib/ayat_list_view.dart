@@ -53,25 +53,26 @@ class _AyatListItemState extends State<AyatListItem> {
 }
 
 class AyatListView extends StatelessWidget {
-  const AyatListView(this._paraAyatModel,
-      {super.key, required this.selectionMode});
+  const AyatListView(this._ayatsList,
+      {super.key, required this.onLongPress, this.selectionMode = false});
 
-  final ParaAyatModel _paraAyatModel;
-  final ValueNotifier<bool> selectionMode;
+  final List<Ayat> _ayatsList;
+  final VoidCallback onLongPress;
+  final bool selectionMode;
 
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
       separatorBuilder: (BuildContext context, int index) =>
           const Divider(indent: 8, endIndent: 8, color: Colors.grey, height: 2),
-      itemCount: _paraAyatModel.ayahs.length,
+      itemCount: _ayatsList.length,
       itemBuilder: (context, index) {
-        final ayat = _paraAyatModel.ayahs[index];
+        final ayat = _ayatsList[index];
         return AyatListItem(
             key: ObjectKey(ayat),
-            ayah: ayat,
-            onLongPress: selectionMode.toggle,
-            selectionMode: selectionMode.value);
+            ayah: _ayatsList[index],
+            onLongPress: onLongPress,
+            selectionMode: selectionMode);
       },
     );
   }

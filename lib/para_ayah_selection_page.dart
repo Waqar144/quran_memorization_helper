@@ -133,20 +133,10 @@ class _ParaAyahSelectionPageState extends State<ParaAyahSelectionPage> {
         future: _importParaText(widget._paraNum),
         builder: (context, snapshot) {
           if (_ayats.isEmpty) return const SizedBox.shrink();
-          return ListView.separated(
-            separatorBuilder: (BuildContext context, int index) =>
-                const Divider(
-                    indent: 8, endIndent: 8, color: Colors.grey, height: 2),
-            itemCount: _ayats.length,
-            itemBuilder: (context, index) {
-              final ayat = _ayats[index];
-              return AyatListItem(
-                key: ObjectKey(ayat),
-                ayah: ayat,
-                onLongPress: () {},
-                selectionMode: true,
-              );
-            },
+          return AyatListView(
+            _ayats,
+            selectionMode: true,
+            onLongPress: () {},
           );
         },
       ),
