@@ -231,6 +231,8 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
           itemCount: 30,
           itemBuilder: (context, index) {
             return ListTile(
+              minVerticalPadding: 0,
+              visualDensity: VisualDensity.compact,
               title: Text("Para ${index + 1}"),
               onTap: () {
                 _paraModel.setCurrentPara(index + 1);
