@@ -8,6 +8,8 @@ import 'settings_page.dart';
 import 'settings.dart';
 import 'page_constants.dart';
 import 'para_ayah_selection_page.dart';
+import 'quiz_para_selection_page.dart';
+import 'quiz_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -25,7 +27,7 @@ class MyApp extends StatelessWidget {
         colorSchemeSeed: Colors.blue,
       ),
       home: const MainPage(),
-      onGenerateRoute: ((settings) {
+      onGenerateRoute: (settings) {
         if (settings.name == importTextRoute) {
           return MaterialPageRoute(
               builder: (context) => ImportTextPage(settings.arguments as int));
@@ -37,9 +39,15 @@ class MyApp extends StatelessWidget {
           return MaterialPageRoute(
               builder: (context) =>
                   ParaAyahSelectionPage(settings.arguments as int));
+        } else if (settings.name == quizSelectionPage) {
+          return MaterialPageRoute(
+              builder: (context) => QuizParaSelectionPage());
+        } else if (settings.name == quizPage) {
+          return MaterialPageRoute(
+              builder: (context) => QuizPage(settings.arguments as List<int>));
         }
         return MaterialPageRoute(builder: (context) => const MainPage());
-      }),
+      },
     );
   }
 }
@@ -89,6 +97,10 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
         _saveToDisk();
       }
     }
+  }
+
+  void _openQuizParaSelectionPage() async {
+    Navigator.of(context).pushNamed(quizSelectionPage);
   }
 
   void _showSnackBarMessage(String message, {bool error = false}) {
@@ -153,6 +165,31 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     _multipleSelectMode.toggle();
   }
 
+  Widget buildThreeDotMenu() {
+    final Map<String, VoidCallback> actions = {
+      'Add Ayahs...': _import,
+      'Take Quiz': _openQuizParaSelectionPage,
+      'Import Json DB File': _importExistingJson,
+      'Settings': _openSettings,
+    };
+    return PopupMenuButton<String>(
+      onSelected: (String value) {
+        final actionCallback = actions[value];
+        if (actionCallback == null) throw "Unknown action: $value";
+        actionCallback();
+      },
+      icon: const Icon(Icons.more_vert),
+      itemBuilder: (BuildContext context) {
+        return actions.keys.map((String choice) {
+          return PopupMenuItem<String>(
+            value: choice,
+            child: Text(choice),
+          );
+        }).toList();
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -187,31 +224,7 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
                 return threeDotMenu!;
               }
             },
-            child: PopupMenuButton<String>(
-              onSelected: (String value) {
-                switch (value) {
-                  case 'Add Ayahs...':
-                    _import();
-                    break;
-                  case 'Import Json DB File':
-                    _importExistingJson();
-                    break;
-                  case 'Settings':
-                    _openSettings();
-                    break;
-                }
-              },
-              icon: const Icon(Icons.more_vert),
-              itemBuilder: (BuildContext context) {
-                return {'Add Ayahs...', 'Import Json DB File', 'Settings'}
-                    .map((String choice) {
-                  return PopupMenuItem<String>(
-                    value: choice,
-                    child: Text(choice),
-                  );
-                }).toList();
-              },
-            ),
+            child: buildThreeDotMenu(),
           ),
         ],
       ),
