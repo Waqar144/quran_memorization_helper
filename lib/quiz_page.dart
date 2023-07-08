@@ -119,11 +119,7 @@ class _QuizPageState extends State<QuizPage> {
         }
         return Column(
           children: [
-            AyatListItem(
-              ayah: quizAyahs[current].nextAyah,
-              onLongPress: () {},
-              selectionMode: false,
-            ),
+            AyatListItem(ayah: quizAyahs[current].nextAyah),
             const Text("Were you right?"),
             const SizedBox(height: 8),
             Row(
@@ -192,11 +188,7 @@ class _QuizPageState extends State<QuizPage> {
               children: [
                 Text("Recite the next ayah",
                     style: Theme.of(context).textTheme.headlineSmall),
-                AyatListItem(
-                  ayah: quizAyahs[current].questionAyah,
-                  onLongPress: () {},
-                  selectionMode: false,
-                ),
+                AyatListItem(ayah: quizAyahs[current].questionAyah),
                 const Divider(
                   height: 8,
                 ),
