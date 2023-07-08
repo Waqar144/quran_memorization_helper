@@ -22,7 +22,11 @@ class AyatListItem extends StatefulWidget {
 }
 
 class _AyatListItemState extends State<AyatListItem> {
-  void _longPress() => widget.onLongPress();
+  void _longPress() {
+    widget.onLongPress();
+    widget.toggleSelected();
+  }
+
   void _onTap() => setState(() {
         widget.toggleSelected();
       });
