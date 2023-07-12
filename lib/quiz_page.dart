@@ -247,15 +247,19 @@ class _QuizPageState extends State<QuizPage> {
           if (_quizAyahs.isEmpty) return const SizedBox.shrink();
           return Padding(
             padding: const EdgeInsets.all(8),
-            child: Column(
+            child: ListView(
               children: [
-                Text("Recite the next ayah",
-                    style: Theme.of(context).textTheme.headlineSmall),
-                AyatListItem(ayah: _quizAyahs[current].questionAyah),
-                const Divider(
-                  height: 8,
+                Column(
+                  children: [
+                    Text("Recite the next ayah",
+                        style: Theme.of(context).textTheme.headlineSmall),
+                    AyatListItem(ayah: _quizAyahs[current].questionAyah),
+                    const Divider(
+                      height: 8,
+                    ),
+                    _buildAnswerWidget(current)
+                  ],
                 ),
-                _buildAnswerWidget(current)
               ],
             ),
           );
