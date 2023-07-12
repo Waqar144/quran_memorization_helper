@@ -76,6 +76,13 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   }
 
   @override
+  void dispose() {
+    _paraModel.dispose();
+    _multipleSelectMode.dispose();
+    super.dispose();
+  }
+
+  @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached) {

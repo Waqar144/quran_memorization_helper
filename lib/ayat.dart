@@ -33,6 +33,13 @@ class ParaAyatModel extends ChangeNotifier {
   Map<int, List<Ayat>> _paraAyats = {};
   ValueNotifier<int> currentParaNotifier = ValueNotifier<int>(1);
 
+  @override
+  void dispose() {
+    currentParaNotifier.dispose();
+    _paraAyats = {};
+    super.dispose();
+  }
+
   set onParaChange(VoidCallback cb) => currentParaNotifier.addListener(cb);
 
   List<Ayat> get ayahs => _paraAyats[currentPara] ?? [];

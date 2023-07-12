@@ -25,7 +25,6 @@ class _QuizPageState extends State<QuizPage> {
   final ValueNotifier<int> _currentQuestion = ValueNotifier(-1);
   List<_QuizAyahQuestion> quizAyahs = [];
   final ValueNotifier<bool> showNextAyah = ValueNotifier(false);
-  final List<Ayat> _allAyahs = [];
   final int _total = 20;
   int _score = 0;
   bool _showResults = false;
@@ -36,25 +35,35 @@ class _QuizPageState extends State<QuizPage> {
     _startReadingAyahsForQuiz();
   }
 
+  @override
+  void dispose() {
+    showNextAyah.dispose();
+    quizAyahs = [];
+    _currentQuestion.dispose();
+
+    super.dispose();
+  }
+
   void _startReadingAyahsForQuiz() async {
     final stream = _readAyahs();
     final random = Random();
     final Set<int> seenIdxes = {};
     int next(int min, int max) => min + random.nextInt(max - min);
+    final List<Ayat> allAyahs = [];
 
     await for (final List<Ayat> ayahs in stream) {
-      _allAyahs.addAll(ayahs);
+      allAyahs.addAll(ayahs);
       // limit to 20 questions for now
       if (quizAyahs.length == _total) break;
 
       // Add one ayah so that we have a ui while we finish in the bg
       if (quizAyahs.isEmpty) {
         // get randome number in range
-        int nextAyah = next(0, _allAyahs.length - 1);
+        int nextAyah = next(0, allAyahs.length - 1);
         // add the question
         quizAyahs.add(_QuizAyahQuestion(
-          _allAyahs[nextAyah],
-          _allAyahs[nextAyah + 1],
+          allAyahs[nextAyah],
+          allAyahs[nextAyah + 1],
         ));
         seenIdxes.add(nextAyah);
         if (_currentQuestion.value == -1) {
@@ -65,15 +74,15 @@ class _QuizPageState extends State<QuizPage> {
 
     // fill up
     while (quizAyahs.length < _total) {
-      int nextAyah = next(0, _allAyahs.length - 1);
+      int nextAyah = next(0, allAyahs.length - 1);
 
       // avoid duplicates
       if (seenIdxes.contains(nextAyah)) continue;
       seenIdxes.add(nextAyah);
 
       quizAyahs.add(_QuizAyahQuestion(
-        _allAyahs[nextAyah],
-        _allAyahs[nextAyah + 1],
+        allAyahs[nextAyah],
+        allAyahs[nextAyah + 1],
       ));
     }
   }
