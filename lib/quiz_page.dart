@@ -49,9 +49,9 @@ class _QuizPageState extends State<QuizPage> {
     final random = Random();
     final Set<int> seenIdxes = {};
     int next(int min, int max) => min + random.nextInt(max - min);
-    final List<Ayat> allAyahs = [];
+    final List<String> allAyahs = [];
 
-    await for (final List<Ayat> ayahs in stream) {
+    await for (final List<String> ayahs in stream) {
       allAyahs.addAll(ayahs);
       // limit to 20 questions for now
       if (quizAyahs.length == _total) break;
@@ -62,8 +62,8 @@ class _QuizPageState extends State<QuizPage> {
         int nextAyah = next(0, allAyahs.length - 1);
         // add the question
         quizAyahs.add(_QuizAyahQuestion(
-          allAyahs[nextAyah],
-          allAyahs[nextAyah + 1],
+          Ayat(allAyahs[nextAyah]),
+          Ayat(allAyahs[nextAyah + 1]),
         ));
         seenIdxes.add(nextAyah);
         if (_currentQuestion.value == -1) {
@@ -81,20 +81,19 @@ class _QuizPageState extends State<QuizPage> {
       seenIdxes.add(nextAyah);
 
       quizAyahs.add(_QuizAyahQuestion(
-        allAyahs[nextAyah],
-        allAyahs[nextAyah + 1],
+        Ayat(allAyahs[nextAyah]),
+        Ayat(allAyahs[nextAyah + 1]),
       ));
     }
   }
 
-  Stream<List<Ayat>> _readAyahs() async* {
+  Stream<List<String>> _readAyahs() async* {
     final data = await rootBundle.load("assets/quran.txt");
     final quranText = utf8.decode(data.buffer.asUint8List());
     for (final para in widget._selectedParas) {
       final str = quranText.substring(
           paraByteBounds[para].start, paraByteBounds[para].end);
-      final List<String> lines = str.split('\n');
-      yield <Ayat>[for (int i = 0; i < lines.length; ++i) Ayat(lines[i])];
+      yield str.split('\n');
     }
   }
 
