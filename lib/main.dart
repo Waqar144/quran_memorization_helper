@@ -3,13 +3,9 @@ import 'package:flutter/material.dart';
 
 import 'ayat.dart';
 import 'ayat_list_view.dart';
-import 'import_text_page.dart';
-import 'settings_page.dart';
 import 'settings.dart';
 import 'page_constants.dart';
-import 'para_ayah_selection_page.dart';
-import 'quiz_para_selection_page.dart';
-import 'quiz_page.dart';
+import 'routing.dart';
 
 void main() {
   runApp(const MyApp());
@@ -27,27 +23,7 @@ class MyApp extends StatelessWidget {
         colorSchemeSeed: Colors.blue,
       ),
       home: const MainPage(),
-      onGenerateRoute: (settings) {
-        if (settings.name == importTextRoute) {
-          return MaterialPageRoute(
-              builder: (context) => ImportTextPage(settings.arguments as int));
-        } else if (settings.name == settingsPageRoute) {
-          return MaterialPageRoute(
-              builder: (context) =>
-                  SettingsPage(settings.arguments as ParaAyatModel));
-        } else if (settings.name == paraAyahSelectionPage) {
-          return MaterialPageRoute(
-              builder: (context) =>
-                  ParaAyahSelectionPage(settings.arguments as int));
-        } else if (settings.name == quizSelectionPage) {
-          return MaterialPageRoute(
-              builder: (context) => QuizParaSelectionPage());
-        } else if (settings.name == quizPage) {
-          return MaterialPageRoute(
-              builder: (context) => QuizPage(settings.arguments as List<int>));
-        }
-        return MaterialPageRoute(builder: (context) => const MainPage());
-      },
+      onGenerateRoute: handleRoute,
     );
   }
 }
