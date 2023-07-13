@@ -26,14 +26,17 @@ class _QuizPageState extends State<QuizPage> {
   final ValueNotifier<int> _currentQuestion = ValueNotifier(-1);
   List<_QuizAyahQuestion> _quizAyahs = [];
   final ValueNotifier<bool> showNextAyah = ValueNotifier(false);
-  List<_QuizAyahQuestion> _wrongAnswers = [];
-  final int _total = 20;
+  final List<_QuizAyahQuestion> _wrongAnswers = [];
+  late final int _total;
   int _score = 0;
   bool _showResults = false;
 
   @override
   void initState() {
     super.initState();
+    _total = widget._creationArgs.selectedParas.length > 20
+        ? widget._creationArgs.selectedParas.length
+        : 20;
     _startReadingAyahsForQuiz();
   }
 
@@ -46,16 +49,12 @@ class _QuizPageState extends State<QuizPage> {
     super.dispose();
   }
 
-  _QuizAyahQuestion _addQuestion(final List<String> allAyahs, int randomIdx) {
-    _QuizAyahQuestion nextAyahQuestion(
-        final List<String> allAyahs, int randomIdx) {
-      return _QuizAyahQuestion(
-          Ayat(allAyahs[randomIdx]), Ayat(allAyahs[randomIdx + 1]));
+  _QuizAyahQuestion _addQuestion(String ayah, String nextAyah) {
+    _QuizAyahQuestion nextAyahQuestion() {
+      return _QuizAyahQuestion(Ayat(ayah), Ayat(nextAyah));
     }
 
-    _QuizAyahQuestion endAyahQuestion(
-        final List<String> allAyahs, int randomIdx) {
-      final String ayah = allAyahs[randomIdx];
+    _QuizAyahQuestion endAyahQuestion() {
       List<String> words = ayah.split(' ');
       int replaceStart = min((words.length / 2).ceil(), 6);
       final question =
@@ -64,14 +63,14 @@ class _QuizPageState extends State<QuizPage> {
     }
 
     if (widget._creationArgs.mode == QuizMode.nextAyah) {
-      return nextAyahQuestion(allAyahs, randomIdx);
+      return nextAyahQuestion();
     } else if (widget._creationArgs.mode == QuizMode.endAyah) {
-      return endAyahQuestion(allAyahs, randomIdx);
+      return endAyahQuestion();
     } else if (widget._creationArgs.mode == QuizMode.mix) {
       if (_quizAyahs.length % 2 == 0) {
-        return nextAyahQuestion(allAyahs, randomIdx);
+        return nextAyahQuestion();
       } else {
-        return endAyahQuestion(allAyahs, randomIdx);
+        return endAyahQuestion();
       }
     }
     throw "Unknown quiz mode!";
@@ -79,46 +78,65 @@ class _QuizPageState extends State<QuizPage> {
 
   void _startReadingAyahsForQuiz() async {
     final stream = _readAyahs();
-    final random = Random();
-    final Set<int> seenIdxes = {};
-    int next(int min, int max) => min + random.nextInt(max - min);
-    final List<String> allAyahs = [];
-
-    await for (final List<String> ayahs in stream) {
-      allAyahs.addAll(ayahs);
-      // limit to 20 questions for now
-      if (_quizAyahs.length == _total) break;
-
-      // Add one ayah so that we have a ui while we finish in the bg
-      if (_quizAyahs.isEmpty) {
-        // get randome number in range
-        int nextAyah = next(0, allAyahs.length - 1);
-        // add the question
-        _quizAyahs.add(_addQuestion(allAyahs, nextAyah));
-        seenIdxes.add(nextAyah);
-        if (_currentQuestion.value == -1) {
-          _currentQuestion.value = 0;
-        }
+    await for (final _QuizAyahQuestion question in stream) {
+      _quizAyahs.add(question);
+      if (_currentQuestion.value == -1) {
+        _currentQuestion.value = 0;
       }
-    }
-
-    // fill up
-    while (_quizAyahs.length < _total) {
-      int nextAyah = next(0, allAyahs.length - 1);
-      // avoid duplicates
-      if (seenIdxes.contains(nextAyah)) continue;
-      seenIdxes.add(nextAyah);
-      _quizAyahs.add(_addQuestion(allAyahs, nextAyah));
     }
   }
 
-  Stream<List<String>> _readAyahs() async* {
+  Stream<_QuizAyahQuestion> _readAyahs() async* {
+    final random = Random();
+    int next(int min, int max) => min + random.nextInt(max - min);
+    final selectedParas = widget._creationArgs.selectedParas;
+    selectedParas.shuffle(random);
+
     final data = await rootBundle.load("assets/quran.txt");
     final quranText = utf8.decode(data.buffer.asUint8List());
-    for (final para in widget._creationArgs.selectedParas) {
-      final str = quranText.substring(
-          paraByteBounds[para].start, paraByteBounds[para].end);
-      yield str.split('\n');
+    final Map<int, List<int>> seenAyahsByPara = {};
+
+    while (_quizAyahs.length < _total) {
+      for (final int para in selectedParas) {
+        int totalAyahsInPara = paraAyahCount[para];
+
+        // get random number
+        int r = next(0, totalAyahsInPara - 1);
+        // avoid duplicate questions
+        if (!seenAyahsByPara.containsKey(para)) {
+          seenAyahsByPara[para] = [];
+        }
+        while (seenAyahsByPara[para]!.contains(r)) {
+          r = next(0, totalAyahsInPara - 1);
+        }
+        seenAyahsByPara[para]!.add(r);
+
+        // find ayah and next ayah
+        ParaBounds bounds = paraByteBounds[para];
+        int startNl = bounds.start;
+        int nextNl = quranText.indexOf('\n', startNl);
+        int count = 0;
+        String ayah = "";
+        String nextAyah = "";
+        while (nextNl < bounds.end) {
+          if (r == count) {
+            ayah = quranText.substring(startNl, nextNl);
+            startNl = nextNl + 1;
+            nextNl = quranText.indexOf('\n', startNl);
+            nextAyah = quranText.substring(startNl, nextNl);
+            break;
+          }
+          count++;
+          startNl = nextNl + 1;
+          nextNl = quranText.indexOf('\n', startNl);
+        }
+
+        yield _addQuestion(ayah, nextAyah);
+
+        if (_quizAyahs.length >= _total) {
+          break;
+        }
+      }
     }
   }
 
@@ -254,9 +272,7 @@ class _QuizPageState extends State<QuizPage> {
                     Text("Recite the next ayah",
                         style: Theme.of(context).textTheme.headlineSmall),
                     AyatListItem(ayah: _quizAyahs[current].questionAyah),
-                    const Divider(
-                      height: 8,
-                    ),
+                    const Divider(height: 8),
                     _buildAnswerWidget(current)
                   ],
                 ),
