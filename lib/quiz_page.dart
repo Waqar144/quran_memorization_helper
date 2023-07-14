@@ -10,7 +10,17 @@ import 'quiz.dart';
 class _QuizAyahQuestion {
   final Ayat questionAyah;
   final Ayat nextAyah;
-  const _QuizAyahQuestion(this.questionAyah, this.nextAyah);
+  final QuizMode mode;
+  const _QuizAyahQuestion(this.questionAyah, this.nextAyah, this.mode);
+}
+
+String _questionTextForQuizMode(QuizMode m) {
+  if (m == QuizMode.nextAyah) {
+    return "Recite the next ayah";
+  } else if (m == QuizMode.endAyah) {
+    return "Finish the ayah";
+  }
+  throw "Invalid question type";
 }
 
 class QuizPage extends StatefulWidget {
@@ -51,7 +61,7 @@ class _QuizPageState extends State<QuizPage> {
 
   _QuizAyahQuestion _addQuestion(String ayah, String nextAyah) {
     _QuizAyahQuestion nextAyahQuestion() {
-      return _QuizAyahQuestion(Ayat(ayah), Ayat(nextAyah));
+      return _QuizAyahQuestion(Ayat(ayah), Ayat(nextAyah), QuizMode.nextAyah);
     }
 
     _QuizAyahQuestion endAyahQuestion() {
@@ -59,7 +69,7 @@ class _QuizPageState extends State<QuizPage> {
       int replaceStart = min((words.length / 2).ceil(), 6);
       final question =
           "${words.sublist(0, words.length - replaceStart).join(' ')}...";
-      return _QuizAyahQuestion(Ayat(question), Ayat(ayah));
+      return _QuizAyahQuestion(Ayat(question), Ayat(ayah), QuizMode.endAyah);
     }
 
     if (widget._creationArgs.mode == QuizMode.nextAyah) {
@@ -166,7 +176,7 @@ class _QuizPageState extends State<QuizPage> {
       builder: (context, bool show, _) {
         if (!show) {
           return ElevatedButton(
-            child: const Text("Show Next Ayah"),
+            child: const Text("Show Answer"),
             onPressed: () {
               showNextAyah.value = true;
             },
@@ -218,10 +228,10 @@ class _QuizPageState extends State<QuizPage> {
               style: Theme.of(context).textTheme.headlineSmall,
             ),
           ),
-          const SizedBox(height: 8),
+          const Divider(),
           Text(
             "Ayahs that you got wrong",
-            style: Theme.of(context).textTheme.headlineSmall,
+            style: Theme.of(context).textTheme.labelLarge,
           ),
           const SizedBox(height: 8),
           Expanded(
@@ -269,7 +279,7 @@ class _QuizPageState extends State<QuizPage> {
               children: [
                 Column(
                   children: [
-                    Text("Recite the next ayah",
+                    Text(_questionTextForQuizMode(_quizAyahs[current].mode),
                         style: Theme.of(context).textTheme.headlineSmall),
                     AyatListItem(ayah: _quizAyahs[current].questionAyah),
                     const Divider(height: 8),
