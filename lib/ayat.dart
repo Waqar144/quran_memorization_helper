@@ -11,14 +11,11 @@ extension ValueNotifierToggle on ValueNotifier<bool> {
 class Ayat {
   Ayat(this.text);
   String text = "";
-  int count = 0;
   bool? selected;
 
-  Ayat.fromJson(Map<String, dynamic> json)
-      : text = json["text"],
-        count = json["count"];
+  Ayat.fromJson(Map<String, dynamic> json) : text = json["text"];
 
-  Map<String, dynamic> toJson() => {"text": text, "count": count};
+  Map<String, dynamic> toJson() => {"text": text};
 
   @override
   bool operator ==(Object other) {
@@ -93,6 +90,19 @@ class ParaAyatModel extends ChangeNotifier {
 
   bool isIndexSelected(int index) =>
       index < ayahs.length && (ayahs[index].selected ?? false);
+
+  void merge(Map<int, List<Ayat>> paraAyahs) {
+    for (final e in paraAyahs.entries) {
+      List<Ayat> existingAyahs = _paraAyats[e.key] ?? [];
+      List<Ayat> toMergeAyahs = e.value;
+      Set<Ayat> newAyahs = {...existingAyahs, ...toMergeAyahs};
+      _paraAyats[e.key] = newAyahs.toList();
+    }
+    // if current para change, notify
+    if (paraAyahs.containsKey(currentParaNotifier.value)) {
+      notifyListeners();
+    }
+  }
 
   void _resetfromJson(Map<String, dynamic> json) {
     final Map<int, List<Ayat>> paraAyats = {};

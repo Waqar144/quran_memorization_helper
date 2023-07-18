@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'page_constants.dart';
 import 'quiz.dart';
 
 class QuizParaSelectionPage extends StatelessWidget {
@@ -14,8 +13,8 @@ class QuizParaSelectionPage extends StatelessWidget {
       Navigator.of(context).pop();
       return;
     }
-    Navigator.of(context).popAndPushNamed(quizPage,
-        arguments: QuizCreationArgs(_selectedParas.value, _quizMode.value));
+    Navigator.of(context)
+        .pop(QuizCreationArgs(_selectedParas.value, _quizMode.value));
   }
 
   @override

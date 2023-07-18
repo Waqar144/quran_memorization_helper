@@ -6,6 +6,7 @@ import 'ayat_list_view.dart';
 import 'settings.dart';
 import 'page_constants.dart';
 import 'routing.dart';
+import 'quiz.dart';
 
 void main() {
   runApp(const MyApp());
@@ -83,7 +84,15 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   }
 
   void _openQuizParaSelectionPage() async {
-    Navigator.of(context).pushNamed(quizSelectionPage);
+    final quizCreationArgs = await Navigator.of(context)
+        .pushNamed(quizSelectionPage) as QuizCreationArgs?;
+    if (!mounted || quizCreationArgs == null) return;
+    if (quizCreationArgs.selectedParas.isEmpty) return;
+    final ayahsToAdd = await Navigator.of(context).pushNamed(quizPage,
+        arguments: quizCreationArgs) as Map<int, List<Ayat>>?;
+    if (!mounted) return;
+    if (ayahsToAdd == null || ayahsToAdd.isEmpty) return;
+    _paraModel.merge(ayahsToAdd);
   }
 
   void _showSnackBarMessage(String message, {bool error = false}) {
