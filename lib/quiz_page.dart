@@ -101,11 +101,6 @@ class _QuizPageState extends State<QuizPage> {
         _currentQuestion.value = 0;
       }
     }
-
-    for (int i = 0; i < 8; ++i) {
-      _wrongAnswers.add(_quizAyahs[i]);
-    }
-    _currentQuestion.value = 19;
   }
 
   Stream<_QuizAyahQuestion> _readAyahs() async* {
