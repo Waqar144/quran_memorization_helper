@@ -22,6 +22,10 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: Colors.blue,
+        appBarTheme: AppBarTheme(
+            elevation: 1,
+            scrolledUnderElevation: 2,
+            shadowColor: Theme.of(context).shadowColor),
       ),
       home: const MainPage(),
       onGenerateRoute: handleRoute,
@@ -195,9 +199,6 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
       child: Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
-          elevation: 1,
-          scrolledUnderElevation: 2,
-          shadowColor: Theme.of(context).shadowColor,
           title: ValueListenableBuilder(
             valueListenable: _paraModel.currentParaNotifier,
             builder: (context, value, _) {
