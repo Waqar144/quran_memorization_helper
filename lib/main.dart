@@ -184,67 +184,76 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: AppBar(
-        elevation: 1,
-        scrolledUnderElevation: 2,
-        shadowColor: Theme.of(context).shadowColor,
-        title: ValueListenableBuilder(
-          valueListenable: _paraModel.currentParaNotifier,
-          builder: (context, value, _) {
-            return Text("Para $value");
-          },
-        ),
-        actions: [
-          ValueListenableBuilder<bool>(
-            valueListenable: _multipleSelectMode,
-            builder: (context, value, threeDotMenu) {
-              if (value) {
-                return Row(children: [
-                  IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: _onDeletePress),
-                  IconButton(
-                      icon: const Icon(Icons.select_all),
-                      onPressed: () => _paraModel.selectAll()),
-                  IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: _onExitMultiSelectMode),
-                ]);
-              } else {
-                return threeDotMenu!;
-              }
+    return WillPopScope(
+      onWillPop: () async {
+        if (_multipleSelectMode.value) {
+          _multipleSelectMode.value = false;
+          return false;
+        }
+        return true;
+      },
+      child: Scaffold(
+        key: _scaffoldKey,
+        appBar: AppBar(
+          elevation: 1,
+          scrolledUnderElevation: 2,
+          shadowColor: Theme.of(context).shadowColor,
+          title: ValueListenableBuilder(
+            valueListenable: _paraModel.currentParaNotifier,
+            builder: (context, value, _) {
+              return Text("Para $value");
             },
-            child: buildThreeDotMenu(),
           ),
-        ],
-      ),
-      body: ListenableBuilder(
-        listenable: Listenable.merge(
-            [_multipleSelectMode, _paraModel, Settings.instance]),
-        builder: (context, child) {
-          return AyatListView(
-            _paraModel.ayahs,
-            selectionMode: _multipleSelectMode.value,
-            onLongPress: _multipleSelectMode.toggle,
-          );
-        },
-      ),
-      drawer: Drawer(
-        child: ListView.builder(
-          itemCount: 30,
-          itemBuilder: (context, index) {
-            return ListTile(
-              minVerticalPadding: 0,
-              visualDensity: VisualDensity.compact,
-              title: Text("Para ${index + 1}"),
-              onTap: () {
-                _paraModel.setCurrentPara(index + 1);
-                _scaffoldKey.currentState?.closeDrawer();
+          actions: [
+            ValueListenableBuilder<bool>(
+              valueListenable: _multipleSelectMode,
+              builder: (context, value, threeDotMenu) {
+                if (value) {
+                  return Row(children: [
+                    IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: _onDeletePress),
+                    IconButton(
+                        icon: const Icon(Icons.select_all),
+                        onPressed: () => _paraModel.selectAll()),
+                    IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: _onExitMultiSelectMode),
+                  ]);
+                } else {
+                  return threeDotMenu!;
+                }
               },
+              child: buildThreeDotMenu(),
+            ),
+          ],
+        ),
+        body: ListenableBuilder(
+          listenable: Listenable.merge(
+              [_multipleSelectMode, _paraModel, Settings.instance]),
+          builder: (context, child) {
+            return AyatListView(
+              _paraModel.ayahs,
+              selectionMode: _multipleSelectMode.value,
+              onLongPress: _multipleSelectMode.toggle,
             );
           },
+        ),
+        drawer: Drawer(
+          child: ListView.builder(
+            itemCount: 30,
+            itemBuilder: (context, index) {
+              return ListTile(
+                minVerticalPadding: 0,
+                visualDensity: VisualDensity.compact,
+                title: Text("Para ${index + 1}"),
+                onTap: () {
+                  _paraModel.setCurrentPara(index + 1);
+                  _scaffoldKey.currentState?.closeDrawer();
+                },
+              );
+            },
+          ),
         ),
       ),
     );
