@@ -275,7 +275,7 @@ class _QuizPageState extends State<QuizPage> {
           separatorBuilder: (context, index) {
             return const Divider();
           },
-          physics: NeverScrollableScrollPhysics(),
+          physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           itemCount: _wrongAnswers.length,
           itemBuilder: (context, index) {
