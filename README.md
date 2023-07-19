@@ -1,6 +1,8 @@
-# Quran Revision Helper
+# Quran Revision Companion
 
-An app that stores ayahs that you find difficult or in which there are mistakes that you make everytime. The idea is to allow you to review such ayahs quickly
+An app that serves as a companion for Quran revision. The intended user of the app is a Hafiz. Currently it has the following features:
+- Create a list of ayahs for each para/juz. These can be ayahs that you find difficult
+- Take quiz
 
 ## Build
 

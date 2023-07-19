@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Quran Revision Helper',
+      title: 'Quran Revision Companion',
       theme: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: Colors.blue,

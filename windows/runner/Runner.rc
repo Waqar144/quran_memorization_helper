@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.wqar" "\0"
-            VALUE "FileDescription", "Quran Revision Helper" "\0"
+            VALUE "FileDescription", "Quran Revision Companion" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "quranmemhelp" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2023 com.example. All rights reserved." "\0"
             VALUE "OriginalFilename", "quran_mem_helper.exe" "\0"
-            VALUE "ProductName", "Quran Revision Helper" "\0"
+            VALUE "ProductName", "Quran Revision Companion" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
