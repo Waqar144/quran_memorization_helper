@@ -18,24 +18,33 @@ class ParaAyahSelectionPage extends StatefulWidget {
 
 class _ParaAyahSelectionPageState extends State<ParaAyahSelectionPage> {
   late final String _para;
-  List<Ayat> _ayats = [];
+  final List<Ayat> _ayats = [];
 
   @override
   void initState() {
     super.initState();
 
     _para = "Para ${widget._paraNum}";
-    _importParaText(widget._paraNum);
   }
 
   Future<void> _importParaText(int para) async {
     final data = await rootBundle.load("assets/quran.txt");
-    var str = utf8.decode(data.buffer.asUint8List());
 
-    str = str.substring(
-        paraByteBounds[para - 1].start, paraByteBounds[para - 1].end);
-    final List<String> lines = str.split('\n');
-    _ayats = <Ayat>[for (int i = 0; i < lines.length; ++i) Ayat(lines[i])];
+    const int newLine = 10;
+    final int offset = paraByteOffsets[para - 1];
+    final int? len = para == 30 ? null : paraByteOffsets[para];
+    final buffer = data.buffer.asUint8List(offset, len);
+    int s = 0;
+    int n = buffer.indexOf(newLine);
+
+    _ayats.clear();
+    while (n != -1) {
+      final text = utf8.decode(buffer.sublist(s, n));
+      _ayats.add(Ayat(text));
+
+      s = n + 1;
+      n = buffer.indexOf(newLine, s);
+    }
   }
 
   void _onDone(BuildContext context) {
