@@ -4,6 +4,8 @@ class ParaBounds {
   const ParaBounds(this.start, this.end);
 }
 
+const String ayahSeparator = " ۞ ";
+
 const List<int> paraByteOffsets = [
   0,
   46001,

@@ -8,6 +8,9 @@ import 'quiz_para_selection_page.dart';
 import 'quiz.dart';
 import 'main.dart';
 import 'quiz_page.dart';
+import 'view_mutashabiha_page.dart';
+import 'add_mutashabiha_page.dart';
+import 'mutashabihas_page.dart';
 
 MaterialPageRoute handleRoute(RouteSettings settings) {
   if (settings.name == importTextRoute) {
@@ -25,6 +28,11 @@ MaterialPageRoute handleRoute(RouteSettings settings) {
   } else if (settings.name == quizPage) {
     return MaterialPageRoute(
         builder: (context) => QuizPage(settings.arguments as QuizCreationArgs));
+  } else if (settings.name == mutashabihasPage) {
+    return MaterialPageRoute(builder: (context) => const MutashabihasPage());
+  } else if (settings.name == paraMutashabihasPage) {
+    return MaterialPageRoute(
+        builder: (context) => ParaMutashabihas(settings.arguments as int));
   }
   return MaterialPageRoute(builder: (context) => const MainPage());
 }

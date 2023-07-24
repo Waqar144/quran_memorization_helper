@@ -19,6 +19,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Quran Revision Companion',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: Colors.blue,
@@ -149,6 +150,10 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
         arguments: _paraModel);
   }
 
+  void _openMutashabihas() {
+    Navigator.pushNamed(context, mutashabihasPage, arguments: _paraModel);
+  }
+
   void _onDeletePress() {
     assert(_multipleSelectMode.value);
     _paraModel.removeSelectedAyahs();
@@ -165,6 +170,7 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     final Map<String, VoidCallback> actions = {
       'Add Ayahs...': _import,
       'Take Quiz': _openQuizParaSelectionPage,
+      'Mutashabihas': _openMutashabihas,
       'Import Json DB File': _importExistingJson,
       'Settings': _openSettings,
     };
