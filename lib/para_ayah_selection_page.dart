@@ -32,7 +32,7 @@ class _ParaAyahSelectionPageState extends State<ParaAyahSelectionPage> {
 
     const int newLine = 10;
     final int offset = paraByteOffsets[para - 1];
-    final int? len = para == 30 ? null : paraByteOffsets[para];
+    final int? len = para == 30 ? null : paraByteOffsets[para] - offset;
     final buffer = data.buffer.asUint8List(offset, len);
     int s = 0;
     int n = buffer.indexOf(newLine);
