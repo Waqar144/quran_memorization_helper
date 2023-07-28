@@ -6,237 +6,123 @@ int toSurahAyahOffset(int surahIdx, int absoluteAyah) {
 }
 
 String surahNameForIdx(idx) {
-  switch (idx) {
-    case 0:
-      return "Al-Fatihah";
-    case 1:
-      return "Al-Baqarah";
-    case 2:
-      return "Ali 'Imran";
-    case 3:
-      return "An-Nisa";
-    case 4:
-      return "Al-Ma'idah";
-    case 5:
-      return "Al-An'am";
-    case 6:
-      return "Al-A'raf";
-    case 7:
-      return "Al-Anfal";
-    case 8:
-      return "At-Tawbah";
-    case 9:
-      return "Yunus";
-    case 10:
-      return "Hud";
-    case 11:
-      return "Yusuf";
-    case 12:
-      return "Ar-Ra'd";
-    case 13:
-      return "Ibrahim";
-    case 14:
-      return "Al-Hijr";
-    case 15:
-      return "An-Nahl";
-    case 16:
-      return "Al-Isra";
-    case 17:
-      return "Al-Kahf";
-    case 18:
-      return "Maryam";
-    case 19:
-      return "Taha";
-    case 20:
-      return "Al-Anbya";
-    case 21:
-      return "Al-Hajj";
-    case 22:
-      return "Al-Mu'minun";
-    case 23:
-      return "An-Nur";
-    case 24:
-      return "Al-Furqan";
-    case 25:
-      return "Ash-Shu'ara";
-    case 26:
-      return "An-Naml";
-    case 27:
-      return "Al-Qasas";
-    case 28:
-      return "Al-'Ankabut";
-    case 29:
-      return "Ar-Rum";
-    case 30:
-      return "Luqman";
-    case 31:
-      return "As-Sajdah";
-    case 32:
-      return "Al-Ahzab";
-    case 33:
-      return "Saba";
-    case 34:
-      return "Fatir";
-    case 35:
-      return "Ya-Sin";
-    case 36:
-      return "As-Saffat";
-    case 37:
-      return "Sad";
-    case 38:
-      return "Az-Zumar";
-    case 39:
-      return "Ghafir";
-    case 40:
-      return "Fussilat";
-    case 41:
-      return "Ash-Shuraa";
-    case 42:
-      return "Az-Zukhruf";
-    case 43:
-      return "Ad-Dukhan";
-    case 44:
-      return "Al-Jathiyah";
-    case 45:
-      return "Al-Ahqaf";
-    case 46:
-      return "Muhammad";
-    case 47:
-      return "Al-Fath";
-    case 48:
-      return "Al-Hujurat";
-    case 49:
-      return "Qaf";
-    case 50:
-      return "Adh-Dhariyat";
-    case 51:
-      return "At-Tur";
-    case 52:
-      return "An-Najm";
-    case 53:
-      return "Al-Qamar";
-    case 54:
-      return "Ar-Rahman";
-    case 55:
-      return "Al-Waqi'ah";
-    case 56:
-      return "Al-Hadid";
-    case 57:
-      return "Al-Mujadila";
-    case 58:
-      return "Al-Hashr";
-    case 59:
-      return "Al-Mumtahanah";
-    case 60:
-      return "As-Saf";
-    case 61:
-      return "Al-Jumu'ah";
-    case 62:
-      return "Al-Munafiqun";
-    case 63:
-      return "At-Taghabun";
-    case 64:
-      return "At-Talaq";
-    case 65:
-      return "At-Tahrim";
-    case 66:
-      return "Al-Mulk";
-    case 67:
-      return "Al-Qalam";
-    case 68:
-      return "Al-Haqqah";
-    case 69:
-      return "Al-Ma'arij";
-    case 70:
-      return "Nuh";
-    case 71:
-      return "Al-Jinn";
-    case 72:
-      return "Al-Muzzammil";
-    case 73:
-      return "Al-Muddaththir";
-    case 74:
-      return "Al-Qiyamah";
-    case 75:
-      return "Al-Insan";
-    case 76:
-      return "Al-Mursalat";
-    case 77:
-      return "An-Naba";
-    case 78:
-      return "An-Nazi'at";
-    case 79:
-      return "'Abasa";
-    case 80:
-      return "At-Takwir";
-    case 81:
-      return "Al-Infitar";
-    case 82:
-      return "Al-Mutaffifin";
-    case 83:
-      return "Al-Inshiqaq";
-    case 84:
-      return "Al-Buruj";
-    case 85:
-      return "At-Tariq";
-    case 86:
-      return "Al-A'la";
-    case 87:
-      return "Al-Ghashiyah";
-    case 88:
-      return "Al-Fajr";
-    case 89:
-      return "Al-Balad";
-    case 90:
-      return "Ash-Shams";
-    case 91:
-      return "Al-Layl";
-    case 92:
-      return "Ad-Duhaa";
-    case 93:
-      return "Ash-Sharh";
-    case 94:
-      return "At-Tin";
-    case 95:
-      return "Al-'Alaq";
-    case 96:
-      return "Al-Qadr";
-    case 97:
-      return "Al-Bayyinah";
-    case 98:
-      return "Az-Zalzalah";
-    case 99:
-      return "Al-'Adiyat";
-    case 100:
-      return "Al-Qari'ah";
-    case 101:
-      return "At-Takathur";
-    case 102:
-      return "Al-'Asr";
-    case 103:
-      return "Al-Humazah";
-    case 104:
-      return "Al-Fil";
-    case 105:
-      return "Quraysh";
-    case 106:
-      return "Al-Ma'un";
-    case 107:
-      return "Al-Kawthar";
-    case 108:
-      return "Al-Kafirun";
-    case 109:
-      return "An-Nasr";
-    case 110:
-      return "Al-Masad";
-    case 111:
-      return "Al-Ikhlas";
-    case 112:
-      return "Al-Falaq";
-    case 113:
-      return "An-Nas";
-  }
-  throw "Invalid surah idx: $idx";
+  return switch (idx) {
+    0 => "Al-Fatihah",
+    1 => "Al-Baqarah",
+    2 => "Ali 'Imran",
+    3 => "An-Nisa",
+    4 => "Al-Ma'idah",
+    5 => "Al-An'am",
+    6 => "Al-A'raf",
+    7 => "Al-Anfal",
+    8 => "At-Tawbah",
+    9 => "Yunus",
+    10 => "Hud",
+    11 => "Yusuf",
+    12 => "Ar-Ra'd",
+    13 => "Ibrahim",
+    14 => "Al-Hijr",
+    15 => "An-Nahl",
+    16 => "Al-Isra",
+    17 => "Al-Kahf",
+    18 => "Maryam",
+    19 => "Taha",
+    20 => "Al-Anbya",
+    21 => "Al-Hajj",
+    22 => "Al-Mu'minun",
+    23 => "An-Nur",
+    24 => "Al-Furqan",
+    25 => "Ash-Shu'ara",
+    26 => "An-Naml",
+    27 => "Al-Qasas",
+    28 => "Al-'Ankabut",
+    29 => "Ar-Rum",
+    30 => "Luqman",
+    31 => "As-Sajdah",
+    32 => "Al-Ahzab",
+    33 => "Saba",
+    34 => "Fatir",
+    35 => "Ya-Sin",
+    36 => "As-Saffat",
+    37 => "Sad",
+    38 => "Az-Zumar",
+    39 => "Ghafir",
+    40 => "Fussilat",
+    41 => "Ash-Shuraa",
+    42 => "Az-Zukhruf",
+    43 => "Ad-Dukhan",
+    44 => "Al-Jathiyah",
+    45 => "Al-Ahqaf",
+    46 => "Muhammad",
+    47 => "Al-Fath",
+    48 => "Al-Hujurat",
+    49 => "Qaf",
+    50 => "Adh-Dhariyat",
+    51 => "At-Tur",
+    52 => "An-Najm",
+    53 => "Al-Qamar",
+    54 => "Ar-Rahman",
+    55 => "Al-Waqi'ah",
+    56 => "Al-Hadid",
+    57 => "Al-Mujadila",
+    58 => "Al-Hashr",
+    59 => "Al-Mumtahanah",
+    60 => "As-Saf",
+    61 => "Al-Jumu'ah",
+    62 => "Al-Munafiqun",
+    63 => "At-Taghabun",
+    64 => "At-Talaq",
+    65 => "At-Tahrim",
+    66 => "Al-Mulk",
+    67 => "Al-Qalam",
+    68 => "Al-Haqqah",
+    69 => "Al-Ma'arij",
+    70 => "Nuh",
+    71 => "Al-Jinn",
+    72 => "Al-Muzzammil",
+    73 => "Al-Muddaththir",
+    74 => "Al-Qiyamah",
+    75 => "Al-Insan",
+    76 => "Al-Mursalat",
+    77 => "An-Naba",
+    78 => "An-Nazi'at",
+    79 => "'Abasa",
+    80 => "At-Takwir",
+    81 => "Al-Infitar",
+    82 => "Al-Mutaffifin",
+    83 => "Al-Inshiqaq",
+    84 => "Al-Buruj",
+    85 => "At-Tariq",
+    86 => "Al-A'la",
+    87 => "Al-Ghashiyah",
+    88 => "Al-Fajr",
+    89 => "Al-Balad",
+    90 => "Ash-Shams",
+    91 => "Al-Layl",
+    92 => "Ad-Duhaa",
+    93 => "Ash-Sharh",
+    94 => "At-Tin",
+    95 => "Al-'Alaq",
+    96 => "Al-Qadr",
+    97 => "Al-Bayyinah",
+    98 => "Az-Zalzalah",
+    99 => "Al-'Adiyat",
+    100 => "Al-Qari'ah",
+    101 => "At-Takathur",
+    102 => "Al-'Asr",
+    103 => "Al-Humazah",
+    104 => "Al-Fil",
+    105 => "Quraysh",
+    106 => "Al-Ma'un",
+    107 => "Al-Kawthar",
+    108 => "Al-Kafirun",
+    109 => "An-Nasr",
+    110 => "Al-Masad",
+    111 => "Al-Ikhlas",
+    112 => "Al-Falaq",
+    113 => "An-Nas",
+    _ => throw "Invalid surah idx: $idx"
+  };
 }
 
 const List<int> _surahAyahOffsets = [
