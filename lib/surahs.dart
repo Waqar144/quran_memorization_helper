@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 int toSurahAyahOffset(int surahIdx, int absoluteAyah) {
   if (surahIdx > _surahAyahOffsets.length) {
     throw "Invalid surah $surahIdx";
@@ -125,7 +127,7 @@ String surahNameForIdx(idx) {
   };
 }
 
-const List<int> _surahAyahOffsets = [
+final Uint32List _surahAyahOffsets = Uint32List.fromList([
   0,
   7,
   293,
@@ -240,4 +242,4 @@ const List<int> _surahAyahOffsets = [
   6221,
   6225,
   6230
-];
+]);
