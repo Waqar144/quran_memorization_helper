@@ -7,6 +7,17 @@ int toSurahAyahOffset(int surahIdx, int absoluteAyah) {
   return absoluteAyah - _surahAyahOffsets[surahIdx];
 }
 
+int surahForAyah(int absoluteAyah) {
+  for (int i = 0; i < _surahAyahOffsets.length; ++i) {
+    if (absoluteAyah > _surahAyahOffsets[i]) {
+      continue;
+    }
+    return i - 1;
+  }
+  // last surah
+  return _surahAyahOffsets.length - 1;
+}
+
 String surahNameForIdx(idx) {
   return switch (idx) {
     0 => "Al-Fatihah",

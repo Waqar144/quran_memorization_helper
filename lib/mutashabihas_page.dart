@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 import 'ayah_offsets.dart';
 import 'settings.dart';
+import 'para_bounds.dart';
 import 'surahs.dart';
 
 class MutashabihasPage extends StatelessWidget {
@@ -37,10 +38,17 @@ class MutashabihasPage extends StatelessWidget {
 }
 
 class MutashabihaAyat extends Ayat {
+  final List<int> surahAyahIndexes;
   final int paraIdx;
   final int surahIdx;
-  final int ayahIdx;
-  MutashabihaAyat(this.paraIdx, this.surahIdx, this.ayahIdx, super.text);
+  MutashabihaAyat(
+      this.paraIdx, this.surahIdx, this.surahAyahIndexes, super.text);
+
+  String surahAyahIndexesString() {
+    return surahAyahIndexes.fold("", (String s, int v) {
+      return s.isEmpty ? "${v + 1}" : "$s, ${v + 1}";
+    });
+  }
 }
 
 class Mutashabiha {
@@ -51,15 +59,31 @@ class Mutashabiha {
 
 MutashabihaAyat _ayatFromJsonObj(dynamic m, final ByteBuffer quranTextUtf8) {
   try {
-    final int ayahIdx = m["ayah"];
-    final int surahIdx = m["sIdx"];
-    final int paraIdx = m["pIdx"];
-    final ayahRange = getAyahRange(ayahIdx);
-    final textUtf8 = quranTextUtf8.asUint8List(ayahRange.start, ayahRange.len);
-    String text = utf8.decode(textUtf8);
-    int surahAyah = toSurahAyahOffset(surahIdx, ayahIdx);
-    // print("ayahRange: ${ayahRange.start}, ${ayahRange.len}, $text");
-    return MutashabihaAyat(paraIdx, surahIdx, surahAyah, text);
+    List<int> ayahIdxes;
+    if (m["ayah"] is List) {
+      ayahIdxes = [for (final a in m["ayah"]) a as int];
+    } else {
+      ayahIdxes = [m["ayah"] as int];
+    }
+    String text = "";
+    List<int> surahAyahIdxes = [];
+    int surahIdx = -1;
+    int paraIdx = -1;
+    for (final ayahIdx in ayahIdxes) {
+      final ayahRange = getAyahRange(ayahIdx);
+      final textUtf8 =
+          quranTextUtf8.asUint8List(ayahRange.start, ayahRange.len);
+      text += utf8.decode(textUtf8);
+      if (ayahIdx != ayahIdxes.last) {
+        text += ayahSeparator;
+      }
+      if (surahIdx == -1) {
+        surahIdx = surahForAyah(ayahIdx);
+        paraIdx = paraForAyah(ayahIdx);
+      }
+      surahAyahIdxes.add(toSurahAyahOffset(surahIdx, ayahIdx));
+    }
+    return MutashabihaAyat(paraIdx, surahIdx, surahAyahIdxes, text);
   } catch (e) {
     print(e);
     rethrow;
@@ -89,7 +113,7 @@ class AyatListItemWithMetadata extends StatelessWidget {
             wordSpacing: Settings.instance.wordSpacing.toDouble()),
       ),
       subtitle: Text(
-          "${surahNameForIdx(_ayah.surahIdx)}:${_ayah.ayahIdx + 1} - Para: ${_ayah.paraIdx + 1}"),
+          "${surahNameForIdx(_ayah.surahIdx)}:${_ayah.surahAyahIndexesString()} - Para: ${_ayah.paraIdx + 1}"),
       onTap: onTap,
     );
   }
@@ -172,6 +196,7 @@ class ParaMutashabihas extends StatelessWidget {
     List<Mutashabiha> mutashabihas = [];
     final ByteData data = await rootBundle.load("assets/quran.txt");
     for (final m in list) {
+      if (m == null) continue;
       MutashabihaAyat src = _ayatFromJsonObj(m["src"], data.buffer);
       List<MutashabihaAyat> matches = [];
       for (final match in m["muts"]) {

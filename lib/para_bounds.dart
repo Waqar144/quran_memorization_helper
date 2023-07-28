@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 class ParaBounds {
   final int start;
   final int end;
@@ -5,6 +7,15 @@ class ParaBounds {
 }
 
 const String ayahSeparator = " ۞ ";
+
+int paraForAyah(int absoluteAyah) {
+  for (int i = 0; i < _paraAyahOffset.length; ++i) {
+    if (absoluteAyah > _paraAyahOffset[i]) continue;
+    return i - 1;
+  }
+  // last para
+  return 29;
+}
 
 const List<int> paraByteOffsets = [
   0,
@@ -105,35 +116,35 @@ const List<int> paraAyahCount = [
   564, // 29
 ];
 
-// const List<ParaBounds> _paraLineBounds = [
-//   ParaBounds(1, 148), // 1
-//   ParaBounds(149, 259), // 2
-//   ParaBounds(260, 384), // 3
-//   ParaBounds(385, 516), // 4
-//   ParaBounds(517, 640), // 5
-//   ParaBounds(641, 751), // 6
-//   ParaBounds(752, 899), // 7
-//   ParaBounds(900, 1041), // 8
-//   ParaBounds(1042, 1200), // 9
-//   ParaBounds(1201, 1328), // 10
-//   ParaBounds(1329, 1478), // 11
-//   ParaBounds(1479, 1648), // 12
-//   ParaBounds(1649, 1803), // 13
-//   ParaBounds(1804, 2029), // 14
-//   ParaBounds(2030, 2214), // 15
-//   ParaBounds(2215, 2483), // 16
-//   ParaBounds(2484, 2673), // 17
-//   ParaBounds(2674, 2875), // 18
-//   ParaBounds(2876, 3218), // 19
-//   ParaBounds(3219, 3384), // 20
-//   ParaBounds(3385, 3563), // 21
-//   ParaBounds(3564, 3726), // 22
-//   ParaBounds(3727, 4089), // 23
-//   ParaBounds(4090, 4264), // 24
-//   ParaBounds(4265, 4510), // 25
-//   ParaBounds(4511, 4705), // 26
-//   ParaBounds(4706, 5104), // 27
-//   ParaBounds(5105, 5241), // 28
-//   ParaBounds(5242, 5672), // 29
-//   ParaBounds(5673, 6236), // 30
-// ];
+final Uint32List _paraAyahOffset = Uint32List.fromList([
+  0,
+  148,
+  259,
+  384,
+  516,
+  640,
+  751,
+  899,
+  1041,
+  1200,
+  1328,
+  1478,
+  1648,
+  1803,
+  2029,
+  2214,
+  2483,
+  2673,
+  2875,
+  3218,
+  3384,
+  3563,
+  3726,
+  4089,
+  4264,
+  4510,
+  4705,
+  5104,
+  5241,
+  5672,
+]);
