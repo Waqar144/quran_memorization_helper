@@ -187,8 +187,10 @@ class ParaMutashabihas extends StatelessWidget {
   const ParaMutashabihas(this._para, {super.key});
 
   Future<List<Mutashabiha>> _importParaMutashabihas() async {
+    final mutashabihasJsonBytes =
+        await rootBundle.load("assets/mutashabiha_data.json");
     final mutashabihasJson =
-        await rootBundle.loadString("assets/mutashabiha_data.json");
+        utf8.decode(mutashabihasJsonBytes.buffer.asUint8List());
     final map = jsonDecode(mutashabihasJson) as Map<String, dynamic>;
     int paraNum = _para + 1;
     final list = map[paraNum.toString()] as List<dynamic>;
