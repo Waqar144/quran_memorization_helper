@@ -25,6 +25,7 @@ class MutashabihasPage extends StatelessWidget {
         itemCount: 30,
         itemBuilder: (context, index) {
           return ListTile(
+            visualDensity: VisualDensity.compact,
             title: Text("Para ${index + 1}"),
             onTap: () {
               Navigator.of(context)
