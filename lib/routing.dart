@@ -8,8 +8,6 @@ import 'quiz_para_selection_page.dart';
 import 'quiz.dart';
 import 'main.dart';
 import 'quiz_page.dart';
-import 'view_mutashabiha_page.dart';
-import 'add_mutashabiha_page.dart';
 import 'mutashabihas_page.dart';
 
 MaterialPageRoute handleRoute(RouteSettings settings) {
