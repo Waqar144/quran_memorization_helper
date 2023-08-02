@@ -86,7 +86,7 @@ MutashabihaAyat _ayatFromJsonObj(dynamic m, final ByteBuffer quranTextUtf8) {
     }
     return MutashabihaAyat(paraIdx, surahIdx, surahAyahIdxes, text);
   } catch (e) {
-    print(e);
+    // print(e);
     rethrow;
   }
 }
@@ -130,26 +130,28 @@ class MutashabihaAyatListItem extends StatelessWidget {
   }
 
   Widget _buildMatches(ThemeData theme) {
-    return Container(
-      padding: const EdgeInsets.only(left: 4, right: 4),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.background,
-        border: Border.all(color: Colors.red, width: 1),
-        boxShadow: [
-          BoxShadow(
-              color: theme.shadowColor,
-              blurRadius: 4,
-              offset: const Offset(4, 2)),
-        ],
-      ),
-      child: ListView.separated(
-        physics: const NeverScrollableScrollPhysics(),
-        shrinkWrap: true,
-        separatorBuilder: (ctx, index) => const Divider(height: 1),
-        itemCount: mutashabiha.matches.length,
-        itemBuilder: (ctx, index) {
-          return AyatListItemWithMetadata(mutashabiha.matches[index]);
-        },
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.background,
+          border: Border.all(color: theme.colorScheme.inversePrimary, width: 1),
+          boxShadow: [
+            BoxShadow(
+                color: theme.shadowColor,
+                blurRadius: 4,
+                offset: const Offset(4, 2)),
+          ],
+        ),
+        child: ListView.separated(
+          physics: const NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          separatorBuilder: (ctx, index) => const Divider(height: 1),
+          itemCount: mutashabiha.matches.length,
+          itemBuilder: (ctx, index) {
+            return AyatListItemWithMetadata(mutashabiha.matches[index]);
+          },
+        ),
       ),
     );
   }
