@@ -202,12 +202,16 @@ class ParaMutashabihas extends StatelessWidget {
     final ByteData data = await rootBundle.load("assets/quran.txt");
     for (final m in list) {
       if (m == null) continue;
-      MutashabihaAyat src = _ayatFromJsonObj(m["src"], data.buffer);
-      List<MutashabihaAyat> matches = [];
-      for (final match in m["muts"]) {
-        matches.add(_ayatFromJsonObj(match, data.buffer));
+      try {
+        MutashabihaAyat src = _ayatFromJsonObj(m["src"], data.buffer);
+        List<MutashabihaAyat> matches = [];
+        for (final match in m["muts"]) {
+          matches.add(_ayatFromJsonObj(match, data.buffer));
+        }
+        mutashabihas.add(Mutashabiha(src, matches));
+      } catch (e) {
+        rethrow;
       }
-      mutashabihas.add(Mutashabiha(src, matches));
     }
     return mutashabihas;
   }
