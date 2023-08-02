@@ -58,7 +58,43 @@ class Mutashabiha {
   Mutashabiha(this.src, this.matches);
 }
 
-MutashabihaAyat _ayatFromJsonObj(dynamic m, final ByteBuffer quranTextUtf8) {
+String _getContext(
+    int contextType, int ayahIdx, String text, final ByteBuffer quranTextUtf8) {
+  if (contextType == 1) {
+    final range = getAyahRange(ayahIdx - 1);
+    String prevAyahText =
+        utf8.decode(quranTextUtf8.asUint8List(range.start, range.len));
+    final words = prevAyahText.split(' ');
+    List<String> toshow = [];
+    for (final word in words.reversed) {
+      toshow.add(word);
+      if (toshow.length > 5) {
+        break;
+      }
+    }
+    toshow = toshow.reversed.toList();
+    final String threeDot = toshow.length == words.length ? "" : "...";
+    return "$threeDot${toshow.join(' ')}$ayahSeparator$text";
+  } else if (contextType == 2) {
+    final range = getAyahRange(ayahIdx + 1);
+    String nextAyahText =
+        utf8.decode(quranTextUtf8.asUint8List(range.start, range.len));
+    final words = nextAyahText.split(' ');
+    List<String> toshow = [];
+    for (final word in words) {
+      toshow.add(word);
+      if (toshow.length > 5) {
+        break;
+      }
+    }
+    final String threeDot = toshow.length == words.length ? "" : "...";
+    return "$text$ayahSeparator${toshow.join(' ')}$threeDot";
+  }
+  throw "Invalid context $contextType";
+}
+
+MutashabihaAyat _ayatFromJsonObj(
+    dynamic m, final ByteBuffer quranTextUtf8, int ctx) {
   try {
     List<int> ayahIdxes;
     if (m["ayah"] is List) {
@@ -84,6 +120,14 @@ MutashabihaAyat _ayatFromJsonObj(dynamic m, final ByteBuffer quranTextUtf8) {
       }
       surahAyahIdxes.add(toSurahAyahOffset(surahIdx, ayahIdx));
     }
+
+    const int preContext = 1;
+    const int postContext = 2;
+    if (ctx == preContext) {
+      text = _getContext(ctx, ayahIdxes.first, text, quranTextUtf8);
+    } else if (ctx == postContext) {
+      text = _getContext(ctx, ayahIdxes.last, text, quranTextUtf8);
+    }
     return MutashabihaAyat(paraIdx, surahIdx, surahAyahIdxes, text);
   } catch (e) {
     // print(e);
@@ -95,28 +139,32 @@ class AyatListItemWithMetadata extends StatelessWidget {
   final MutashabihaAyat _ayah;
   final VoidCallback? onTap;
   final Widget? leading;
-  const AyatListItemWithMetadata(this._ayah,
-      {this.onTap, this.leading, super.key});
+  final ValueNotifier<bool> doRebuild = ValueNotifier(false);
+  AyatListItemWithMetadata(this._ayah, {this.onTap, this.leading, super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: leading,
-      title: Text(
-        _ayah.text,
-        softWrap: true,
-        textAlign: TextAlign.right,
-        textDirection: TextDirection.rtl,
-        style: TextStyle(
-            fontFamily: "Al Mushaf",
-            fontSize: Settings.instance.fontSize.toDouble(),
-            letterSpacing: 0.0,
-            wordSpacing: Settings.instance.wordSpacing.toDouble()),
-      ),
-      subtitle: Text(
-          "${surahNameForIdx(_ayah.surahIdx)}:${_ayah.surahAyahIndexesString()} - Para: ${_ayah.paraIdx + 1}"),
-      onTap: onTap,
-    );
+    return ValueListenableBuilder(
+        valueListenable: doRebuild,
+        builder: (context, value, _) {
+          return ListTile(
+            leading: leading,
+            title: Text(
+              _ayah.text,
+              softWrap: true,
+              textAlign: TextAlign.right,
+              textDirection: TextDirection.rtl,
+              style: TextStyle(
+                  fontFamily: "Al Mushaf",
+                  fontSize: Settings.instance.fontSize.toDouble(),
+                  letterSpacing: 0.0,
+                  wordSpacing: Settings.instance.wordSpacing.toDouble()),
+            ),
+            subtitle: Text(
+                "${surahNameForIdx(_ayah.surahIdx)}:${_ayah.surahAyahIndexesString()} - Para: ${_ayah.paraIdx + 1}"),
+            onTap: onTap,
+          );
+        });
   }
 }
 
@@ -203,10 +251,11 @@ class ParaMutashabihas extends StatelessWidget {
     for (final m in list) {
       if (m == null) continue;
       try {
-        MutashabihaAyat src = _ayatFromJsonObj(m["src"], data.buffer);
+        int ctx = (m["ctx"] as int?) ?? 0;
+        MutashabihaAyat src = _ayatFromJsonObj(m["src"], data.buffer, ctx);
         List<MutashabihaAyat> matches = [];
         for (final match in m["muts"]) {
-          matches.add(_ayatFromJsonObj(match, data.buffer));
+          matches.add(_ayatFromJsonObj(match, data.buffer, ctx));
         }
         mutashabihas.add(Mutashabiha(src, matches));
       } catch (e) {
