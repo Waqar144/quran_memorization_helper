@@ -5,10 +5,10 @@ import 'package:quran_memorization_helper/ayat.dart';
 import 'page_constants.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:quran_memorization_helper/ayah_offsets.dart';
+import 'package:quran_memorization_helper/quran_data/ayah_offsets.dart';
 import 'package:quran_memorization_helper/settings.dart';
-import 'package:quran_memorization_helper/para_bounds.dart';
-import 'package:quran_memorization_helper/surahs.dart';
+import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
+import 'package:quran_memorization_helper/quran_data/surahs.dart';
 
 class MutashabihasPage extends StatelessWidget {
   const MutashabihasPage({super.key});

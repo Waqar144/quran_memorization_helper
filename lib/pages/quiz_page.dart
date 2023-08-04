@@ -3,7 +3,7 @@ import 'package:quran_memorization_helper/ayat.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:convert';
 import 'dart:math';
-import 'package:quran_memorization_helper/para_bounds.dart';
+import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
 import 'package:quran_memorization_helper/ayat_list_view.dart';
 import 'package:quran_memorization_helper/quiz.dart';
 
