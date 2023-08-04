@@ -4,7 +4,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'dart:convert';
 import 'dart:math';
 import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
-import 'package:quran_memorization_helper/ayat_list_view.dart';
+import 'package:quran_memorization_helper/widgets/ayat_list_view.dart';
 import 'package:quran_memorization_helper/models/quiz.dart';
 
 class _QuizAyahQuestion {
