@@ -95,9 +95,13 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     _showSnackBarMessage("Saved to file $path");
   }
 
-  void _import() async {
-    final dynamic result = await Navigator.pushNamed(context, importTextRoute,
-        arguments: _paraModel.currentPara);
+  void _addAyahs() async {
+    final dynamic result = await Navigator.pushNamed(
+      context,
+      paraAyahSelectionPage,
+      arguments: _paraModel.currentPara,
+    );
+
     if (!mounted) return;
 
     List<Ayat>? importedAyats = result as List<Ayat>?;
@@ -140,7 +144,7 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
 
   Widget buildThreeDotMenu() {
     final Map<String, VoidCallback> actions = {
-      'Add Ayahs...': _import,
+      'Add Ayahs...': _addAyahs,
       'Take Quiz': _openQuizParaSelectionPage,
       'Mutashabihas': _openMutashabihas,
       'Import Json DB File': _importExistingJson,

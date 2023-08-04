@@ -4,7 +4,6 @@ import 'package:quran_memorization_helper/models/ayat.dart';
 import 'package:quran_memorization_helper/models/quiz.dart';
 import 'package:quran_memorization_helper/pages/main_page.dart';
 import 'package:quran_memorization_helper/pages/page_constants.dart';
-import 'package:quran_memorization_helper/pages/import_text_page.dart';
 import 'package:quran_memorization_helper/pages/settings_page.dart';
 import 'package:quran_memorization_helper/pages/para_ayah_selection_page.dart';
 import 'package:quran_memorization_helper/pages/quiz_para_selection_page.dart';
@@ -12,10 +11,7 @@ import 'package:quran_memorization_helper/pages/quiz_page.dart';
 import 'package:quran_memorization_helper/pages/mutashabihas_page.dart';
 
 MaterialPageRoute handleRoute(RouteSettings settings) {
-  if (settings.name == importTextRoute) {
-    return MaterialPageRoute(
-        builder: (context) => ImportTextPage(settings.arguments as int));
-  } else if (settings.name == settingsPageRoute) {
+  if (settings.name == settingsPageRoute) {
     return MaterialPageRoute(
         builder: (context) =>
             SettingsPage(settings.arguments as ParaAyatModel));
