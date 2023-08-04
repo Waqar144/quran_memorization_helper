@@ -11,23 +11,26 @@ import 'package:quran_memorization_helper/pages/quiz_page.dart';
 import 'package:quran_memorization_helper/pages/mutashabihas_page.dart';
 
 MaterialPageRoute handleRoute(RouteSettings settings) {
-  if (settings.name == settingsPageRoute) {
-    return MaterialPageRoute(
-        builder: (context) =>
-            SettingsPage(settings.arguments as ParaAyatModel));
-  } else if (settings.name == paraAyahSelectionPage) {
-    return MaterialPageRoute(
-        builder: (context) => ParaAyahSelectionPage(settings.arguments as int));
-  } else if (settings.name == quizSelectionPage) {
-    return MaterialPageRoute(builder: (context) => QuizParaSelectionPage());
-  } else if (settings.name == quizPage) {
-    return MaterialPageRoute(
-        builder: (context) => QuizPage(settings.arguments as QuizCreationArgs));
-  } else if (settings.name == mutashabihasPage) {
-    return MaterialPageRoute(builder: (context) => const MutashabihasPage());
-  } else if (settings.name == paraMutashabihasPage) {
-    return MaterialPageRoute(
-        builder: (context) => ParaMutashabihas(settings.arguments as int));
-  }
-  return MaterialPageRoute(builder: (context) => const MainPage());
+  return switch (settings.name ?? "") {
+    // SettingsPage
+    settingsPageRoute => MaterialPageRoute(
+        builder: (ctx) => SettingsPage(settings.arguments as ParaAyatModel)),
+    // ParaAyahSelectionPage
+    paraAyahSelectionPage => MaterialPageRoute(
+        builder: (ctx) => ParaAyahSelectionPage(settings.arguments as int)),
+    // QuizParaSelectionPage
+    quizSelectionPage =>
+      MaterialPageRoute(builder: (ctx) => QuizParaSelectionPage()),
+    // QuizPage
+    quizPage => MaterialPageRoute(
+        builder: (ctx) => QuizPage(settings.arguments as QuizCreationArgs)),
+    // MutashabihasPage
+    mutashabihasPage =>
+      MaterialPageRoute(builder: (ctx) => const MutashabihasPage()),
+    // ParaMutashabihas
+    paraMutashabihasPage => MaterialPageRoute(
+        builder: (ctx) => ParaMutashabihas(settings.arguments as int)),
+    // MainPage is the default
+    _ => MaterialPageRoute(builder: (ctx) => const MainPage())
+  };
 }
