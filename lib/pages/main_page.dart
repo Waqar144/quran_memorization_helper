@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:quran_memorization_helper/ayat.dart';
+import 'package:quran_memorization_helper/models/ayat.dart';
 import 'package:quran_memorization_helper/ayat_list_view.dart';
-import 'package:quran_memorization_helper/settings.dart';
+import 'package:quran_memorization_helper/models/settings.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:quran_memorization_helper/pages/page_constants.dart';
-import 'package:quran_memorization_helper/quiz.dart';
+import 'package:quran_memorization_helper/models/quiz.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});

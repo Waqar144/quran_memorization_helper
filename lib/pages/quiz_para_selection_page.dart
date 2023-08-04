@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:quran_memorization_helper/quiz.dart';
+import 'package:quran_memorization_helper/models/quiz.dart';
 
 class QuizParaSelectionPage extends StatelessWidget {
   final ValueNotifier<List<int>> _selectedParas = ValueNotifier([]);

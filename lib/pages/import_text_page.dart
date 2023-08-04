@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:quran_memorization_helper/ayat.dart';
+import 'package:quran_memorization_helper/models/ayat.dart';
 import 'page_constants.dart';
 
 class ImportTextPage extends StatelessWidget {

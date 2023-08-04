@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quran_memorization_helper/pages/main_page.dart';
-import 'routing.dart';
+import 'package:quran_memorization_helper/utils/routing.dart';
 
 void main() {
   runApp(const MyApp());

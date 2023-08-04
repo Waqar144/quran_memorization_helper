@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'ayat.dart';
-import 'settings.dart';
+import 'package:quran_memorization_helper/models/ayat.dart';
+import 'package:quran_memorization_helper/models/settings.dart';
 
 class AyatListItem extends StatefulWidget {
   const AyatListItem({

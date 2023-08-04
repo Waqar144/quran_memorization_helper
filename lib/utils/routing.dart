@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'ayat.dart';
-import 'quiz.dart';
 
+import 'package:quran_memorization_helper/models/ayat.dart';
+import 'package:quran_memorization_helper/models/quiz.dart';
 import 'package:quran_memorization_helper/pages/main_page.dart';
 import 'package:quran_memorization_helper/pages/page_constants.dart';
 import 'package:quran_memorization_helper/pages/import_text_page.dart';

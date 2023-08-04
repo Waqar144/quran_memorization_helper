@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'dart:convert';
 import 'dart:async';
-import 'utils.dart' as utils;
+import 'package:quran_memorization_helper/utils/utils.dart' as utils;
 
 class Settings extends ChangeNotifier {
   static final Settings _instance = Settings._private();
