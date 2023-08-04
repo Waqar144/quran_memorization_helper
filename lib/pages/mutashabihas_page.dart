@@ -58,39 +58,20 @@ class Mutashabiha {
   Mutashabiha(this.src, this.matches);
 }
 
-String _getContext(
-    int contextType, int ayahIdx, String text, final ByteBuffer quranTextUtf8) {
-  if (contextType == 1) {
-    final range = getAyahRange(ayahIdx - 1);
-    String prevAyahText =
-        utf8.decode(quranTextUtf8.asUint8List(range.start, range.len));
-    final words = prevAyahText.split(' ');
-    List<String> toshow = [];
-    for (final word in words.reversed) {
-      toshow.add(word);
-      if (toshow.length > 5) {
-        break;
-      }
+String _getContext(int ayahIdx, String text, final ByteBuffer quranTextUtf8) {
+  final range = getAyahRange(ayahIdx + 1);
+  String nextAyahText =
+      utf8.decode(quranTextUtf8.asUint8List(range.start, range.len));
+  final words = nextAyahText.split(' ');
+  List<String> toshow = [];
+  for (final word in words) {
+    toshow.add(word);
+    if (toshow.length > 5) {
+      break;
     }
-    toshow = toshow.reversed.toList();
-    final String threeDot = toshow.length == words.length ? "" : "...";
-    return "$threeDot${toshow.join(' ')}$ayahSeparator$text";
-  } else if (contextType == 2) {
-    final range = getAyahRange(ayahIdx + 1);
-    String nextAyahText =
-        utf8.decode(quranTextUtf8.asUint8List(range.start, range.len));
-    final words = nextAyahText.split(' ');
-    List<String> toshow = [];
-    for (final word in words) {
-      toshow.add(word);
-      if (toshow.length > 5) {
-        break;
-      }
-    }
-    final String threeDot = toshow.length == words.length ? "" : "...";
-    return "$text$ayahSeparator${toshow.join(' ')}$threeDot";
   }
-  throw "Invalid context $contextType";
+  final String threeDot = toshow.length == words.length ? "" : "...";
+  return "$text$ayahSeparator${toshow.join(' ')}$threeDot";
 }
 
 MutashabihaAyat _ayatFromJsonObj(
@@ -121,12 +102,9 @@ MutashabihaAyat _ayatFromJsonObj(
       surahAyahIdxes.add(toSurahAyahOffset(surahIdx, ayahIdx));
     }
 
-    const int preContext = 1;
-    const int postContext = 2;
-    if (ctx == preContext) {
-      text = _getContext(ctx, ayahIdxes.first, text, quranTextUtf8);
-    } else if (ctx == postContext) {
-      text = _getContext(ctx, ayahIdxes.last, text, quranTextUtf8);
+    final bool showContext = ctx != 0;
+    if (showContext) {
+      text = _getContext(ayahIdxes.last, text, quranTextUtf8);
     }
     return MutashabihaAyat(paraIdx, surahIdx, surahAyahIdxes, text);
   } catch (e) {
