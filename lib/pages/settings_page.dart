@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'ayat.dart';
-import 'settings.dart';
+import 'package:quran_memorization_helper/ayat.dart';
+import 'package:quran_memorization_helper/settings.dart';
 
 class SettingsPage extends StatefulWidget {
   final List<int> fontSizes = [24, 28, 32];

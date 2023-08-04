@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'page_constants.dart';
-import 'import_text_page.dart';
-import 'settings_page.dart';
-import 'para_ayah_selection_page.dart';
 import 'ayat.dart';
-import 'quiz_para_selection_page.dart';
 import 'quiz.dart';
-import 'main.dart';
-import 'quiz_page.dart';
-import 'mutashabihas_page.dart';
+
+import 'package:quran_memorization_helper/pages/main_page.dart';
+import 'package:quran_memorization_helper/pages/page_constants.dart';
+import 'package:quran_memorization_helper/pages/import_text_page.dart';
+import 'package:quran_memorization_helper/pages/settings_page.dart';
+import 'package:quran_memorization_helper/pages/para_ayah_selection_page.dart';
+import 'package:quran_memorization_helper/pages/quiz_para_selection_page.dart';
+import 'package:quran_memorization_helper/pages/quiz_page.dart';
+import 'package:quran_memorization_helper/pages/mutashabihas_page.dart';
 
 MaterialPageRoute handleRoute(RouteSettings settings) {
   if (settings.name == importTextRoute) {

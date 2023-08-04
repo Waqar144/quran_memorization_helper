@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'ayat.dart';
+import 'package:quran_memorization_helper/ayat.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:convert';
 import 'dart:math';
-import 'para_bounds.dart';
-import 'ayat_list_view.dart';
-import 'quiz.dart';
+import 'package:quran_memorization_helper/para_bounds.dart';
+import 'package:quran_memorization_helper/ayat_list_view.dart';
+import 'package:quran_memorization_helper/quiz.dart';
 
 class _QuizAyahQuestion {
   final Ayat questionAyah;
