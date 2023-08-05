@@ -16,7 +16,7 @@ int toAbsoluteAyahOffset(int surahIdx, int surahAyahIdx) {
 
 int surahForAyah(int absoluteAyah) {
   for (int i = 0; i < _surahAyahOffsets.length; ++i) {
-    if (absoluteAyah > _surahAyahOffsets[i]) {
+    if (absoluteAyah >= _surahAyahOffsets[i]) {
       continue;
     }
     return i - 1;
