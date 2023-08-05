@@ -159,6 +159,7 @@ class ParaMutashabihas extends StatelessWidget {
                   itemCount: data.length,
                   itemBuilder: (ctx, index) {
                     return MutashabihaAyatListItem(
+                      key: ObjectKey(index),
                       mutashabiha: data[index],
                       selectionMode: _selectionMode.value,
                     );
