@@ -8,10 +8,12 @@ class AyatListItem extends StatefulWidget {
     required this.ayah,
     this.onLongPress,
     this.selectionMode = false,
+    this.showSurahAyahIndex = true,
   });
 
   final VoidCallback? onLongPress;
   final bool selectionMode;
+  final bool showSurahAyahIndex;
   final Ayat ayah;
 
   bool _isSelected() => ayah.selected ?? false;
@@ -58,6 +60,9 @@ class _AyatListItemState extends State<AyatListItem> {
             letterSpacing: 0.0,
             wordSpacing: Settings.instance.wordSpacing.toDouble()),
       ),
+      subtitle: widget.showSurahAyahIndex
+          ? Text(widget.ayah.surahAyahText())
+          : const SizedBox.shrink(),
       onLongPress: _getLongPressCallback(),
       onTap: widget.selectionMode ? _onTap : null,
     );

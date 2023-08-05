@@ -192,7 +192,10 @@ class _QuizPageState extends State<QuizPage> {
         }
         return Column(
           children: [
-            AyatListItem(ayah: _quizAyahs[current].nextAyah),
+            AyatListItem(
+              ayah: _quizAyahs[current].nextAyah,
+              showSurahAyahIndex: false,
+            ),
             const Text("Were you right?"),
             const SizedBox(height: 8),
             Row(
@@ -288,8 +291,14 @@ class _QuizPageState extends State<QuizPage> {
               onDismissed: (dir) => _onAyahDismiss(dir, index),
               child: Column(
                 children: [
-                  AyatListItem(ayah: _wrongAnswers[index].questionAyah),
-                  AyatListItem(ayah: _wrongAnswers[index].nextAyah)
+                  AyatListItem(
+                    ayah: _wrongAnswers[index].questionAyah,
+                    showSurahAyahIndex: false,
+                  ),
+                  AyatListItem(
+                    ayah: _wrongAnswers[index].nextAyah,
+                    showSurahAyahIndex: false,
+                  )
                 ],
               ),
             );
@@ -347,7 +356,10 @@ class _QuizPageState extends State<QuizPage> {
                   children: [
                     Text(_questionTextForQuizMode(_quizAyahs[current].mode),
                         style: Theme.of(context).textTheme.headlineSmall),
-                    AyatListItem(ayah: _quizAyahs[current].questionAyah),
+                    AyatListItem(
+                      ayah: _quizAyahs[current].questionAyah,
+                      showSurahAyahIndex: false,
+                    ),
                     const Divider(height: 8),
                     _buildAnswerWidget(current)
                   ],
