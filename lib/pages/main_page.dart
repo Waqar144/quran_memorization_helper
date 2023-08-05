@@ -124,6 +124,7 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   void _onDeletePress() {
     assert(_multipleSelectMode.value);
     _paraModel.removeSelectedAyahs();
+    _multipleSelectMode.value = false;
     // update the db
     _saveToDisk();
   }
