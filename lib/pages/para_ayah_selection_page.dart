@@ -1,11 +1,9 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
-import 'package:quran_memorization_helper/models/ayat.dart';
 import 'package:quran_memorization_helper/widgets/ayat_list_view.dart';
 import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
+import 'package:quran_memorization_helper/quran_data/ayat.dart';
 
 class ParaAyahSelectionPage extends StatefulWidget {
   final int _paraNum;
@@ -18,7 +16,7 @@ class ParaAyahSelectionPage extends StatefulWidget {
 
 class _ParaAyahSelectionPageState extends State<ParaAyahSelectionPage> {
   late final String _para;
-  final List<Ayat> _ayats = [];
+  List<Ayat> _ayats = [];
 
   @override
   void initState() {
@@ -29,22 +27,7 @@ class _ParaAyahSelectionPageState extends State<ParaAyahSelectionPage> {
 
   Future<void> _importParaText(int para) async {
     final data = await rootBundle.load("assets/quran.txt");
-
-    const int newLine = 10;
-    final int offset = paraByteOffsets[para - 1];
-    final int? len = para == 30 ? null : paraByteOffsets[para] - offset;
-    final buffer = data.buffer.asUint8List(offset, len);
-    int s = 0;
-    int n = buffer.indexOf(newLine);
-
-    _ayats.clear();
-    while (n != -1) {
-      final text = utf8.decode(buffer.sublist(s, n));
-      _ayats.add(Ayat(text));
-
-      s = n + 1;
-      n = buffer.indexOf(newLine, s);
-    }
+    _ayats = await getParaAyahs(para - 1, data.buffer);
   }
 
   void _onDone(BuildContext context) {

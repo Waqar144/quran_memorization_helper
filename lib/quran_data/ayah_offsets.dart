@@ -1,4 +1,6 @@
 import 'dart:typed_data';
+import 'dart:convert';
+import 'ayat.dart';
 
 class AyahOffset {
   final int start;
@@ -14,6 +16,12 @@ AyahOffset getAyahRange(int ayah) {
   int e = ayah + 1 >= _ayahOffsets.length ? -1 : _ayahOffsets[ayah + 1];
   int? len = e == -1 ? null : (e - s) - 1; // -1 to exclude newline
   return AyahOffset(s, len);
+}
+
+Ayat getAyahForIdx(int ayahIdx, final ByteBuffer quranText) {
+  final AyahOffset off = getAyahRange(ayahIdx);
+  final text = utf8.decode(quranText.asUint8List(off.start, off.len));
+  return Ayat(text, ayahIdx: ayahIdx);
 }
 
 final Uint32List _ayahOffsets = Uint32List.fromList([

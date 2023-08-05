@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:quran_memorization_helper/models/ayat.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:convert';
 import 'dart:math';
 import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
-import 'package:quran_memorization_helper/widgets/ayat_list_view.dart';
+import 'package:quran_memorization_helper/quran_data/ayat.dart';
+import 'package:quran_memorization_helper/widgets/ayat_list_item.dart';
 import 'package:quran_memorization_helper/models/quiz.dart';
 
 class _QuizAyahQuestion {
@@ -64,10 +64,11 @@ class _QuizPageState extends State<QuizPage> {
     super.dispose();
   }
 
-  _QuizAyahQuestion _addQuestion(String ayah, String nextAyah, int paraIndex) {
+  _QuizAyahQuestion _addQuestion(
+      String ayah, String nextAyah, int paraIndex, int ayahIdx) {
     _QuizAyahQuestion nextAyahQuestion() {
-      return _QuizAyahQuestion(
-          Ayat(ayah), Ayat(nextAyah), QuizMode.nextAyah, paraIndex);
+      return _QuizAyahQuestion(Ayat(ayah, ayahIdx: ayahIdx),
+          Ayat(nextAyah, ayahIdx: ayahIdx + 1), QuizMode.nextAyah, paraIndex);
     }
 
     _QuizAyahQuestion endAyahQuestion() {
@@ -75,8 +76,8 @@ class _QuizPageState extends State<QuizPage> {
       int replaceStart = min((words.length / 2).ceil(), 6);
       final question =
           "${words.sublist(0, words.length - replaceStart).join(' ')}...";
-      return _QuizAyahQuestion(
-          Ayat(question), Ayat(ayah), QuizMode.endAyah, paraIndex);
+      return _QuizAyahQuestion(Ayat(question, ayahIdx: ayahIdx),
+          Ayat(ayah, ayahIdx: ayahIdx), QuizMode.endAyah, paraIndex);
     }
 
     if (widget._creationArgs.mode == QuizMode.nextAyah) {
@@ -117,7 +118,7 @@ class _QuizPageState extends State<QuizPage> {
       for (final int para in selectedParas) {
         int totalAyahsInPara = paraAyahCount[para];
 
-        // get random number
+        // get random number -> this is the ayah number in para
         int r = next(0, totalAyahsInPara - 1);
         // avoid duplicate questions
         if (!seenAyahsByPara.containsKey(para)) {
@@ -148,7 +149,7 @@ class _QuizPageState extends State<QuizPage> {
           nextNl = quranText.indexOf('\n', startNl);
         }
 
-        yield _addQuestion(ayah, nextAyah, para);
+        yield _addQuestion(ayah, nextAyah, para, r);
 
         if (_quizAyahs.length >= _total) {
           break;
@@ -230,19 +231,18 @@ class _QuizPageState extends State<QuizPage> {
     assert(index < _wrongAnswers.length);
     final a = _wrongAnswers[index];
 
-    String textToAdd = "";
     if (a.mode == QuizMode.nextAyah) {
-      textToAdd = a.questionAyah.text;
-      textToAdd += " ۞ ";
-      textToAdd += a.nextAyah.text;
+      _ayahsToAddToDB[a.paraNumber] = [
+        ...(_ayahsToAddToDB[a.paraNumber] ?? <Ayat>[]),
+        a.questionAyah,
+        a.nextAyah
+      ];
     } else {
-      textToAdd = a.nextAyah.text;
+      _ayahsToAddToDB[a.paraNumber] = [
+        ...(_ayahsToAddToDB[a.paraNumber] ?? <Ayat>[]),
+        a.nextAyah
+      ];
     }
-    final ayat = Ayat(textToAdd);
-    _ayahsToAddToDB[a.paraNumber] = [
-      ...(_ayahsToAddToDB[a.paraNumber] ?? <Ayat>[]),
-      ayat
-    ];
   }
 
   void _onAddAllToDB() {

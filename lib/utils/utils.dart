@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:convert';
 import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
 Future<String> saveJsonToDisk(String json, String fileName) async {
@@ -31,4 +32,13 @@ Future<Map<String, dynamic>?> readJsonFromFilePath(String path) async {
 
   final String contents = await jsonFile.readAsString();
   return jsonDecode(contents);
+}
+
+void showSnackBarMessage(BuildContext context, String message,
+    {bool error = false}) {
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    content: Text(message),
+    duration: const Duration(seconds: 2),
+    backgroundColor: error ? Colors.red : Colors.green,
+  ));
 }

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:quran_memorization_helper/models/ayat.dart';
-import 'package:quran_memorization_helper/widgets/ayat_list_view.dart';
+import 'package:quran_memorization_helper/widgets/ayat_and_mutashabiha_list_view.dart';
 import 'package:quran_memorization_helper/models/settings.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:quran_memorization_helper/pages/page_constants.dart';
 import 'package:quran_memorization_helper/models/quiz.dart';
+import 'package:quran_memorization_helper/quran_data/ayat.dart';
+import 'package:quran_memorization_helper/utils/utils.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -54,7 +56,10 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
       String? path = result.paths.first;
       if (path == null) return;
       if (await _readJsonFromDisk(path: path)) {
-        _showSnackBarMessage("${result.names.first} imported successfully");
+        if (mounted) {
+          showSnackBarMessage(
+              context, "${result.names.first} imported successfully");
+        }
         _saveToDisk();
       }
     }
@@ -72,19 +77,11 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     _paraModel.merge(ayahsToAdd);
   }
 
-  void _showSnackBarMessage(String message, {bool error = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(message),
-      duration: const Duration(seconds: 2),
-      backgroundColor: error ? Colors.red : Colors.green,
-    ));
-  }
-
   Future<bool> _readJsonFromDisk({String? path}) async {
     final bool showError = path != null;
     final bool result = await _paraModel.readJsonDB(path: path);
-    if (!result && showError) {
-      _showSnackBarMessage("$path doesn't exist", error: true);
+    if (!result && showError && mounted) {
+      showSnackBarMessage(context, "$path doesn't exist", error: true);
       return false;
     }
     return true;
@@ -92,7 +89,8 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
 
   void _saveToDisk() async {
     String path = await _paraModel.saveToDisk();
-    _showSnackBarMessage("Saved to file $path");
+    if (mounted) return;
+    showSnackBarMessage(context, "Saved to file $path");
   }
 
   void _addAyahs() async {
@@ -106,16 +104,9 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
 
     List<Ayat>? importedAyats = result as List<Ayat>?;
     if (importedAyats == null) return;
+    _paraModel.addAyahs(importedAyats);
 
-    // merge new and old ayahs
-    final existingAyahs = _paraModel.ayahs;
-    Set<Ayat> newAyahs = {};
-    newAyahs.addAll(existingAyahs);
-    newAyahs.addAll(importedAyats);
-    if (newAyahs.isEmpty) return;
-    _paraModel.setAyahs(newAyahs.toList());
-
-    _showSnackBarMessage(
+    showSnackBarMessage(context,
         "Imported ${importedAyats.length} ayahs into Para ${_paraModel.currentPara}");
 
     _saveToDisk();
@@ -215,7 +206,7 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
           listenable: Listenable.merge(
               [_multipleSelectMode, _paraModel, Settings.instance]),
           builder: (context, child) {
-            return AyatListView(
+            return AyatAndMutashabihaListView(
               _paraModel.ayahs,
               selectionMode: _multipleSelectMode.value,
               onLongPress: _multipleSelectMode.toggle,

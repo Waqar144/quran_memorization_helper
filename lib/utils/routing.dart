@@ -25,11 +25,13 @@ MaterialPageRoute handleRoute(RouteSettings settings) {
     quizPage => MaterialPageRoute(
         builder: (ctx) => QuizPage(settings.arguments as QuizCreationArgs)),
     // MutashabihasPage
-    mutashabihasPage =>
-      MaterialPageRoute(builder: (ctx) => const MutashabihasPage()),
+    mutashabihasPage => MaterialPageRoute(
+        builder: (ctx) =>
+            MutashabihasPage(settings.arguments as ParaAyatModel)),
     // ParaMutashabihas
     paraMutashabihasPage => MaterialPageRoute(
-        builder: (ctx) => ParaMutashabihas(settings.arguments as int)),
+        builder: (ctx) =>
+            ParaMutashabihas(settings.arguments as ParaMutashabihasArgs)),
     // MainPage is the default
     _ => MaterialPageRoute(builder: (ctx) => const MainPage())
   };
