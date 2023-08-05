@@ -40,7 +40,7 @@ Future<List<Ayat>> getParaAyahs(int para, final ByteBuffer quranText) async {
   return ayahs;
 }
 
-const List<int> paraByteOffsets = [
+final Uint32List paraByteOffsets = Uint32List.fromList([
   0,
   46001,
   93470,
@@ -71,7 +71,7 @@ const List<int> paraByteOffsets = [
   1270319,
   1318999,
   1368340,
-];
+]);
 
 const List<ParaBounds> paraByteBounds = [
   ParaBounds(0, 24080),

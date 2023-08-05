@@ -26,8 +26,12 @@ class _ParaAyahSelectionPageState extends State<ParaAyahSelectionPage> {
   }
 
   Future<void> _importParaText(int para) async {
-    final data = await rootBundle.load("assets/quran.txt");
-    _ayats = await getParaAyahs(para - 1, data.buffer);
+    try {
+      final data = await rootBundle.load("assets/quran.txt");
+      _ayats = await getParaAyahs(para - 1, data.buffer);
+    } catch (e) {
+      rethrow;
+    }
   }
 
   void _onDone(BuildContext context) {
