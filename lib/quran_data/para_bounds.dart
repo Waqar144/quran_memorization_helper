@@ -40,6 +40,11 @@ Future<List<Ayat>> getParaAyahs(int para, final ByteBuffer quranText) async {
   return ayahs;
 }
 
+int getFirstAyahOfPara(int paraIndex) {
+  if (paraIndex < 0 || paraIndex > 29) throw "Invalid paraIndex: $paraIndex";
+  return _paraAyahOffset[paraIndex];
+}
+
 final Uint32List paraByteOffsets = Uint32List.fromList([
   0,
   46001,

@@ -68,6 +68,7 @@ flutter:
   assets:
     - assets/quran.txt
     - assets/mutashabiha_data.json
+    - assets/pages/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
@@ -83,7 +84,8 @@ flutter:
   fonts:
     - family: Al Mushaf
       fonts:
-        - asset: fonts/Al Qalam Quran Majeed 2.ttf
+        - asset: fonts/indopak-nastaleeq-waqf-lazim-v4.2.1.ttf
+        # - asset: fonts/Al Qalam Quran Majeed 2.ttf
   #   - family: Schyler
   #     fonts:
   #       - asset: fonts/Schyler-Regular.ttf

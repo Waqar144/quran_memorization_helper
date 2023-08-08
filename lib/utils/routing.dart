@@ -9,6 +9,7 @@ import 'package:quran_memorization_helper/pages/para_ayah_selection_page.dart';
 import 'package:quran_memorization_helper/pages/quiz_para_selection_page.dart';
 import 'package:quran_memorization_helper/pages/quiz_page.dart';
 import 'package:quran_memorization_helper/pages/mutashabihas_page.dart';
+import 'package:quran_memorization_helper/pages/read_quran.dart';
 
 MaterialPageRoute handleRoute(RouteSettings settings) {
   return switch (settings.name ?? "") {
@@ -32,6 +33,8 @@ MaterialPageRoute handleRoute(RouteSettings settings) {
     paraMutashabihasPage => MaterialPageRoute(
         builder: (ctx) =>
             ParaMutashabihas(settings.arguments as ParaMutashabihasArgs)),
+    readQuranPage => MaterialPageRoute(
+        builder: (ctx) => ReadQuranPage(settings.arguments as int)),
     // MainPage is the default
     _ => MaterialPageRoute(builder: (ctx) => const MainPage())
   };

@@ -134,8 +134,14 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     _multipleSelectMode.toggle();
   }
 
+  void _readQuran() {
+    Navigator.pushNamed(context, readQuranPage,
+        arguments: _paraModel.currentPara);
+  }
+
   Widget buildThreeDotMenu() {
     final Map<String, VoidCallback> actions = {
+      'Read Quran...': _readQuran,
       'Add Ayahs...': _addAyahs,
       'Take Quiz': _openQuizParaSelectionPage,
       'Mutashabihas': _openMutashabihas,
