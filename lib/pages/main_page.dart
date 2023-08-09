@@ -140,7 +140,6 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
 
   Widget buildThreeDotMenu() {
     final Map<String, VoidCallback> actions = {
-      'Read Quran...': _readQuran,
       'Add Ayahs...': _addAyahs,
       'Take Quiz': _openQuizParaSelectionPage,
       'Mutashabihas': _openMutashabihas,
@@ -204,7 +203,14 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
                   return threeDotMenu!;
                 }
               },
-              child: buildThreeDotMenu(),
+              child: Row(children: [
+                IconButton(
+                  tooltip: "Read para",
+                  icon: const Icon(Icons.menu_book),
+                  onPressed: _readQuran,
+                ),
+                buildThreeDotMenu()
+              ]),
             ),
           ],
         ),
