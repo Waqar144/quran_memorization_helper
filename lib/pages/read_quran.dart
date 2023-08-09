@@ -11,7 +11,7 @@ import 'package:quran_memorization_helper/quran_data/pages.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/ayah_offsets.dart';
 import 'package:quran_memorization_helper/widgets/mutashabiha_ayat_list_item.dart';
-import 'package:wakelock/wakelock.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 class AyatInPage {
   String text;
@@ -43,7 +43,7 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
   void initState() {
     super.initState();
 
-    Wakelock.enable(); // disable auto screen turn off
+    WakelockPlus.enable(); // disable auto screen turn off
     _currentParaIndex = widget.model.currentPara - 1;
     _para = "Para ${widget.model.currentPara}";
   }
@@ -51,7 +51,7 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
   @override
   void dispose() {
     super.dispose();
-    Wakelock.disable(); // enable auto screen turn off
+    WakelockPlus.disable(); // enable auto screen turn off
   }
 
   String toUrduNumber(int num) {
