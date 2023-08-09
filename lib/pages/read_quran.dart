@@ -9,6 +9,7 @@ import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
 import 'package:quran_memorization_helper/quran_data/surahs.dart';
 import 'package:quran_memorization_helper/quran_data/pages.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
+import 'package:quran_memorization_helper/quran_data/ayah_offsets.dart';
 import 'package:quran_memorization_helper/widgets/mutashabiha_ayat_list_item.dart';
 
 class AyatInPage {
@@ -35,6 +36,7 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
   final List<List<AyatInPage>> _ayats = [];
   final List<String> _pageNumbers = [];
   List<Mutashabiha> _mutashabihat = [];
+  late final ByteBuffer _quranUtf8;
 
   @override
   void initState() {
@@ -68,6 +70,7 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
   Future<void> _importParaText() async {
     final int para = _currentParaIndex;
     final data = await rootBundle.load("assets/quran.txt");
+    _quranUtf8 = data.buffer;
     int start = para16LinePageOffsets[para] - 1;
     int end = para >= 29 ? 548 : para16LinePageOffsets[para + 1] - 1;
 
@@ -117,43 +120,91 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
     // List<Ayat> selected = [
   }
 
-  void ontap(int surahIdx, int ayahIdx) {
-    showModalBottomSheet(
-        context: context,
-        elevation: 5.0,
-        builder: (context) {
-          List<Mutashabiha> mutashabihat =
-              _getMutashabihaAyat(ayahIdx, surahIdx);
-          if (mutashabihat.isNotEmpty) {
-            return SizedBox(
-              width: MediaQuery.of(context).size.width - 32,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ListView(
-                  children: [
-                    const ListTile(
-                      title: Text("Add to DB"),
-                    ),
-                    const Divider(),
-                    ListView.separated(
-                      physics: const NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      separatorBuilder: (ctx, index) =>
-                          const Divider(height: 1),
-                      itemCount: mutashabihat.length,
-                      itemBuilder: (ctx, index) {
-                        return MutashabihaAyatListItem(
-                            mutashabiha: mutashabihat[index]);
-                      },
-                    ),
-                  ],
+  Future<bool> _onAyahTapped(int surahIdx, int ayahIdx) async {
+    // helper function build actions when clicked on mutashabiha
+    List<Widget> buildMutashabihaActions(
+        List<Mutashabiha> mutashabihat, AyatOrMutashabiha? aOrM) {
+      List<Widget> widgets = [];
+
+      if (aOrM != null) {
+        if (aOrM.mutashabiha != null) {
+          widgets.add(ListTile(
+            title: const Text("Remove mutashabiha from DB"),
+            onTap: () {
+              widget.model
+                  .removeMutashabihas(_currentParaIndex, [aOrM.mutashabiha!]);
+              Navigator.of(context).pop(true);
+            },
+          ));
+        } else {
+          widgets.add(ListTile(
+            title: const Text("Remove ayah from DB"),
+            onTap: () {
+              // widget.model.addAyahs([aOrM.ayat!]);
+              widget.model.removeAyats(_currentParaIndex, [aOrM.getAyahIdx()]);
+              Navigator.of(context).pop(true);
+            },
+          ));
+        }
+        // close action sheet
+      } else {
+        widgets.add(ListTile(
+          title: const Text("Add to DB"),
+          onTap: () {
+            if (mutashabihat.isNotEmpty) {
+              widget.model
+                  .setParaMutashabihas(_currentParaIndex + 1, mutashabihat);
+            }
+            Navigator.of(context).pop(true);
+          },
+        ));
+      }
+
+      widgets.add(const Divider());
+      widgets.add(ListView.separated(
+        physics: const NeverScrollableScrollPhysics(),
+        shrinkWrap: true,
+        separatorBuilder: (ctx, index) => const Divider(height: 1),
+        itemCount: mutashabihat.length,
+        itemBuilder: (ctx, index) {
+          return MutashabihaAyatListItem(mutashabiha: mutashabihat[index]);
+        },
+      ));
+      return widgets;
+    }
+
+    List<Mutashabiha> mutashabihat = _getMutashabihaAyat(ayahIdx, surahIdx);
+    AyatOrMutashabiha? aOrM = _getAyatInDB(ayahIdx, surahIdx);
+    if (mutashabihat.isNotEmpty) {
+      // If the user clicked on a mutashabiha ayat, we show a bottom sheet
+      return await showModalBottomSheet<bool>(
+            context: context,
+            builder: (context) {
+              return SizedBox(
+                width: MediaQuery.of(context).size.width - 32,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ListView(
+                      children: buildMutashabihaActions(mutashabihat, aOrM)),
                 ),
-              ),
-            );
-          } else {
-            return const SizedBox.shrink();
-          }
-        });
+              );
+            },
+          ) ??
+          false; // return false if no value to avoid a rebuild of page
+    } else {
+      // otherwise we add/remove ayah
+      final int abs = toAbsoluteAyahOffset(surahIdx, ayahIdx);
+      if (aOrM != null && aOrM.ayat != null) {
+        // remove
+        widget.model.removeAyats(_currentParaIndex, [abs]);
+      } else {
+        // add
+        final Ayat ayat = getAyahForIdx(abs, _quranUtf8);
+        widget.model.addAyahs([ayat]);
+      }
+    }
+    // return true by default
+    return true;
   }
 
   List<Mutashabiha> _getMutashabihaAyat(int surahAyahIdx, int surahIdx) {
@@ -185,6 +236,74 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
     return false;
   }
 
+  AyatOrMutashabiha? _getAyatInDB(int surahAyahIdx, int surahIdx) {
+    int abs = toAbsoluteAyahOffset(surahIdx, surahAyahIdx);
+    for (final a in widget.model.ayahs) {
+      if (a.getAyahIdx() == abs) return a;
+    }
+    return null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Reading $_para"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.check),
+            onPressed: () => _onDone(context),
+          )
+        ],
+      ),
+      body: FutureBuilder(
+        future: _importParaText(),
+        builder: (context, snapshot) {
+          if (_ayats.isEmpty) return const SizedBox.shrink();
+          return ListView.separated(
+            separatorBuilder: (context, index) => const Divider(height: 1),
+            itemCount: _ayats.length,
+            itemBuilder: (context, index) {
+              final pageAyas = _ayats[index];
+              return ListTile(
+                contentPadding: const EdgeInsets.only(left: 8, right: 8),
+                title: QuranPageWidget(
+                  pageAyas,
+                  _pageNumbers[index],
+                  onAyahTapped: _onAyahTapped,
+                  isAyatInDB: _isAyatInDB,
+                  isMutashabihaAyat: _isMutashabihaAyat,
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+class QuranPageWidget extends StatelessWidget {
+  final List<AyatInPage> pageAyas;
+  final Future<bool> Function(int surahIdx, int ayahIdx) onAyahTapped;
+  final bool Function(int ayahIdx, int surahIdx) isMutashabihaAyat;
+  final bool Function(int ayahIdx, int surahIdx) isAyatInDB;
+  final ValueNotifier<int> _rebuilder = ValueNotifier(0);
+  final String pageNumberText;
+
+  QuranPageWidget(this.pageAyas, this.pageNumberText,
+      {required this.onAyahTapped,
+      required this.isAyatInDB,
+      required this.isMutashabihaAyat,
+      super.key});
+
+  void _tapHandler(int surahIdx, int ayahIdx) async {
+    // if the handler returns true, we do a rebuild
+    if (await onAyahTapped(surahIdx, ayahIdx)) {
+      _rebuilder.value++; // trigger rebuild
+    }
+  }
+
   List<InlineSpan> _buildSpans(List<AyatInPage> pageAyas) {
     List<InlineSpan> spans = [];
     for (final a in pageAyas) {
@@ -193,30 +312,31 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
       }
       String x =
           a.isFull ? String.fromCharCodes([0x6df, 0xF500 + a.ayahIdx]) : "";
-      if (_isAyatInDB(a.ayahIdx, a.surahIdx)) {
+      if (isAyatInDB(a.ayahIdx, a.surahIdx)) {
         spans.add(TextSpan(
             text: "${a.text}$x ",
             recognizer: TapGestureRecognizer()
-              ..onTap = () => ontap(a.surahIdx, a.ayahIdx),
+              ..onTap = () => _tapHandler(a.surahIdx, a.ayahIdx),
             style: const TextStyle(inherit: true, color: Colors.red)));
-      } else if (_isMutashabihaAyat(a.ayahIdx, a.surahIdx)) {
+      } else if (isMutashabihaAyat(a.ayahIdx, a.surahIdx)) {
         spans.add(TextSpan(
             text: "${a.text}$x ",
             recognizer: TapGestureRecognizer()
-              ..onTap = () => ontap(a.surahIdx, a.ayahIdx),
+              ..onTap = () => _tapHandler(a.surahIdx, a.ayahIdx),
             style: const TextStyle(inherit: true, color: Colors.indigo)));
       } else {
         spans.add(TextSpan(
           text: "${a.text}$x ",
           recognizer: TapGestureRecognizer()
-            ..onTap = () => ontap(a.surahIdx, a.ayahIdx),
+            ..onTap = () => _tapHandler(a.surahIdx, a.ayahIdx),
         ));
       }
     }
     return spans;
   }
 
-  List<Widget> _buildPageAyahs(List<AyatInPage> pageAyas) {
+  List<Widget> _buildPageAyahs(
+      List<AyatInPage> pageAyas, BuildContext context) {
     List<Widget> widgets = [];
     for (int i = 0; i < pageAyas.length; ++i) {
       final a = pageAyas[i];
@@ -264,7 +384,8 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
     return widgets;
   }
 
-  Widget _buildPage(String pageNumberText, List<AyatInPage> pageAyas) {
+  @override
+  Widget build(BuildContext context) {
     return Column(
       children: [
         Text(
@@ -276,43 +397,16 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
         ),
         Padding(
           padding: const EdgeInsets.only(left: 16, right: 16),
-          child: Column(
-            children: _buildPageAyahs(pageAyas),
+          child: ValueListenableBuilder(
+            valueListenable: _rebuilder,
+            builder: (context, v, _) {
+              return Column(
+                children: _buildPageAyahs(pageAyas, context),
+              );
+            },
           ),
         )
       ],
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Reading $_para"),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.check),
-            onPressed: () => _onDone(context),
-          )
-        ],
-      ),
-      body: FutureBuilder(
-        future: _importParaText(),
-        builder: (context, snapshot) {
-          if (_ayats.isEmpty) return const SizedBox.shrink();
-          return ListView.separated(
-            separatorBuilder: (context, index) => const Divider(height: 1),
-            itemCount: _ayats.length,
-            itemBuilder: (context, index) {
-              final pageAyas = _ayats[index];
-              return ListTile(
-                contentPadding: const EdgeInsets.only(left: 8, right: 8),
-                title: _buildPage(_pageNumbers[index], pageAyas),
-              );
-            },
-          );
-        },
-      ),
     );
   }
 }

@@ -149,6 +149,34 @@ class ParaAyatModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Remove ayats from given para index
+  void removeAyats(int paraIndex, List<int> absoluteAyahIndexes) {
+    final List<AyatOrMutashabiha>? ayahs = _paraAyats[paraIndex + 1];
+    if (ayahs == null) return;
+    ayahs.removeWhere((AyatOrMutashabiha a) =>
+        a.ayat != null && absoluteAyahIndexes.contains(a.getAyahIdx()));
+    _paraAyats[paraIndex] = ayahs;
+    notifyListeners();
+  }
+
+  /// Remove mutashabiha from given para index
+  void removeMutashabihas(int paraIndex, List<Mutashabiha> mutashabihas) {
+    final List<AyatOrMutashabiha>? ayahs = _paraAyats[paraIndex + 1];
+    if (ayahs == null) return;
+    ayahs.removeWhere((AyatOrMutashabiha a) {
+      if (a.mutashabiha != null) {
+        for (final m in mutashabihas) {
+          if (m.src.surahAyahIndexes == a.mutashabiha!.src.surahAyahIndexes) {
+            return true;
+          }
+        }
+      }
+      return false;
+    });
+    _paraAyats[paraIndex] = ayahs;
+    notifyListeners();
+  }
+
   void resetSelection() {
     for (var i = 0; i < ayahs.length; i++) {
       ayahs[i].selected = false;
