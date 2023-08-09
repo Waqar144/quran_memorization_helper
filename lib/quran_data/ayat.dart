@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'ayah_offsets.dart';
 import 'para_bounds.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 class Ayat {
   Ayat(this.text, {required this.ayahIdx});
@@ -133,4 +134,32 @@ MutashabihaAyat ayatFromJsonObj(
     // print(e);
     rethrow;
   }
+}
+
+Future<List<Mutashabiha>> importParaMutashabihas(int paraIdx) async {
+  final mutashabihasJsonBytes =
+      await rootBundle.load("assets/mutashabiha_data.json");
+  final mutashabihasJson =
+      utf8.decode(mutashabihasJsonBytes.buffer.asUint8List());
+  final map = jsonDecode(mutashabihasJson) as Map<String, dynamic>;
+  int paraNum = paraIdx + 1;
+  final list = map[paraNum.toString()] as List<dynamic>;
+
+  List<Mutashabiha> mutashabihas = [];
+  final ByteData data = await rootBundle.load("assets/quran.txt");
+  for (final m in list) {
+    if (m == null) continue;
+    try {
+      int ctx = (m["ctx"] as int?) ?? 0;
+      MutashabihaAyat src = ayatFromJsonObj(m["src"], data.buffer, ctx);
+      List<MutashabihaAyat> matches = [];
+      for (final match in m["muts"]) {
+        matches.add(ayatFromJsonObj(match, data.buffer, ctx));
+      }
+      mutashabihas.add(Mutashabiha(src, matches));
+    } catch (e) {
+      rethrow;
+    }
+  }
+  return mutashabihas;
 }

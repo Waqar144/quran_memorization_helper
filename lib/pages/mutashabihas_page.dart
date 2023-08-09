@@ -1,9 +1,5 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'page_constants.dart';
-import 'dart:convert';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'package:quran_memorization_helper/models/ayat.dart';
 import 'package:quran_memorization_helper/utils/utils.dart';
@@ -56,30 +52,8 @@ class ParaMutashabihas extends StatelessWidget {
 
   /// Import the mutashabihas from assets
   Future<List<Mutashabiha>> _importParaMutashabihas() async {
-    final mutashabihasJsonBytes =
-        await rootBundle.load("assets/mutashabiha_data.json");
-    final mutashabihasJson =
-        utf8.decode(mutashabihasJsonBytes.buffer.asUint8List());
-    final map = jsonDecode(mutashabihasJson) as Map<String, dynamic>;
-    int paraNum = _para + 1;
-    final list = map[paraNum.toString()] as List<dynamic>;
-
     _mutashabihas.clear();
-    final ByteData data = await rootBundle.load("assets/quran.txt");
-    for (final m in list) {
-      if (m == null) continue;
-      try {
-        int ctx = (m["ctx"] as int?) ?? 0;
-        MutashabihaAyat src = ayatFromJsonObj(m["src"], data.buffer, ctx);
-        List<MutashabihaAyat> matches = [];
-        for (final match in m["muts"]) {
-          matches.add(ayatFromJsonObj(match, data.buffer, ctx));
-        }
-        _mutashabihas.add(Mutashabiha(src, matches));
-      } catch (e) {
-        rethrow;
-      }
-    }
+    _mutashabihas.addAll(await importParaMutashabihas(_para));
     return _mutashabihas;
   }
 

@@ -2,21 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/gestures.dart';
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:quran_memorization_helper/models/settings.dart';
+import 'package:quran_memorization_helper/models/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
 import 'package:quran_memorization_helper/quran_data/surahs.dart';
 import 'package:quran_memorization_helper/quran_data/pages.dart';
+import 'package:quran_memorization_helper/quran_data/ayat.dart';
+import 'package:quran_memorization_helper/widgets/mutashabiha_ayat_list_item.dart';
 
 class AyatInPage {
   String text;
   int ayahIdx;
-  AyatInPage(this.text, this.ayahIdx);
+  int surahIdx;
+  bool isSurahStart = false;
+  bool isFull = true;
+  AyatInPage(this.text, this.ayahIdx, this.surahIdx);
 }
 
 class ReadQuranPage extends StatefulWidget {
-  final int _paraNum;
+  final ParaAyatModel model;
 
-  const ReadQuranPage(this._paraNum, {super.key});
+  const ReadQuranPage(this.model, {super.key});
 
   @override
   State<StatefulWidget> createState() => _ReadQuranPageState();
@@ -24,45 +31,50 @@ class ReadQuranPage extends StatefulWidget {
 
 class _ReadQuranPageState extends State<ReadQuranPage> {
   late final String _para;
+  late final int _currentParaIndex;
   final List<List<AyatInPage>> _ayats = [];
   final List<String> _pageNumbers = [];
+  List<Mutashabiha> _mutashabihat = [];
 
   @override
   void initState() {
     super.initState();
 
-    _para = "Para ${widget._paraNum}";
+    _currentParaIndex = widget.model.currentPara - 1;
+    _para = "Para ${widget.model.currentPara}";
   }
 
   String toUrduNumber(int num) {
-    const List<String> numMap = [
-      "٠",
-      "۱",
-      "٢",
-      "٣",
-      "٤",
-      "٥",
-      "٦",
-      "٧",
-      "۸",
-      "٩"
-    ];
+    final Uint16List numMap = Uint16List.fromList([
+      0x6F0,
+      0x6F0 + 1,
+      0x6F0 + 2,
+      0x6F0 + 3,
+      0x6F0 + 4,
+      0x6F0 + 5,
+      0x6F0 + 6,
+      0x6F0 + 7,
+      0x6F0 + 8,
+      0x6F0 + 9
+    ]);
     final numStr = num.toString();
     String ret = "";
     for (final c in numStr.codeUnits) {
-      ret += numMap[c - 48];
+      ret += String.fromCharCode(numMap[c - 48]);
     }
     return ret;
   }
 
-  Future<void> _importParaText(int para) async {
+  Future<void> _importParaText() async {
+    final int para = _currentParaIndex;
     final data = await rootBundle.load("assets/quran.txt");
-    int start = para16LinePageOffsets[para - 1] - 1;
-    int end = para >= 30 ? 548 : para16LinePageOffsets[para] - 1;
+    int start = para16LinePageOffsets[para] - 1;
+    int end = para >= 29 ? 548 : para16LinePageOffsets[para + 1] - 1;
 
     _ayats.clear();
 
-    int absoluteAyahIdx = getFirstAyahOfPara(para - 1);
+    int prevSurah = -1;
+    int absoluteAyahIdx = getFirstAyahOfPara(para);
     for (int i = start; i < end; ++i) {
       _pageNumbers.add(toUrduNumber(i + 2));
       final ps = pageOffsets[i];
@@ -71,62 +83,205 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
 
       final str = utf8.decode(pageUtf8);
       final ayahs = str.split('\n');
-      List<AyatInPage> ayas = [];
+      final bool isLastAyahComplete = str.endsWith('\n');
+      List<AyatInPage> ayasInPage = [];
       for (final a in ayahs) {
         if (a.isEmpty) continue;
+
         int surahIdx = surahForAyah(absoluteAyahIdx);
+        if (prevSurah != surahIdx) {
+          prevSurah = surahIdx;
+          final surahMarker = AyatInPage("", -1, surahIdx);
+          surahMarker.isSurahStart = true;
+          ayasInPage.add(surahMarker);
+        }
+
         int surahAyahIdx = toSurahAyahOffset(surahIdx, absoluteAyahIdx);
-        ayas.add(AyatInPage(a, surahAyahIdx));
+        ayasInPage.add(AyatInPage(a, surahAyahIdx, surahIdx));
+        // if we are less than, length this is a complete ayah
         absoluteAyahIdx++;
       }
-      _ayats.add(ayas);
+
+      if (!isLastAyahComplete) {
+        ayasInPage.last.isFull = false;
+        absoluteAyahIdx--;
+      }
+
+      _ayats.add(ayasInPage);
     }
+
+    _mutashabihat = await importParaMutashabihas(para);
   }
 
   void _onDone(BuildContext context) {
     // List<Ayat> selected = [
   }
 
-  void ontap(int ayahIdx) {
-    print("Tapped: $ayahIdx");
+  void ontap(int surahIdx, int ayahIdx) {
     showModalBottomSheet(
         context: context,
         elevation: 5.0,
         builder: (context) {
-          return SizedBox(
-            width: MediaQuery.of(context).size.width - 32,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                children: [
-                  ListTile(
-                    title: const Text(
-                      "Hello what is a long action",
-                      textAlign: TextAlign.center,
+          List<Mutashabiha> mutashabihat =
+              _getMutashabihaAyat(ayahIdx, surahIdx);
+          if (mutashabihat.isNotEmpty) {
+            return SizedBox(
+              width: MediaQuery.of(context).size.width - 32,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ListView(
+                  children: [
+                    const ListTile(
+                      title: Text("Add to DB"),
                     ),
-                    onTap: () => Navigator.of(context).pop(),
-                  ),
-                  const Text("Hello"),
-                ],
+                    const Divider(),
+                    ListView.separated(
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      separatorBuilder: (ctx, index) =>
+                          const Divider(height: 1),
+                      itemCount: mutashabihat.length,
+                      itemBuilder: (ctx, index) {
+                        return MutashabihaAyatListItem(
+                            mutashabiha: mutashabihat[index]);
+                      },
+                    ),
+                  ],
+                ),
               ),
-            ),
-          );
+            );
+          } else {
+            return const SizedBox.shrink();
+          }
         });
   }
 
-  List<InlineSpan> buildSpans(List<AyatInPage> pageAyas) {
+  List<Mutashabiha> _getMutashabihaAyat(int surahAyahIdx, int surahIdx) {
+    List<Mutashabiha> ret = [];
+    for (final m in _mutashabihat) {
+      if (m.src.surahIdx == surahIdx &&
+          m.src.surahAyahIndexes.contains(surahAyahIdx)) {
+        ret.add(m);
+      }
+    }
+    return ret;
+  }
+
+  bool _isMutashabihaAyat(int surahAyahIdx, int surahIdx) {
+    for (final m in _mutashabihat) {
+      if (m.src.surahIdx == surahIdx &&
+          m.src.surahAyahIndexes.contains(surahAyahIdx)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool _isAyatInDB(int surahAyahIdx, int surahIdx) {
+    int abs = toAbsoluteAyahOffset(surahIdx, surahAyahIdx);
+    for (final a in widget.model.ayahs) {
+      if (a.getAyahIdx() == abs) return true;
+    }
+    return false;
+  }
+
+  List<InlineSpan> _buildSpans(List<AyatInPage> pageAyas) {
     List<InlineSpan> spans = [];
     for (final a in pageAyas) {
-      // int ayahNum = a.ayahIdx + 1;
-      String x = String.fromCharCodes([0x6df, 0xF500 + a.ayahIdx]);
-      // print("$ayahNum --- '${a.text}'");
-      spans.add(TextSpan(
-        text: "${a.text}$x ",
-        recognizer: TapGestureRecognizer()..onTap = () => ontap(a.ayahIdx),
-      ));
-      // spans.add(TextSpan(text: "$x"));
+      if (a.isSurahStart) {
+        return spans;
+      }
+      String x =
+          a.isFull ? String.fromCharCodes([0x6df, 0xF500 + a.ayahIdx]) : "";
+      if (_isAyatInDB(a.ayahIdx, a.surahIdx)) {
+        spans.add(TextSpan(
+            text: "${a.text}$x ",
+            recognizer: TapGestureRecognizer()
+              ..onTap = () => ontap(a.surahIdx, a.ayahIdx),
+            style: const TextStyle(inherit: true, color: Colors.red)));
+      } else if (_isMutashabihaAyat(a.ayahIdx, a.surahIdx)) {
+        spans.add(TextSpan(
+            text: "${a.text}$x ",
+            recognizer: TapGestureRecognizer()
+              ..onTap = () => ontap(a.surahIdx, a.ayahIdx),
+            style: const TextStyle(inherit: true, color: Colors.indigo)));
+      } else {
+        spans.add(TextSpan(
+          text: "${a.text}$x ",
+          recognizer: TapGestureRecognizer()
+            ..onTap = () => ontap(a.surahIdx, a.ayahIdx),
+        ));
+      }
     }
     return spans;
+  }
+
+  List<Widget> _buildPageAyahs(List<AyatInPage> pageAyas) {
+    List<Widget> widgets = [];
+    for (int i = 0; i < pageAyas.length; ++i) {
+      final a = pageAyas[i];
+      if (a.isSurahStart) {
+        Container c = Container(
+          width: MediaQuery.of(context).size.width,
+          margin: const EdgeInsets.only(bottom: 16),
+          decoration:
+              BoxDecoration(border: Border.all(color: Colors.black, width: 2)),
+          child: Text(
+            /*data:*/ "بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ",
+            textDirection: TextDirection.rtl,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.black,
+              fontFamily: "Al Mushaf",
+              fontSize: Settings.instance.fontSize.toDouble(),
+              letterSpacing: 0.0,
+              wordSpacing: Settings.instance.wordSpacing.toDouble(),
+            ),
+          ),
+        );
+
+        widgets.add(c);
+      } else {
+        final spans = _buildSpans(pageAyas.sublist(i));
+        final text = Text.rich(
+          textDirection: TextDirection.rtl,
+          textAlign: TextAlign.justify,
+          style: TextStyle(
+            color: Colors.black,
+            fontFamily: "Al Mushaf",
+            fontSize: Settings.instance.fontSize.toDouble(),
+            letterSpacing: 0.0,
+            wordSpacing: Settings.instance.wordSpacing.toDouble(),
+          ),
+          TextSpan(
+            children: spans,
+          ),
+        );
+        widgets.add(text);
+        i += spans.length - 1;
+      }
+    }
+    return widgets;
+  }
+
+  Widget _buildPage(String pageNumberText, List<AyatInPage> pageAyas) {
+    return Column(
+      children: [
+        Text(
+          pageNumberText,
+          style: const TextStyle(
+            fontFamily: "Al Mushaf",
+            fontSize: 24,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 16, right: 16),
+          child: Column(
+            children: _buildPageAyahs(pageAyas),
+          ),
+        )
+      ],
+    );
   }
 
   @override
@@ -142,7 +297,7 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
         ],
       ),
       body: FutureBuilder(
-        future: _importParaText(widget._paraNum),
+        future: _importParaText(),
         builder: (context, snapshot) {
           if (_ayats.isEmpty) return const SizedBox.shrink();
           return ListView.separated(
@@ -152,24 +307,7 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
               final pageAyas = _ayats[index];
               return ListTile(
                 contentPadding: const EdgeInsets.only(left: 8, right: 8),
-                title: Column(
-                  children: [
-                    Text(_pageNumbers[index]),
-                    Text.rich(
-                      textDirection: TextDirection.rtl,
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontFamily: "Al Mushaf",
-                        fontSize: Settings.instance.fontSize.toDouble(),
-                        letterSpacing: 0.0,
-                        wordSpacing: Settings.instance.wordSpacing.toDouble(),
-                      ),
-                      TextSpan(
-                        children: buildSpans(pageAyas),
-                      ),
-                    )
-                  ],
-                ),
+                title: _buildPage(_pageNumbers[index], pageAyas),
               );
             },
           );

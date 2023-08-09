@@ -135,8 +135,7 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   }
 
   void _readQuran() {
-    Navigator.pushNamed(context, readQuranPage,
-        arguments: _paraModel.currentPara);
+    Navigator.pushNamed(context, readQuranPage, arguments: _paraModel);
   }
 
   Widget buildThreeDotMenu() {

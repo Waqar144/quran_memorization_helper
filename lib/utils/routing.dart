@@ -34,7 +34,7 @@ MaterialPageRoute handleRoute(RouteSettings settings) {
         builder: (ctx) =>
             ParaMutashabihas(settings.arguments as ParaMutashabihasArgs)),
     readQuranPage => MaterialPageRoute(
-        builder: (ctx) => ReadQuranPage(settings.arguments as int)),
+        builder: (ctx) => ReadQuranPage(settings.arguments as ParaAyatModel)),
     // MainPage is the default
     _ => MaterialPageRoute(builder: (ctx) => const MainPage())
   };
