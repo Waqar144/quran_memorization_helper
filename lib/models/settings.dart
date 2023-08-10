@@ -6,6 +6,7 @@ import 'package:quran_memorization_helper/utils/utils.dart' as utils;
 class Settings extends ChangeNotifier {
   static final Settings _instance = Settings._private();
   static Settings get instance => _instance;
+  int _currentReadingPage = -1;
   Timer? timer;
 
   // The font size of ayahs
@@ -23,6 +24,12 @@ class Settings extends ChangeNotifier {
   set wordSpacing(int val) {
     _wordSpacing = val;
     notifyListeners();
+    persist();
+  }
+
+  int get currentReadingPage => _currentReadingPage;
+  set currentReadingPage(int val) {
+    _currentReadingPage = val;
     persist();
   }
 

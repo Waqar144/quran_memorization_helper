@@ -12,6 +12,7 @@ import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/ayah_offsets.dart';
 import 'package:quran_memorization_helper/widgets/mutashabiha_ayat_list_item.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class AyatInPage {
   String text;
@@ -38,6 +39,8 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
   final List<String> _pageNumbers = [];
   List<Mutashabiha> _mutashabihat = [];
   late final ByteBuffer _quranUtf8;
+  final ItemPositionsListener _itemPositionListener =
+      ItemPositionsListener.create();
 
   @override
   void initState() {
@@ -52,6 +55,13 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
   void dispose() {
     super.dispose();
     WakelockPlus.disable(); // enable auto screen turn off
+
+    // save position
+    final v = _itemPositionListener.itemPositions.value;
+    if (v.isNotEmpty) {
+      int start = para16LinePageOffsets[_currentParaIndex] - 1;
+      Settings.instance.currentReadingPage = start + v.last.index;
+    }
   }
 
   String toUrduNumber(int num) {
@@ -252,6 +262,18 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
     return null;
   }
 
+  int _getInitialPageIndex() {
+    int p = Settings.instance.currentReadingPage;
+    int start = para16LinePageOffsets[_currentParaIndex] - 1;
+    int end = _currentParaIndex >= 29
+        ? 548
+        : para16LinePageOffsets[_currentParaIndex + 1] - 1;
+    if (p >= start && p <= end) {
+      return p - start;
+    }
+    return 0;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -268,9 +290,11 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
         future: _importParaText(),
         builder: (context, snapshot) {
           if (_ayats.isEmpty) return const SizedBox.shrink();
-          return ListView.separated(
+          return ScrollablePositionedList.separated(
             separatorBuilder: (context, index) => const Divider(height: 1),
             itemCount: _ayats.length,
+            initialScrollIndex: _getInitialPageIndex(),
+            itemPositionsListener: _itemPositionListener,
             itemBuilder: (context, index) {
               final pageAyas = _ayats[index];
               return ListTile(

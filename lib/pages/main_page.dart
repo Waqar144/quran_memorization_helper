@@ -7,6 +7,7 @@ import 'package:quran_memorization_helper/pages/page_constants.dart';
 import 'package:quran_memorization_helper/models/quiz.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'package:quran_memorization_helper/utils/utils.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -19,6 +20,8 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   final ParaAyatModel _paraModel = ParaAyatModel();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   final ValueNotifier<bool> _multipleSelectMode = ValueNotifier(false);
+  final ItemScrollController _drawerItemsScrollController =
+      ItemScrollController();
 
   @override
   void initState() {
@@ -226,8 +229,9 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
           },
         ),
         drawer: Drawer(
-          child: ListView.builder(
+          child: ScrollablePositionedList.builder(
             itemCount: 30,
+            itemScrollController: _drawerItemsScrollController,
             itemBuilder: (context, index) {
               return ListTile(
                 minVerticalPadding: 0,
@@ -237,10 +241,20 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
                   _paraModel.setCurrentPara(index + 1);
                   _scaffoldKey.currentState?.closeDrawer();
                 },
+                selected: (_paraModel.currentPara - 1) == index,
+                selectedTileColor: Theme.of(context).highlightColor,
               );
             },
           ),
         ),
+        onDrawerChanged: (opened) {
+          if (opened) {
+            Future.delayed(const Duration(milliseconds: 150), () {
+              _drawerItemsScrollController.jumpTo(
+                  index: _paraModel.currentPara - 1, alignment: 0.5);
+            });
+          }
+        },
       ),
     );
   }
