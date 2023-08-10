@@ -3,7 +3,7 @@ import 'package:quran_memorization_helper/models/ayat.dart';
 import 'package:quran_memorization_helper/models/settings.dart';
 
 class SettingsPage extends StatefulWidget {
-  final List<int> fontSizes = [24, 28, 32];
+  final List<int> fontSizes = [20, 22, 24, 26, 28, 30, 32];
   final List<double> wordSpacings = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0];
   final ParaAyatModel paraModel;
   SettingsPage(this.paraModel, {super.key});
