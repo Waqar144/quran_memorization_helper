@@ -3,6 +3,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/gestures.dart';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'dart:async';
 import 'package:quran_memorization_helper/models/settings.dart';
 import 'package:quran_memorization_helper/models/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
@@ -36,11 +37,12 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
   late final String _para;
   late final int _currentParaIndex;
   final List<List<AyatInPage>> _ayats = [];
-  final List<String> _pageNumbers = [];
+  final List<int> _pageNumbers = [];
   List<Mutashabiha> _mutashabihat = [];
   late final ByteBuffer _quranUtf8;
   final ItemPositionsListener _itemPositionListener =
       ItemPositionsListener.create();
+  final _repaintNotifier = StreamController<int>.broadcast();
 
   @override
   void initState() {
@@ -64,27 +66,6 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
     }
   }
 
-  String toUrduNumber(int num) {
-    final Uint16List numMap = Uint16List.fromList([
-      0x6F0,
-      0x6F0 + 1,
-      0x6F0 + 2,
-      0x6F0 + 3,
-      0x6F0 + 4,
-      0x6F0 + 5,
-      0x6F0 + 6,
-      0x6F0 + 7,
-      0x6F0 + 8,
-      0x6F0 + 9
-    ]);
-    final numStr = num.toString();
-    String ret = "";
-    for (final c in numStr.codeUnits) {
-      ret += String.fromCharCode(numMap[c - 48]);
-    }
-    return ret;
-  }
-
   Future<void> _importParaText() async {
     final int para = _currentParaIndex;
     final data = await rootBundle.load("assets/quran.txt");
@@ -96,8 +77,9 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
 
     int prevSurah = -1;
     int absoluteAyahIdx = getFirstAyahOfPara(para);
+    bool lastAyahWasIncomplete = false;
     for (int i = start; i < end; ++i) {
-      _pageNumbers.add(toUrduNumber(i + 2));
+      _pageNumbers.add(i);
       final ps = pageOffsets[i];
       final pe = i + 1 >= pageOffsets.length ? null : pageOffsets[i + 1] - ps;
       final pageUtf8 = data.buffer.asUint8List(ps, pe);
@@ -126,6 +108,11 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
       if (!isLastAyahComplete) {
         ayasInPage.last.isFull = false;
         absoluteAyahIdx--;
+        lastAyahWasIncomplete = true;
+      }
+
+      if (lastAyahWasIncomplete) {
+        ayasInPage.first.isFull = false;
       }
 
       _ayats.add(ayasInPage);
@@ -138,7 +125,24 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
     // List<Ayat> selected = [
   }
 
-  Future<bool> _onAyahTapped(int surahIdx, int ayahIdx) async {
+  void _onAyahTapped(int surahIdx, int ayahIdx, int pageIdx) async {
+    bool isFull = true;
+    bool isAtPageEnd = false;
+    print("Tapped, $surahIdx, $ayahIdx");
+    final pageAyas = _ayats[pageIdx];
+    for (final a in pageAyas) {
+      if (a.ayahIdx == ayahIdx && a.surahIdx == surahIdx) {
+        isFull = a.isFull;
+        if (!isFull) {
+          isAtPageEnd = a.ayahIdx == pageAyas.last.ayahIdx;
+        }
+        break;
+      }
+    }
+    int pageNumberOfTappedAyah = _pageNumbers[pageIdx];
+    print(_itemPositionListener.itemPositions.value.first.index);
+    print(pageNumberOfTappedAyah);
+
     // helper function build actions when clicked on mutashabiha
     List<Widget> buildMutashabihaActions(
         List<Mutashabiha> mutashabihat, AyatOrMutashabiha? aOrM) {
@@ -191,24 +195,25 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
       return widgets;
     }
 
+    // int firstPageNumber = para16LinePageOffsets[_currentParaIndex] - 1;
+
     List<Mutashabiha> mutashabihat = _getMutashabihaAyat(ayahIdx, surahIdx);
     AyatOrMutashabiha? aOrM = _getAyatInDB(ayahIdx, surahIdx);
     if (mutashabihat.isNotEmpty) {
       // If the user clicked on a mutashabiha ayat, we show a bottom sheet
-      return await showModalBottomSheet<bool>(
-            context: context,
-            builder: (context) {
-              return SizedBox(
-                width: MediaQuery.of(context).size.width - 32,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ListView(
-                      children: buildMutashabihaActions(mutashabihat, aOrM)),
-                ),
-              );
-            },
-          ) ??
-          false; // return false if no value to avoid a rebuild of page
+      return await showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return SizedBox(
+            width: MediaQuery.of(context).size.width - 32,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ListView(
+                  children: buildMutashabihaActions(mutashabihat, aOrM)),
+            ),
+          );
+        },
+      );
     } else {
       // otherwise we add/remove ayah
       final int abs = toAbsoluteAyahOffset(surahIdx, ayahIdx);
@@ -220,9 +225,16 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
         final Ayat ayat = getAyahForIdx(abs, _quranUtf8);
         widget.model.addAyahs([ayat]);
       }
+
+      _repaintNotifier.add(pageNumberOfTappedAyah);
+      if (!isFull) {
+        if (isAtPageEnd) {
+          _repaintNotifier.add(pageNumberOfTappedAyah + 1);
+        } else {
+          _repaintNotifier.add(pageNumberOfTappedAyah - 1);
+        }
+      }
     }
-    // return true by default
-    return true;
   }
 
   List<Mutashabiha> _getMutashabihaAyat(int surahAyahIdx, int surahIdx) {
@@ -294,6 +306,7 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
                 title: QuranPageWidget(
                   pageAyas,
                   _pageNumbers[index],
+                  repaintNotifierStream: _repaintNotifier.stream,
                   onAyahTapped: _onAyahTapped,
                   isAyatInDB: _isAyatInDB,
                   isMutashabihaAyat: _isMutashabihaAyat,
@@ -309,23 +322,53 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
 
 class QuranPageWidget extends StatelessWidget {
   final List<AyatInPage> pageAyas;
-  final Future<bool> Function(int surahIdx, int ayahIdx) onAyahTapped;
+  final void Function(int surahIdx, int ayahIdx, int pageIdx) onAyahTapped;
   final bool Function(int ayahIdx, int surahIdx) isMutashabihaAyat;
   final bool Function(int ayahIdx, int surahIdx) isAyatInDB;
   final ValueNotifier<int> _rebuilder = ValueNotifier(0);
-  final String pageNumberText;
+  final Stream<int> repaintNotifierStream;
+  final int pageNumber;
 
-  QuranPageWidget(this.pageAyas, this.pageNumberText,
+  QuranPageWidget(this.pageAyas, this.pageNumber,
       {required this.onAyahTapped,
       required this.isAyatInDB,
       required this.isMutashabihaAyat,
-      super.key});
+      required this.repaintNotifierStream,
+      super.key}) {
+    repaintNotifierStream.listen(_onStreamEvent);
+  }
+
+  void _onStreamEvent(int page) {
+    if (page == pageNumber) {
+      print("Repaint page: $pageNumber");
+      _rebuilder.value++;
+    }
+  }
 
   void _tapHandler(int surahIdx, int ayahIdx) async {
     // if the handler returns true, we do a rebuild
-    if (await onAyahTapped(surahIdx, ayahIdx)) {
-      _rebuilder.value++; // trigger rebuild
+    onAyahTapped(surahIdx, ayahIdx, pageNumber);
+  }
+
+  static String _toUrduNumber(int num) {
+    final Uint16List numMap = Uint16List.fromList([
+      0x6F0,
+      0x6F0 + 1,
+      0x6F0 + 2,
+      0x6F0 + 3,
+      0x6F0 + 4,
+      0x6F0 + 5,
+      0x6F0 + 6,
+      0x6F0 + 7,
+      0x6F0 + 8,
+      0x6F0 + 9
+    ]);
+    final numStr = num.toString();
+    String ret = "";
+    for (final c in numStr.codeUnits) {
+      ret += String.fromCharCode(numMap[c - 48]);
     }
+    return ret;
   }
 
   List<InlineSpan> _buildSpans(List<AyatInPage> pageAyas) {
@@ -334,23 +377,27 @@ class QuranPageWidget extends StatelessWidget {
       if (a.isSurahStart) {
         return spans;
       }
-      String x =
-          a.isFull ? String.fromCharCodes([0x6df, 0xF500 + a.ayahIdx]) : "";
+      String ayahNumber;
+      if (a.isFull || a.ayahIdx == pageAyas.first.ayahIdx) {
+        ayahNumber = String.fromCharCodes([0x6df, 0xF500 + a.ayahIdx]);
+      } else {
+        ayahNumber = "";
+      }
       if (isAyatInDB(a.ayahIdx, a.surahIdx)) {
         spans.add(TextSpan(
-            text: "${a.text}$x ",
+            text: "${a.text}$ayahNumber ",
             recognizer: TapGestureRecognizer()
               ..onTap = () => _tapHandler(a.surahIdx, a.ayahIdx),
             style: const TextStyle(inherit: true, color: Colors.red)));
       } else if (isMutashabihaAyat(a.ayahIdx, a.surahIdx)) {
         spans.add(TextSpan(
-            text: "${a.text}$x ",
+            text: "${a.text}$ayahNumber ",
             recognizer: TapGestureRecognizer()
               ..onTap = () => _tapHandler(a.surahIdx, a.ayahIdx),
             style: const TextStyle(inherit: true, color: Colors.indigo)));
       } else {
         spans.add(TextSpan(
-          text: "${a.text}$x ",
+          text: "${a.text}$ayahNumber ",
           recognizer: TapGestureRecognizer()
             ..onTap = () => _tapHandler(a.surahIdx, a.ayahIdx),
         ));
@@ -413,7 +460,7 @@ class QuranPageWidget extends StatelessWidget {
     return Column(
       children: [
         Text(
-          pageNumberText,
+          _toUrduNumber(pageNumber + 2),
           style: const TextStyle(
             fontFamily: "Al Mushaf",
             fontSize: 24,
