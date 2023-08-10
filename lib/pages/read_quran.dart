@@ -277,15 +277,7 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Reading $_para"),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.check),
-            onPressed: () => _onDone(context),
-          )
-        ],
-      ),
+      appBar: AppBar(title: Text("Reading $_para")),
       body: FutureBuilder(
         future: _importParaText(),
         builder: (context, snapshot) {
