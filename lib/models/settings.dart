@@ -40,7 +40,8 @@ class Settings extends ChangeNotifier {
   void saveToDisk() async {
     Map<String, dynamic> map = {
       'fontSize': fontSize,
-      'wordSpacing': wordSpacing
+      'wordSpacing': wordSpacing,
+      'currentReadingPage': _currentReadingPage
     };
     String json = const JsonEncoder.withIndent("  ").convert(map);
     await utils.saveJsonToDisk(json, "settings");
@@ -51,6 +52,7 @@ class Settings extends ChangeNotifier {
     if (json == null) return;
     _fontSize = json["fontSize"] ?? 24;
     _wordSpacing = json["wordSpacing"] ?? 1;
+    _currentReadingPage = json["currentReadingPage"] ?? 1;
   }
 
   void persist() {
