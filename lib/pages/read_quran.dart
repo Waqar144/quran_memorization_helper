@@ -121,15 +121,11 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
     _mutashabihat = await importParaMutashabihas(para);
   }
 
-  void _onDone(BuildContext context) {
-    // List<Ayat> selected = [
-  }
-
   void _onAyahTapped(int surahIdx, int ayahIdx, int pageIdx) async {
     bool isFull = true;
     bool isAtPageEnd = false;
-    print("Tapped, $surahIdx, $ayahIdx");
-    final pageAyas = _ayats[pageIdx];
+    int ayatsArrayIndex = pageIdx - _pageNumbers[0];
+    final pageAyas = _ayats[ayatsArrayIndex];
     for (final a in pageAyas) {
       if (a.ayahIdx == ayahIdx && a.surahIdx == surahIdx) {
         isFull = a.isFull;
@@ -139,9 +135,7 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
         break;
       }
     }
-    int pageNumberOfTappedAyah = _pageNumbers[pageIdx];
-    print(_itemPositionListener.itemPositions.value.first.index);
-    print(pageNumberOfTappedAyah);
+    int pageNumberOfTappedAyah = _pageNumbers[ayatsArrayIndex];
 
     // helper function build actions when clicked on mutashabiha
     List<Widget> buildMutashabihaActions(
@@ -340,7 +334,6 @@ class QuranPageWidget extends StatelessWidget {
 
   void _onStreamEvent(int page) {
     if (page == pageNumber) {
-      print("Repaint page: $pageNumber");
       _rebuilder.value++;
     }
   }
