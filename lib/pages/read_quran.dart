@@ -137,6 +137,17 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
     }
     int pageNumberOfTappedAyah = _pageNumbers[ayatsArrayIndex];
 
+    void sendRepainEvent() {
+      _repaintNotifier.add(pageNumberOfTappedAyah);
+      if (!isFull) {
+        if (isAtPageEnd) {
+          _repaintNotifier.add(pageNumberOfTappedAyah + 1);
+        } else {
+          _repaintNotifier.add(pageNumberOfTappedAyah - 1);
+        }
+      }
+    }
+
     // helper function build actions when clicked on mutashabiha
     List<Widget> buildMutashabihaActions(
         List<Mutashabiha> mutashabihat, AyatOrMutashabiha? aOrM) {
@@ -145,33 +156,54 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
       if (aOrM != null) {
         if (aOrM.mutashabiha != null) {
           widgets.add(ListTile(
-            title: const Text("Remove mutashabiha from DB"),
+            title: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.delete),
+                Text("Remove mutashabiha from DB", textAlign: TextAlign.center),
+              ],
+            ),
             onTap: () {
               widget.model
                   .removeMutashabihas(_currentParaIndex, [aOrM.mutashabiha!]);
-              Navigator.of(context).pop(true);
+              Navigator.of(context).pop();
+              sendRepainEvent();
             },
           ));
         } else {
           widgets.add(ListTile(
-            title: const Text("Remove ayah from DB"),
+            title: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.delete),
+                Text("Remove ayah from DB", textAlign: TextAlign.center),
+              ],
+            ),
             onTap: () {
               // widget.model.addAyahs([aOrM.ayat!]);
               widget.model.removeAyats(_currentParaIndex, [aOrM.getAyahIdx()]);
-              Navigator.of(context).pop(true);
+              Navigator.of(context).pop();
+              sendRepainEvent();
             },
           ));
         }
         // close action sheet
       } else {
         widgets.add(ListTile(
-          title: const Text("Add to DB"),
+          title: const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.add),
+              Text("Add to DB", textAlign: TextAlign.center),
+            ],
+          ),
           onTap: () {
             if (mutashabihat.isNotEmpty) {
               widget.model
                   .setParaMutashabihas(_currentParaIndex + 1, mutashabihat);
             }
-            Navigator.of(context).pop(true);
+            Navigator.of(context).pop();
+            sendRepainEvent();
           },
         ));
       }
@@ -219,15 +251,7 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
         final Ayat ayat = getAyahForIdx(abs, _quranUtf8);
         widget.model.addAyahs([ayat]);
       }
-
-      _repaintNotifier.add(pageNumberOfTappedAyah);
-      if (!isFull) {
-        if (isAtPageEnd) {
-          _repaintNotifier.add(pageNumberOfTappedAyah + 1);
-        } else {
-          _repaintNotifier.add(pageNumberOfTappedAyah - 1);
-        }
-      }
+      sendRepainEvent();
     }
   }
 
