@@ -85,7 +85,7 @@ flutter:
   fonts:
     - family: Al Mushaf
       fonts:
-        - asset: fonts/indopak-nastaleeq-waqf-lazim-v4.2.1.ttf
+        - asset: fonts/IndoPakQuranWBW.ttf
         # - asset: fonts/Al Qalam Quran Majeed 2.ttf
   #   - family: Schyler
   #     fonts:
