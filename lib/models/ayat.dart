@@ -74,8 +74,10 @@ class ParaAyatModel extends ChangeNotifier {
   }
 
   void persist() {
-    if (timer == null || !(timer?.isActive ?? false)) {
-      timer = Timer(const Duration(seconds: 1), saveToDisk);
+    if (timer == null || !timer!.isActive) {
+      timer = Timer(const Duration(seconds: 1), () async {
+        await saveToDisk();
+      });
     }
   }
 
@@ -294,7 +296,8 @@ class ParaAyatModel extends ChangeNotifier {
 
   Future<String> saveToDisk({String? fileName}) async {
     String json = const JsonEncoder.withIndent("  ").convert(toJson());
-    return utils.saveJsonToDisk(json, fileName ?? "ayatsdb");
+    String path = await utils.saveJsonToDisk(json, fileName ?? "ayatsdb");
+    return path;
   }
 
   Map<String, dynamic> toJson() {

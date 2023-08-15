@@ -297,7 +297,6 @@ class _RPS extends State<ReadQuranPage> {
           final data = await rootBundle.load("assets/quran.txt");
           _quranUtf8 = data.buffer;
         }
-        print("Add");
         final Ayat ayat = getAyahForIdx(abs, _quranUtf8!);
         widget.model.addAyahs([ayat]);
       }
