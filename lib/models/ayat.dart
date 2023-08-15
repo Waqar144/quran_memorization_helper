@@ -74,11 +74,8 @@ class ParaAyatModel extends ChangeNotifier {
   }
 
   void persist() {
-    if (timer == null || !timer!.isActive) {
-      timer = Timer(const Duration(seconds: 1), () async {
-        await saveToDisk();
-      });
-    }
+    timer?.cancel();
+    timer = Timer(const Duration(seconds: 1), () => saveToDisk());
   }
 
   set onParaChange(VoidCallback cb) => currentParaNotifier.addListener(cb);
