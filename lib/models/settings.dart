@@ -56,7 +56,7 @@ class Settings extends ChangeNotifier {
   }
 
   void persist() {
-    if (timer == null || (timer?.isActive ?? false)) {
+    if (timer == null || !(timer?.isActive ?? false)) {
       timer = Timer(const Duration(seconds: 2), saveToDisk);
     }
   }
