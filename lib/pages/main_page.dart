@@ -111,8 +111,6 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
 
     showSnackBarMessage(context,
         "Imported ${importedAyats.length} ayahs into Para ${_paraModel.currentPara}");
-
-    _saveToDisk();
   }
 
   void _openSettings() async {
@@ -128,8 +126,6 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     assert(_multipleSelectMode.value);
     _paraModel.removeSelectedAyahs();
     _multipleSelectMode.value = false;
-    // update the db
-    _saveToDisk();
   }
 
   void _onExitMultiSelectMode() {
@@ -230,6 +226,7 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
         ),
         drawer: Drawer(
           child: ScrollablePositionedList.builder(
+            padding: const EdgeInsets.only(top: 32),
             itemCount: 30,
             itemScrollController: _drawerItemsScrollController,
             itemBuilder: (context, index) {

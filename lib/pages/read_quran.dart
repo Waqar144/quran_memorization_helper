@@ -6,7 +6,6 @@ import 'dart:typed_data';
 import 'dart:async';
 import 'package:quran_memorization_helper/models/settings.dart';
 import 'package:quran_memorization_helper/models/ayat.dart';
-import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
 import 'package:quran_memorization_helper/quran_data/surahs.dart';
 import 'package:quran_memorization_helper/quran_data/pages.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
@@ -15,13 +14,48 @@ import 'package:quran_memorization_helper/widgets/mutashabiha_ayat_list_item.dar
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
-class AyatInPage {
-  String text;
-  int ayahIdx;
-  int surahIdx;
-  bool isSurahStart = false;
-  bool isFull = true;
-  AyatInPage(this.text, this.ayahIdx, this.surahIdx);
+class LineAyah {
+  final int ayahIndex;
+  final String text;
+  const LineAyah(this.ayahIndex, this.text);
+}
+
+class Line {
+  final List<LineAyah> lineAyahs;
+  const Line(this.lineAyahs);
+}
+
+class Page {
+  final int pageNum;
+  final List<Line> lines;
+  const Page(this.pageNum, this.lines);
+
+  static Page fromJson(dynamic json, Uint32List surahAyahStarts) {
+    int pageNum = json["pageNum"] as int;
+    List<dynamic> lineDatas = json["lines"] as List<dynamic>;
+    // List<String> lineDatas = data.split('\n');
+    List<Line> lines = [];
+    int lastSurahFound = 0;
+    for (final lineData in lineDatas) {
+      final lineArray = lineData as List<dynamic>;
+      List<LineAyah> lineAyahs = [];
+
+      int firstAyahIdx = lineArray.first['idx'] as int;
+      int surah = surahAyahStarts.indexOf(firstAyahIdx, lastSurahFound);
+      if (surah > 0) {
+        lines.add(Line([LineAyah(-surah, "")]));
+        lastSurahFound = surah + 1;
+      }
+
+      for (final lineArrayItem in lineArray) {
+        int ayahIdx = lineArrayItem['idx'] as int;
+        final ayahText = lineArrayItem['text'] as String;
+        lineAyahs.add(LineAyah(ayahIdx, ayahText));
+      }
+      lines.add(Line(lineAyahs));
+    }
+    return Page(pageNum, lines);
+  }
 }
 
 class ReadQuranPage extends StatefulWidget {
@@ -30,119 +64,130 @@ class ReadQuranPage extends StatefulWidget {
   const ReadQuranPage(this.model, {super.key});
 
   @override
-  State<StatefulWidget> createState() => _ReadQuranPageState();
+  State<StatefulWidget> createState() => _RPS();
 }
 
-class _ReadQuranPageState extends State<ReadQuranPage> {
-  late final String _para;
-  late final int _currentParaIndex;
-  final List<List<AyatInPage>> _ayats = [];
-  final List<int> _pageNumbers = [];
+class _RPS extends State<ReadQuranPage> {
+  List<Line> lines = [];
+  List<Page> _pages = [];
   List<Mutashabiha> _mutashabihat = [];
-  late final ByteBuffer _quranUtf8;
+  ByteBuffer? _quranUtf8;
+  final _repaintNotifier = StreamController<int>.broadcast();
   final ItemPositionsListener _itemPositionListener =
       ItemPositionsListener.create();
-  final _repaintNotifier = StreamController<int>.broadcast();
 
   @override
   void initState() {
     super.initState();
-
     WakelockPlus.enable(); // disable auto screen turn off
-    _currentParaIndex = widget.model.currentPara - 1;
-    _para = "Para ${widget.model.currentPara}";
   }
 
   @override
   void dispose() {
     super.dispose();
-    WakelockPlus.disable(); // enable auto screen turn off
+    WakelockPlus.disable();
 
     // save position
     final v = _itemPositionListener.itemPositions.value;
     if (v.isNotEmpty) {
-      int start = para16LinePageOffsets[_currentParaIndex] - 1;
-      Settings.instance.currentReadingPage = start + v.last.index;
+      int start = para16LinePageOffsets[widget.model.currentPara - 1] - 1;
+      Settings.instance.currentReadingPage = start + v.first.index;
     }
   }
 
-  Future<void> _importParaText() async {
-    final int para = _currentParaIndex;
-    final data = await rootBundle.load("assets/quran.txt");
-    _quranUtf8 = data.buffer;
-    int start = para16LinePageOffsets[para] - 1;
-    int end = para >= 29 ? 548 : para16LinePageOffsets[para + 1] - 1;
-
-    _ayats.clear();
-
-    int prevSurah = -1;
-    int absoluteAyahIdx = getFirstAyahOfPara(para);
-    bool lastAyahWasIncomplete = false;
-    for (int i = start; i < end; ++i) {
-      _pageNumbers.add(i);
-      final ps = pageOffsets[i];
-      final pe = i + 1 >= pageOffsets.length ? null : pageOffsets[i + 1] - ps;
-      final pageUtf8 = data.buffer.asUint8List(ps, pe);
-
-      final str = utf8.decode(pageUtf8);
-      final ayahs = str.split('\n');
-      final bool isLastAyahComplete = str.endsWith('\n');
-      List<AyatInPage> ayasInPage = [];
-      for (final a in ayahs) {
-        if (a.isEmpty) continue;
-
-        int surahIdx = surahForAyah(absoluteAyahIdx);
-        if (prevSurah != surahIdx) {
-          prevSurah = surahIdx;
-          final surahMarker = AyatInPage("", -1, surahIdx);
-          surahMarker.isSurahStart = true;
-          ayasInPage.add(surahMarker);
-        }
-
-        int surahAyahIdx = toSurahAyahOffset(surahIdx, absoluteAyahIdx);
-        ayasInPage.add(AyatInPage(a, surahAyahIdx, surahIdx));
-        // if we are less than, length this is a complete ayah
-        absoluteAyahIdx++;
-      }
-
-      if (!isLastAyahComplete) {
-        ayasInPage.last.isFull = false;
-        absoluteAyahIdx--;
-        lastAyahWasIncomplete = true;
-      }
-
-      if (lastAyahWasIncomplete) {
-        ayasInPage.first.isFull = false;
-      }
-
-      _ayats.add(ayasInPage);
+  Future<List<Page>> doload() async {
+    int para = widget.model.currentPara;
+    final data = await rootBundle.loadString("assets/16line/$para.json");
+    List<dynamic> pagesList = jsonDecode(data);
+    List<Page> pages = [];
+    final surahAyahStarts = getSurahAyahStarts();
+    for (final p in pagesList) {
+      final page = Page.fromJson(p, surahAyahStarts);
+      pages.add(page);
     }
+    _pages = pages;
 
-    _mutashabihat = await importParaMutashabihas(para);
+    _mutashabihat = await importParaMutashabihas(para - 1);
+
+    return _pages;
   }
 
-  void _onAyahTapped(int surahIdx, int ayahIdx, int pageIdx) async {
+  bool _isMutashabihaAyat(int surahAyahIdx, int surahIdx) {
+    for (final m in _mutashabihat) {
+      if (m.src.surahIdx == surahIdx &&
+          m.src.surahAyahIndexes.contains(surahAyahIdx)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  List<Mutashabiha> _getMutashabihaAyat(int surahAyahIdx, int surahIdx) {
+    List<Mutashabiha> ret = [];
+    for (final m in _mutashabihat) {
+      if (m.src.surahIdx == surahIdx &&
+          m.src.surahAyahIndexes.contains(surahAyahIdx)) {
+        ret.add(m);
+      }
+    }
+    return ret;
+  }
+
+  bool _isAyatInDB(int surahAyahIdx, int surahIdx) {
+    int abs = toAbsoluteAyahOffset(surahIdx, surahAyahIdx);
+    for (final a in widget.model.ayahs) {
+      if (a.getAyahIdx() == abs) return true;
+    }
+    return false;
+  }
+
+  AyatOrMutashabiha? _getAyatInDB(int surahAyahIdx, int surahIdx) {
+    int abs = toAbsoluteAyahOffset(surahIdx, surahAyahIdx);
+    for (final a in widget.model.ayahs) {
+      if (a.getAyahIdx() == abs) return a;
+    }
+    return null;
+  }
+
+  (bool isFull, bool atPageStart, bool atPageEnd) _isAyahFull(
+      int ayahIdx, int pageNum) {
     bool isFull = true;
     bool isAtPageEnd = false;
-    int ayatsArrayIndex = pageIdx - _pageNumbers[0];
-    final pageAyas = _ayats[ayatsArrayIndex];
-    for (final a in pageAyas) {
-      if (a.ayahIdx == ayahIdx && a.surahIdx == surahIdx) {
-        isFull = a.isFull;
-        if (!isFull) {
-          isAtPageEnd = a.ayahIdx == pageAyas.last.ayahIdx;
-        }
-        break;
-      }
+    bool isAtPageStart = false;
+    int pageIndex = pageNum - _pages[0].pageNum;
+
+    isAtPageEnd =
+        _pages[pageIndex].lines.last.lineAyahs.last.ayahIndex == ayahIdx;
+    isAtPageStart =
+        _pages[pageIndex].lines.first.lineAyahs.first.ayahIndex == ayahIdx;
+
+    if (isAtPageEnd && (pageIndex + 1) < _pages.length) {
+      // next page first ayah != this ayah => we have a full ayah
+      isFull = _pages[pageIndex + 1].lines.first.lineAyahs.first.ayahIndex !=
+          ayahIdx;
     }
-    int pageNumberOfTappedAyah = _pageNumbers[ayatsArrayIndex];
+    if (isAtPageStart && pageIndex > 0) {
+      // prev page last ayah != this ayah => we have a full ayah
+      isFull =
+          _pages[pageIndex - 1].lines.last.lineAyahs.last.ayahIndex != ayahIdx;
+    }
+    return (isFull, isAtPageStart, isAtPageEnd);
+  }
+
+  void _onAyahTapped(int surahIdx, int ayahIdx, int pageNum) async {
+    int currentParaIndex = widget.model.currentPara - 1;
+    int absoluteAyah = toAbsoluteAyahOffset(surahIdx, ayahIdx);
+    final (isFull, isAtPageStart, isAtPageEnd) =
+        _isAyahFull(absoluteAyah, pageNum);
+
+    int pageNumberOfTappedAyah = pageNum;
 
     void sendRepainEvent() {
       _repaintNotifier.add(pageNumberOfTappedAyah);
       if (!isFull) {
         if (isAtPageEnd) {
           _repaintNotifier.add(pageNumberOfTappedAyah + 1);
-        } else {
+        } else if (isAtPageStart) {
           _repaintNotifier.add(pageNumberOfTappedAyah - 1);
         }
       }
@@ -165,7 +210,7 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
             ),
             onTap: () {
               widget.model
-                  .removeMutashabihas(_currentParaIndex, [aOrM.mutashabiha!]);
+                  .removeMutashabihas(currentParaIndex, [aOrM.mutashabiha!]);
               Navigator.of(context).pop();
               sendRepainEvent();
             },
@@ -181,7 +226,7 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
             ),
             onTap: () {
               // widget.model.addAyahs([aOrM.ayat!]);
-              widget.model.removeAyats(_currentParaIndex, [aOrM.getAyahIdx()]);
+              widget.model.removeAyats(currentParaIndex, [aOrM.getAyahIdx()]);
               Navigator.of(context).pop();
               sendRepainEvent();
             },
@@ -200,7 +245,7 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
           onTap: () {
             if (mutashabihat.isNotEmpty) {
               widget.model
-                  .setParaMutashabihas(_currentParaIndex + 1, mutashabihat);
+                  .setParaMutashabihas(currentParaIndex + 1, mutashabihat);
             }
             Navigator.of(context).pop();
             sendRepainEvent();
@@ -245,59 +290,31 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
       final int abs = toAbsoluteAyahOffset(surahIdx, ayahIdx);
       if (aOrM != null && aOrM.ayat != null) {
         // remove
-        widget.model.removeAyats(_currentParaIndex, [abs]);
+        widget.model.removeAyats(currentParaIndex, [abs]);
       } else {
         // add
-        final Ayat ayat = getAyahForIdx(abs, _quranUtf8);
+        if (_quranUtf8 == null) {
+          final data = await rootBundle.load("assets/quran.txt");
+          _quranUtf8 = data.buffer;
+        }
+        print("Add");
+        final Ayat ayat = getAyahForIdx(abs, _quranUtf8!);
         widget.model.addAyahs([ayat]);
       }
       sendRepainEvent();
     }
   }
 
-  List<Mutashabiha> _getMutashabihaAyat(int surahAyahIdx, int surahIdx) {
-    List<Mutashabiha> ret = [];
-    for (final m in _mutashabihat) {
-      if (m.src.surahIdx == surahIdx &&
-          m.src.surahAyahIndexes.contains(surahAyahIdx)) {
-        ret.add(m);
-      }
-    }
-    return ret;
-  }
-
-  bool _isMutashabihaAyat(int surahAyahIdx, int surahIdx) {
-    for (final m in _mutashabihat) {
-      if (m.src.surahIdx == surahIdx &&
-          m.src.surahAyahIndexes.contains(surahAyahIdx)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  bool _isAyatInDB(int surahAyahIdx, int surahIdx) {
-    int abs = toAbsoluteAyahOffset(surahIdx, surahAyahIdx);
-    for (final a in widget.model.ayahs) {
-      if (a.getAyahIdx() == abs) return true;
-    }
-    return false;
-  }
-
-  AyatOrMutashabiha? _getAyatInDB(int surahAyahIdx, int surahIdx) {
-    int abs = toAbsoluteAyahOffset(surahIdx, surahAyahIdx);
-    for (final a in widget.model.ayahs) {
-      if (a.getAyahIdx() == abs) return a;
-    }
-    return null;
-  }
-
   int _getInitialPageIndex() {
+    if (_pages.isEmpty) {
+      return 0;
+    }
     int p = Settings.instance.currentReadingPage;
-    int start = para16LinePageOffsets[_currentParaIndex] - 1;
-    int end = _currentParaIndex >= 29
+    int currentParaIndex = widget.model.currentPara - 1;
+    int start = para16LinePageOffsets[currentParaIndex] - 1;
+    int end = currentParaIndex >= 29
         ? 548
-        : para16LinePageOffsets[_currentParaIndex + 1] - 1;
+        : para16LinePageOffsets[currentParaIndex + 1] - 1;
     if (p >= start && p <= end) {
       return p - start;
     }
@@ -307,64 +324,90 @@ class _ReadQuranPageState extends State<ReadQuranPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Reading $_para")),
+      appBar: AppBar(title: Text("Reading ${widget.model.currentPara}")),
       body: FutureBuilder(
-        future: _importParaText(),
-        builder: (context, snapshot) {
-          if (_ayats.isEmpty) return const SizedBox.shrink();
-          return ScrollablePositionedList.separated(
-            separatorBuilder: (context, index) => const Divider(height: 1),
-            itemCount: _ayats.length,
-            initialScrollIndex: _getInitialPageIndex(),
-            itemPositionsListener: _itemPositionListener,
-            itemBuilder: (context, index) {
-              final pageAyas = _ayats[index];
-              return ListTile(
-                contentPadding: const EdgeInsets.only(left: 8, right: 8),
-                title: QuranPageWidget(
-                  pageAyas,
-                  _pageNumbers[index],
-                  repaintNotifierStream: _repaintNotifier.stream,
-                  onAyahTapped: _onAyahTapped,
-                  isAyatInDB: _isAyatInDB,
-                  isMutashabihaAyat: _isMutashabihaAyat,
-                ),
-              );
-            },
-          );
-        },
-      ),
+          future: doload(),
+          builder: (context, snapshot) {
+            if (_pages.isEmpty) return const SizedBox.shrink();
+            return ScrollablePositionedList.builder(
+              itemCount: _pages.length,
+              itemPositionsListener: _itemPositionListener,
+              initialScrollIndex: _getInitialPageIndex(),
+              itemBuilder: (ctx, index) {
+                return Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.background,
+                    boxShadow: [
+                      BoxShadow(
+                          color: Theme.of(context).shadowColor,
+                          blurRadius: 1,
+                          offset: const Offset(1, 1)),
+                      BoxShadow(
+                          color: Theme.of(context).shadowColor,
+                          blurRadius: 1,
+                          offset: const Offset(-1, -1))
+                    ],
+                  ),
+                  child: ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: PageWidget(
+                      _pages[index].pageNum,
+                      _pages[index].lines,
+                      isAyatInDB: _isAyatInDB,
+                      onAyahTapped: _onAyahTapped,
+                      isMutashabihaAyat: _isMutashabihaAyat,
+                      isAyahFull: _isAyahFull,
+                      repaintStream: _repaintNotifier.stream,
+                    ),
+                  ),
+                );
+              },
+            );
+          }),
     );
   }
 }
 
-class QuranPageWidget extends StatelessWidget {
-  final List<AyatInPage> pageAyas;
-  final void Function(int surahIdx, int ayahIdx, int pageIdx) onAyahTapped;
+class PageWidget extends StatefulWidget {
+  final int pageNum;
+  final List<Line> _pageLines;
   final bool Function(int ayahIdx, int surahIdx) isMutashabihaAyat;
   final bool Function(int ayahIdx, int surahIdx) isAyatInDB;
-  final ValueNotifier<int> _rebuilder = ValueNotifier(0);
-  final Stream<int> repaintNotifierStream;
-  final int pageNumber;
+  final void Function(int surahIdx, int ayahIdx, int pageIdx) onAyahTapped;
+  final (bool, bool, bool) Function(int ayahIdx, int pageIdx) isAyahFull;
+  final Stream<int> repaintStream;
 
-  QuranPageWidget(this.pageAyas, this.pageNumber,
-      {required this.onAyahTapped,
+  const PageWidget(this.pageNum, this._pageLines,
+      {required this.isMutashabihaAyat,
       required this.isAyatInDB,
-      required this.isMutashabihaAyat,
-      required this.repaintNotifierStream,
-      super.key}) {
-    repaintNotifierStream.listen(_onStreamEvent);
+      required this.onAyahTapped,
+      required this.repaintStream,
+      required this.isAyahFull,
+      super.key});
+
+  @override
+  State<StatefulWidget> createState() => _PageWidgetState();
+}
+
+class _PageWidgetState extends State<PageWidget> {
+  StreamSubscription<int>? _subscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _subscription = widget.repaintStream.listen(_triggerRepaint);
   }
 
-  void _onStreamEvent(int page) {
-    if (page == pageNumber) {
-      _rebuilder.value++;
+  void _triggerRepaint(int page) {
+    if (page == widget.pageNum) {
+      setState(() {});
     }
   }
 
-  void _tapHandler(int surahIdx, int ayahIdx) async {
-    // if the handler returns true, we do a rebuild
-    onAyahTapped(surahIdx, ayahIdx, pageNumber);
+  @override
+  void dispose() {
+    super.dispose();
+    _subscription?.cancel();
   }
 
   static String _toUrduNumber(int num) {
@@ -388,88 +431,146 @@ class QuranPageWidget extends StatelessWidget {
     return ret;
   }
 
-  List<InlineSpan> _buildSpans(List<AyatInPage> pageAyas) {
-    List<InlineSpan> spans = [];
-    for (final a in pageAyas) {
-      if (a.isSurahStart) {
-        return spans;
-      }
-      String ayahNumber;
-      if (a.isFull || a.ayahIdx == pageAyas.first.ayahIdx) {
-        ayahNumber = String.fromCharCodes([0x6df, 0xF500 + a.ayahIdx]);
-      } else {
-        ayahNumber = "";
-      }
-      if (isAyatInDB(a.ayahIdx, a.surahIdx)) {
-        spans.add(TextSpan(
-            text: "${a.text}$ayahNumber ",
-            recognizer: TapGestureRecognizer()
-              ..onTap = () => _tapHandler(a.surahIdx, a.ayahIdx),
-            style: const TextStyle(inherit: true, color: Colors.red)));
-      } else if (isMutashabihaAyat(a.ayahIdx, a.surahIdx)) {
-        spans.add(TextSpan(
-            text: "${a.text}$ayahNumber ",
-            recognizer: TapGestureRecognizer()
-              ..onTap = () => _tapHandler(a.surahIdx, a.ayahIdx),
-            style: const TextStyle(inherit: true, color: Colors.indigo)));
-      } else {
-        spans.add(TextSpan(
-          text: "${a.text}$ayahNumber ",
-          recognizer: TapGestureRecognizer()
-            ..onTap = () => _tapHandler(a.surahIdx, a.ayahIdx),
-        ));
-      }
-    }
-    return spans;
+  void _tapHandler(int surahIdx, int ayahIdx) async {
+    // if the handler returns true, we do a rebuild
+    widget.onAyahTapped(surahIdx, ayahIdx, widget.pageNum);
   }
 
-  List<Widget> _buildPageAyahs(
-      List<AyatInPage> pageAyas, BuildContext context) {
-    List<Widget> widgets = [];
-    for (int i = 0; i < pageAyas.length; ++i) {
-      final a = pageAyas[i];
-      if (a.isSurahStart) {
-        Container c = Container(
-          width: MediaQuery.of(context).size.width,
-          margin: const EdgeInsets.only(bottom: 16),
-          decoration:
-              BoxDecoration(border: Border.all(color: Colors.black, width: 2)),
-          child: Text(
+  Widget getBismillah(int surahIdx) {
+    surahIdx = -surahIdx;
+    final style = TextStyle(
+      color: Colors.black,
+      fontFamily: "Al Mushaf",
+      fontSize: Settings.instance.fontSize.toDouble(),
+      letterSpacing: 0.0,
+      wordSpacing: Settings.instance.wordSpacing.toDouble(),
+    );
+    SurahData surahData = surahDataForIdx(surahIdx, arabic: true);
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      // margin: const EdgeInsets.all(8),
+      decoration:
+          BoxDecoration(border: Border.all(color: Colors.black, width: 1)),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        textDirection: TextDirection.rtl,
+        children: [
+          Text(
+            "\uFD3F${surahData.name}\uFD3E",
+            textDirection: TextDirection.rtl,
+            textAlign: TextAlign.center,
+            style: style,
+          ),
+          Text(
             /*data:*/ "بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ",
             textDirection: TextDirection.rtl,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.black,
-              fontFamily: "Al Mushaf",
-              fontSize: Settings.instance.fontSize.toDouble(),
-              letterSpacing: 0.0,
-              wordSpacing: Settings.instance.wordSpacing.toDouble(),
+            style: style,
+          ),
+          Text(
+            "\uFD3F${_toUrduNumber(surahData.ayahCount)}\uFD3E",
+            textDirection: TextDirection.rtl,
+            textAlign: TextAlign.center,
+            style: style,
+          ),
+        ],
+      ),
+    );
+  }
+
+  bool _shouldDrawAyahEndMarker(int ayahIdx, int lineIdx) {
+    Line l = widget._pageLines[lineIdx];
+    // If we have multiple ayahs in the line, and this not the last then this is full ayah
+    if (l.lineAyahs.last.ayahIndex != ayahIdx) {
+      return true;
+    } else {
+      bool isLast = lineIdx == widget._pageLines.length - 1;
+      if (isLast) {
+        return widget.isAyahFull(ayahIdx, widget.pageNum).$1;
+      } else {
+        if (widget._pageLines[lineIdx + 1].lineAyahs.first.ayahIndex !=
+            ayahIdx) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  Widget _buildLine(Line line, int lineIdx) {
+    List<InlineSpan> spans = [];
+    List<int> ayahMarkerIdxes = [];
+    for (final a in line.lineAyahs) {
+      int surahIdx = surahForAyah(a.ayahIndex);
+      int surahAyahIdx = toSurahAyahOffset(surahIdx, a.ayahIndex);
+
+      if (widget.isAyatInDB(surahAyahIdx, surahIdx)) {
+        spans.add(TextSpan(
+            text: a.text.trim(),
+            recognizer: TapGestureRecognizer()
+              ..onTap = () => _tapHandler(surahIdx, surahAyahIdx),
+            style: const TextStyle(inherit: true, color: Colors.red)));
+      } else if (widget.isMutashabihaAyat(surahAyahIdx, surahIdx)) {
+        spans.add(TextSpan(
+            text: a.text.trim(),
+            recognizer: TapGestureRecognizer()
+              ..onTap = () => _tapHandler(surahIdx, surahAyahIdx),
+            style: const TextStyle(inherit: true, color: Colors.indigo)));
+      } else {
+        spans.add(TextSpan(
+            recognizer: TapGestureRecognizer()
+              ..onTap = () => _tapHandler(surahIdx, surahAyahIdx),
+            text: a.text));
+      }
+
+      if (_shouldDrawAyahEndMarker(a.ayahIndex, lineIdx)) {
+        spans.add(
+          WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            baseline: TextBaseline.ideographic,
+            style:
+                const TextStyle(color: Colors.black, fontFamily: "Al Mushaf"),
+            child: Container(
+              margin: const EdgeInsets.only(top: 6),
+              decoration:
+                  BoxDecoration(shape: BoxShape.circle, border: Border.all()),
+              alignment: Alignment.center,
+              width: 15,
+              height: 15,
+              child: FittedBox(
+                fit: BoxFit.contain,
+                child: Text(_toUrduNumber(surahAyahIdx + 1),
+                    softWrap: false, textDirection: TextDirection.rtl),
+              ),
             ),
           ),
         );
-
-        widgets.add(c);
-      } else {
-        final spans = _buildSpans(pageAyas.sublist(i));
-        final text = Text.rich(
-          textDirection: TextDirection.rtl,
-          textAlign: TextAlign.justify,
-          style: TextStyle(
-            color: Colors.black,
-            fontFamily: "Al Mushaf",
-            fontSize: Settings.instance.fontSize.toDouble(),
-            letterSpacing: 0.0,
-            wordSpacing: Settings.instance.wordSpacing.toDouble(),
-          ),
-          TextSpan(
-            children: spans,
-          ),
-        );
-        widgets.add(text);
-        i += spans.length - 1;
+        ayahMarkerIdxes.add(spans.length - 1);
       }
     }
-    return widgets;
+
+    List<InlineSpan> widgetSpans = [];
+    for (final am in ayahMarkerIdxes) {
+      widgetSpans.add(spans[am]);
+    }
+    widgetSpans = widgetSpans.reversed.toList();
+    int i = 0;
+    for (final am in ayahMarkerIdxes) {
+      spans.removeAt(am);
+      spans.insert(am, widgetSpans[i++]);
+    }
+
+    return Text.rich(
+      TextSpan(children: spans),
+      textDirection: TextDirection.rtl,
+      style: TextStyle(
+        color: Colors.black,
+        fontFamily: "Al Mushaf",
+        fontSize: Settings.instance.fontSize.toDouble(),
+        letterSpacing: 0.1,
+        wordSpacing: Settings.instance.wordSpacing.toDouble(),
+      ),
+    );
   }
 
   @override
@@ -477,19 +578,30 @@ class QuranPageWidget extends StatelessWidget {
     return Column(
       children: [
         Text(
-          _toUrduNumber(pageNumber + 2),
-          style: const TextStyle(
-            fontFamily: "Al Mushaf",
-            fontSize: 24,
-          ),
+          (widget.pageNum + 1).toString(),
+          style: const TextStyle(fontSize: 12),
         ),
         Padding(
-          padding: const EdgeInsets.only(left: 16, right: 16),
-          child: ValueListenableBuilder(
-            valueListenable: _rebuilder,
-            builder: (context, v, _) {
-              return Column(
-                children: _buildPageAyahs(pageAyas, context),
+          padding: const EdgeInsets.only(left: 8, right: 8),
+          child: ListView.separated(
+            separatorBuilder: (ctx, idx) => const Divider(
+              color: Colors.grey,
+              height: 1,
+            ),
+            shrinkWrap: true,
+            itemCount: widget._pageLines.length,
+            physics: const NeverScrollableScrollPhysics(),
+            itemBuilder: (ctx, idx) {
+              final pageLine = widget._pageLines[idx];
+              if (pageLine.lineAyahs.first.ayahIndex < 0) {
+                return getBismillah(pageLine.lineAyahs.first.ayahIndex);
+              }
+              return SizedBox(
+                height: 46,
+                child: FittedBox(
+                  fit: BoxFit.contain,
+                  child: _buildLine(pageLine, idx),
+                ),
               );
             },
           ),
