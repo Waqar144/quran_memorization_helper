@@ -524,6 +524,7 @@ class _PageWidgetState extends State<PageWidget> {
       }
 
       if (_shouldDrawAyahEndMarker(a.ayahIndex, lineIdx)) {
+        bool hasRukuMarker = a.text.lastIndexOf("\uE022") != -1;
         spans.add(
           WidgetSpan(
             alignment: PlaceholderAlignment.middle,
@@ -532,8 +533,11 @@ class _PageWidgetState extends State<PageWidget> {
                 const TextStyle(color: Colors.black, fontFamily: "Al Mushaf"),
             child: Container(
               margin: const EdgeInsets.only(top: 6),
-              decoration:
-                  BoxDecoration(shape: BoxShape.circle, border: Border.all()),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(),
+                color: hasRukuMarker ? Colors.amber : Colors.transparent,
+              ),
               alignment: Alignment.center,
               width: 15,
               height: 15,
