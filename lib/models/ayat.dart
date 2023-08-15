@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'dart:convert';
+import 'dart:async';
 import 'package:flutter/services.dart' show rootBundle;
 
 import 'package:quran_memorization_helper/utils/utils.dart' as utils;
@@ -63,12 +64,19 @@ extension ValueNotifierToggle on ValueNotifier<bool> {
 class ParaAyatModel extends ChangeNotifier {
   Map<int, List<AyatOrMutashabiha>> _paraAyats = {};
   ValueNotifier<int> currentParaNotifier = ValueNotifier<int>(1);
+  Timer? timer;
 
   @override
   void dispose() {
     currentParaNotifier.dispose();
     _paraAyats = {};
     super.dispose();
+  }
+
+  void persist() {
+    if (timer == null || !(timer?.isActive ?? false)) {
+      timer = Timer(const Duration(seconds: 1), saveToDisk);
+    }
   }
 
   set onParaChange(VoidCallback cb) => currentParaNotifier.addListener(cb);
@@ -81,6 +89,7 @@ class ParaAyatModel extends ChangeNotifier {
     _setParaAyahs(currentPara, newAyahs);
     resetSelection();
     notifyListeners();
+    persist();
   }
 
   void _setParaAyahs(int para, List<Ayat> newAyahs) {
@@ -102,6 +111,7 @@ class ParaAyatModel extends ChangeNotifier {
 
     existingData.sort(_comparator);
     _paraAyats[para] = existingData;
+    persist();
   }
 
   void setParaMutashabihas(int paraNum, List<Mutashabiha> newMutashabihas) {
@@ -127,6 +137,7 @@ class ParaAyatModel extends ChangeNotifier {
     existingData.sort(_comparator);
     _paraAyats[paraNum] = existingData;
     notifyListeners();
+    persist();
   }
 
   void setCurrentPara(int para) {
@@ -136,9 +147,7 @@ class ParaAyatModel extends ChangeNotifier {
     notifyListeners();
 
     // trigger a save
-    Future.delayed(const Duration(seconds: 5), () {
-      saveToDisk();
-    });
+    persist();
   }
 
   void removeSelectedAyahs() {
@@ -147,6 +156,7 @@ class ParaAyatModel extends ChangeNotifier {
     list.removeWhere((final AyatOrMutashabiha ayah) => ayah.selected);
     _paraAyats[currentPara] = list;
     notifyListeners();
+    persist();
   }
 
   /// Remove ayats from given para index
@@ -157,6 +167,7 @@ class ParaAyatModel extends ChangeNotifier {
         a.ayat != null && absoluteAyahIndexes.contains(a.getAyahIdx()));
     _paraAyats[paraIndex] = ayahs;
     notifyListeners();
+    persist();
   }
 
   /// Remove mutashabiha from given para index
@@ -175,6 +186,7 @@ class ParaAyatModel extends ChangeNotifier {
     });
     _paraAyats[paraIndex] = ayahs;
     notifyListeners();
+    persist();
   }
 
   void resetSelection() {
