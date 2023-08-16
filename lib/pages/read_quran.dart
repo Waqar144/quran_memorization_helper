@@ -244,8 +244,7 @@ class _RPS extends State<ReadQuranPage> {
           ),
           onTap: () {
             if (mutashabihat.isNotEmpty) {
-              widget.model
-                  .setParaMutashabihas(currentParaIndex + 1, mutashabihat);
+              widget.model.setParaMutashabihas(currentParaIndex, mutashabihat);
             }
             Navigator.of(context).pop();
             sendRepainEvent();

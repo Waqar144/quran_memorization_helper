@@ -79,7 +79,7 @@ class ParaMutashabihas extends StatelessWidget {
 
     if (selection.isEmpty) return;
 
-    _model.setParaMutashabihas(_para + 1, selection);
+    _model.setParaMutashabihas(_para, selection);
     await _model.saveToDisk();
     if (context.mounted) {
       showSnackBarMessage(context, "Added ${selection.length} mutashabihas");

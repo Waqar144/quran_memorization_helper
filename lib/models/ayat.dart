@@ -113,8 +113,8 @@ class ParaAyatModel extends ChangeNotifier {
     persist();
   }
 
-  void setParaMutashabihas(int paraNum, List<Mutashabiha> newMutashabihas) {
-    List<AyatOrMutashabiha> existingData = _paraAyats[paraNum] ?? [];
+  void setParaMutashabihas(int paraIndex, List<Mutashabiha> newMutashabihas) {
+    List<AyatOrMutashabiha> existingData = _paraAyats[paraIndex + 1] ?? [];
     // copy out all mutashabihas for this para
     final List<Mutashabiha> existingMutashabihas = [
       for (final m in existingData)
@@ -134,7 +134,7 @@ class ParaAyatModel extends ChangeNotifier {
     }
 
     existingData.sort(_comparator);
-    _paraAyats[paraNum] = existingData;
+    _paraAyats[paraIndex + 1] = existingData;
     notifyListeners();
     persist();
   }
