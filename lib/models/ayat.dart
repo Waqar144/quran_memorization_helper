@@ -164,7 +164,7 @@ class ParaAyatModel extends ChangeNotifier {
     if (ayahs == null) return;
     ayahs.removeWhere((AyatOrMutashabiha a) =>
         a.ayat != null && absoluteAyahIndexes.contains(a.getAyahIdx()));
-    _paraAyats[paraIndex] = ayahs;
+    _paraAyats[paraIndex + 1] = ayahs;
     notifyListeners();
     persist();
   }
@@ -183,7 +183,7 @@ class ParaAyatModel extends ChangeNotifier {
       }
       return false;
     });
-    _paraAyats[paraIndex] = ayahs;
+    _paraAyats[paraIndex + 1] = ayahs;
     notifyListeners();
     persist();
   }
