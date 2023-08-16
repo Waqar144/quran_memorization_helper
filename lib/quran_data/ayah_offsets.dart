@@ -21,7 +21,7 @@ AyahOffset getAyahRange(int ayah) {
 Ayat getAyahForIdx(int ayahIdx, final ByteBuffer quranText) {
   final AyahOffset off = getAyahRange(ayahIdx);
   final text = utf8.decode(quranText.asUint8List(off.start, off.len));
-  return Ayat(text, ayahIdx: ayahIdx);
+  return Ayat(text.trim(), ayahIdx: ayahIdx);
 }
 
 final Uint32List _ayahOffsets = Uint32List.fromList([

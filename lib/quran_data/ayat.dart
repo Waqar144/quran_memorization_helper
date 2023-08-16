@@ -83,7 +83,7 @@ class Mutashabiha {
 String _getContext(int ayahIdx, String text, final ByteBuffer quranTextUtf8) {
   final range = getAyahRange(ayahIdx + 1);
   String nextAyahText =
-      utf8.decode(quranTextUtf8.asUint8List(range.start, range.len));
+      utf8.decode(quranTextUtf8.asUint8List(range.start, range.len)).trim();
   final words = nextAyahText.split(' ');
   List<String> toshow = [];
   for (final word in words) {
@@ -113,7 +113,7 @@ MutashabihaAyat ayatFromJsonObj(
       final ayahRange = getAyahRange(ayahIdx);
       final textUtf8 =
           quranTextUtf8.asUint8List(ayahRange.start, ayahRange.len);
-      text += utf8.decode(textUtf8);
+      text += utf8.decode(textUtf8).trim();
       if (ayahIdx != ayahIdxes.last) {
         text += ayahSeparator;
       }
