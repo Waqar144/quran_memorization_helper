@@ -312,7 +312,7 @@ class _RPS extends State<ReadQuranPage> {
     int start = para16LinePageOffsets[currentParaIndex] - 1;
     int end = currentParaIndex >= 29
         ? 548
-        : para16LinePageOffsets[currentParaIndex + 1] - 1;
+        : para16LinePageOffsets[currentParaIndex] - 1;
     if (p >= start && p <= end) {
       return p - start;
     }
