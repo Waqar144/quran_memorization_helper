@@ -91,7 +91,7 @@ class _RPS extends State<ReadQuranPage> {
     final v = _itemPositionListener.itemPositions.value;
     if (v.isNotEmpty) {
       int start = para16LinePageOffsets[widget.model.currentPara - 1] - 1;
-      Settings.instance.currentReadingPage = start + v.first.index;
+      Settings.instance.currentReadingPage = start + v.last.index;
     }
   }
 
@@ -312,8 +312,8 @@ class _RPS extends State<ReadQuranPage> {
     int start = para16LinePageOffsets[currentParaIndex] - 1;
     int end = currentParaIndex >= 29
         ? 548
-        : para16LinePageOffsets[currentParaIndex] - 1;
-    if (p >= start && p <= end) {
+        : para16LinePageOffsets[currentParaIndex + 1] - 1;
+    if (p >= start && p < end) {
       return p - start;
     }
     return 0;
