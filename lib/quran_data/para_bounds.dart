@@ -1,6 +1,4 @@
 import 'dart:typed_data';
-import 'ayat.dart';
-import 'dart:convert';
 
 class ParaBounds {
   final int start;
@@ -17,27 +15,6 @@ int paraForAyah(int absoluteAyah) {
   }
   // last para
   return 29;
-}
-
-Future<List<Ayat>> getParaAyahs(int para, final ByteBuffer quranText) async {
-  const int newLine = 10;
-  final int offset = paraByteOffsets[para];
-  final int? len = para >= 29 ? null : paraByteOffsets[para + 1] - offset;
-  final buffer = quranText.asUint8List(offset, len);
-  int s = 0;
-  int n = buffer.indexOf(newLine);
-
-  int ayahIdx = _paraAyahOffset[para];
-  List<Ayat> ayahs = [];
-  while (n != -1) {
-    final text = utf8.decode(buffer.sublist(s, n));
-    ayahs.add(Ayat(text, ayahIdx: ayahIdx));
-    ayahIdx++;
-
-    s = n + 1;
-    n = buffer.indexOf(newLine, s);
-  }
-  return ayahs;
 }
 
 int getFirstAyahOfPara(int paraIndex) {

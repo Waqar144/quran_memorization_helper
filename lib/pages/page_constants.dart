@@ -1,4 +1,3 @@
-const String paraAyahSelectionPage = "ParaAyahSelectionPage";
 const String settingsPageRoute = "SettingsPageRoute";
 const String quizSelectionPage = "QuizSelectionPage";
 const String quizPage = "QuizPage";
