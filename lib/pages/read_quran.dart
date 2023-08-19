@@ -25,6 +25,29 @@ class Line {
   const Line(this.lineAyahs);
 }
 
+class _AppbarHideHelper extends StatelessWidget implements PreferredSizeWidget {
+  final AppBar appBar;
+  final ValueNotifier<bool> _visible = ValueNotifier(true);
+  _AppbarHideHelper({required this.appBar, super.key});
+
+  void toggle() {
+    _visible.value = !_visible.value;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+        valueListenable: _visible,
+        builder: (context, value, _) {
+          return value ? appBar : const SizedBox.shrink();
+        });
+  }
+
+  @override
+  Size get preferredSize =>
+      _visible.value ? appBar.preferredSize : const Size(0, 0);
+}
+
 class Page {
   final int pageNum;
   final List<Line> lines;
@@ -75,11 +98,14 @@ class _RPS extends State<ReadQuranPage> {
   final _repaintNotifier = StreamController<int>.broadcast();
   final ItemPositionsListener _itemPositionListener =
       ItemPositionsListener.create();
+  late _AppbarHideHelper _myAppbar;
 
   @override
   void initState() {
     super.initState();
     WakelockPlus.enable(); // disable auto screen turn off
+    _myAppbar = _AppbarHideHelper(
+        appBar: AppBar(title: Text("Reading ${widget.model.currentPara}")));
   }
 
   @override
@@ -108,6 +134,11 @@ class _RPS extends State<ReadQuranPage> {
     _pages = pages;
 
     _mutashabihat = await importParaMutashabihas(para - 1);
+
+    Future.delayed(const Duration(seconds: 2), () {
+      _myAppbar._visible.value = false;
+      ;
+    });
 
     return _pages;
   }
@@ -322,46 +353,51 @@ class _RPS extends State<ReadQuranPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Reading ${widget.model.currentPara}")),
-      body: FutureBuilder(
-          future: doload(),
-          builder: (context, snapshot) {
-            if (_pages.isEmpty) return const SizedBox.shrink();
-            return ScrollablePositionedList.builder(
-              itemCount: _pages.length,
-              itemPositionsListener: _itemPositionListener,
-              initialScrollIndex: _getInitialPageIndex(),
-              itemBuilder: (ctx, index) {
-                return Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.background,
-                    boxShadow: [
-                      BoxShadow(
-                          color: Theme.of(context).shadowColor,
-                          blurRadius: 1,
-                          offset: const Offset(1, 1)),
-                      BoxShadow(
-                          color: Theme.of(context).shadowColor,
-                          blurRadius: 1,
-                          offset: const Offset(-1, -1))
-                    ],
-                  ),
-                  child: ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: PageWidget(
-                      _pages[index].pageNum,
-                      _pages[index].lines,
-                      isAyatInDB: _isAyatInDB,
-                      onAyahTapped: _onAyahTapped,
-                      isMutashabihaAyat: _isMutashabihaAyat,
-                      isAyahFull: _isAyahFull,
-                      repaintStream: _repaintNotifier.stream,
+      appBar: _myAppbar,
+      body: GestureDetector(
+        onTap: () {
+          _myAppbar.toggle();
+        },
+        child: FutureBuilder(
+            future: doload(),
+            builder: (context, snapshot) {
+              if (_pages.isEmpty) return const SizedBox.shrink();
+              return ScrollablePositionedList.builder(
+                itemCount: _pages.length,
+                itemPositionsListener: _itemPositionListener,
+                initialScrollIndex: _getInitialPageIndex(),
+                itemBuilder: (ctx, index) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.background,
+                      boxShadow: [
+                        BoxShadow(
+                            color: Theme.of(context).shadowColor,
+                            blurRadius: 1,
+                            offset: const Offset(1, 1)),
+                        BoxShadow(
+                            color: Theme.of(context).shadowColor,
+                            blurRadius: 1,
+                            offset: const Offset(-1, -1))
+                      ],
                     ),
-                  ),
-                );
-              },
-            );
-          }),
+                    child: ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: PageWidget(
+                        _pages[index].pageNum,
+                        _pages[index].lines,
+                        isAyatInDB: _isAyatInDB,
+                        onAyahTapped: _onAyahTapped,
+                        isMutashabihaAyat: _isMutashabihaAyat,
+                        isAyahFull: _isAyahFull,
+                        repaintStream: _repaintNotifier.stream,
+                      ),
+                    ),
+                  );
+                },
+              );
+            }),
+      ),
     );
   }
 }
