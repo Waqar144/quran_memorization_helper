@@ -641,7 +641,7 @@ class _PageWidgetState extends State<PageWidget> {
         color: Colors.black,
         fontFamily: "Al Mushaf",
         fontSize: Settings.instance.fontSize.toDouble(),
-        letterSpacing: 0.1,
+        letterSpacing: 0,
         wordSpacing: Settings.instance.wordSpacing.toDouble(),
       ),
     );
