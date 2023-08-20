@@ -28,9 +28,24 @@ class Line {
 class _AppbarHideHelper extends StatelessWidget implements PreferredSizeWidget {
   final AppBar appBar;
   final ValueNotifier<bool> _visible = ValueNotifier(true);
-  _AppbarHideHelper({required this.appBar, super.key});
+  final ValueNotifier<bool> _showAppbarNotifier = ValueNotifier(true);
+  final AnimationController controller;
+  _AppbarHideHelper(
+      {required this.appBar, required this.controller, super.key}) {
+    controller.addListener(() {
+      // when hiding the appbar, first animate, then replace the appbar
+      if (controller.isCompleted) {
+        _showAppbarNotifier.value = false;
+      }
+    });
+  }
 
   void toggle() {
+    // When showing the appbar, bring the appbar first then trigger animation
+    final newVal = !_visible.value;
+    if (newVal) {
+      _showAppbarNotifier.value = true;
+    }
     _visible.value = !_visible.value;
   }
 
@@ -39,7 +54,20 @@ class _AppbarHideHelper extends StatelessWidget implements PreferredSizeWidget {
     return ValueListenableBuilder(
         valueListenable: _visible,
         builder: (context, value, _) {
-          return value ? appBar : const SizedBox.shrink();
+          value ? controller.reverse() : controller.forward();
+          return SlideTransition(
+            position:
+                Tween<Offset>(begin: Offset.zero, end: const Offset(0, -1))
+                    .animate(
+              CurvedAnimation(parent: controller, curve: Curves.easeInOut),
+            ),
+            child: ValueListenableBuilder(
+              valueListenable: _showAppbarNotifier,
+              builder: (context, showAppbar, _) {
+                return showAppbar ? appBar : const SizedBox.shrink();
+              },
+            ),
+          );
         });
   }
 
@@ -90,7 +118,7 @@ class ReadQuranPage extends StatefulWidget {
   State<StatefulWidget> createState() => _RPS();
 }
 
-class _RPS extends State<ReadQuranPage> {
+class _RPS extends State<ReadQuranPage> with SingleTickerProviderStateMixin {
   List<Line> lines = [];
   List<Page> _pages = [];
   List<Mutashabiha> _mutashabihat = [];
@@ -105,7 +133,12 @@ class _RPS extends State<ReadQuranPage> {
     super.initState();
     WakelockPlus.enable(); // disable auto screen turn off
     _myAppbar = _AppbarHideHelper(
-        appBar: AppBar(title: Text("Reading ${widget.model.currentPara}")));
+      appBar: AppBar(title: Text("Reading ${widget.model.currentPara}")),
+      controller: AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 250),
+      ),
+    );
   }
 
   @override
@@ -358,7 +391,8 @@ class _RPS extends State<ReadQuranPage> {
         onTap: () {
           _myAppbar.toggle();
         },
-        child: FutureBuilder(
+        child: SafeArea(
+          child: FutureBuilder(
             future: doload(),
             builder: (context, snapshot) {
               if (_pages.isEmpty) return const SizedBox.shrink();
@@ -396,7 +430,9 @@ class _RPS extends State<ReadQuranPage> {
                   );
                 },
               );
-            }),
+            },
+          ),
+        ),
       ),
     );
   }
