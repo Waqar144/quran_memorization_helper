@@ -207,23 +207,24 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
           },
         ),
         drawer: Drawer(
-          child: ScrollablePositionedList.builder(
-            padding: const EdgeInsets.only(top: 32),
-            itemCount: 30,
-            itemScrollController: _drawerItemsScrollController,
-            itemBuilder: (context, index) {
-              return ListTile(
-                minVerticalPadding: 0,
-                visualDensity: VisualDensity.compact,
-                title: Text("Para ${index + 1}"),
-                onTap: () {
-                  _paraModel.setCurrentPara(index + 1);
-                  _scaffoldKey.currentState?.closeDrawer();
-                },
-                selected: (_paraModel.currentPara - 1) == index,
-                selectedTileColor: Theme.of(context).highlightColor,
-              );
-            },
+          child: SafeArea(
+            child: ScrollablePositionedList.builder(
+              itemCount: 30,
+              itemScrollController: _drawerItemsScrollController,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  minVerticalPadding: 0,
+                  visualDensity: VisualDensity.compact,
+                  title: Text("Para ${index + 1}"),
+                  onTap: () {
+                    _paraModel.setCurrentPara(index + 1);
+                    _scaffoldKey.currentState?.closeDrawer();
+                  },
+                  selected: (_paraModel.currentPara - 1) == index,
+                  selectedTileColor: Theme.of(context).highlightColor,
+                );
+              },
+            ),
           ),
         ),
         onDrawerChanged: (opened) {
