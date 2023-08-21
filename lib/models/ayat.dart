@@ -141,6 +141,13 @@ class ParaAyatModel extends ChangeNotifier {
 
   void setCurrentPara(int para) {
     if (para == currentPara) return;
+    // wrap around
+    if (para <= 0) {
+      para = 30;
+    } else if (para > 30) {
+      para = 0;
+    }
+
     currentParaNotifier.value = para;
     resetSelection();
     notifyListeners();

@@ -339,10 +339,26 @@ class _RPS extends State<ReadQuranPage> with SingleTickerProviderStateMixin {
         builder: (context, snapshot) {
           if (_pages.isEmpty) return const SizedBox.shrink();
           return ScrollablePositionedList.builder(
-            itemCount: _pages.length,
+            itemCount: _pages.length + 1,
             itemPositionsListener: _itemPositionListener,
             initialScrollIndex: _getInitialPageIndex(),
             itemBuilder: (ctx, index) {
+              if (index >= _pages.length) {
+                return Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      widget.model.setCurrentPara(widget.model.currentPara + 1);
+                      setState(() {
+                        _pages.clear();
+                      });
+                    },
+                    icon: const Icon(Icons.arrow_right),
+                    label: const Text("Next Para"),
+                  ),
+                );
+              }
+
               return Container(
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.background,
