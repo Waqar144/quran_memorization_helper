@@ -25,57 +25,6 @@ class Line {
   const Line(this.lineAyahs);
 }
 
-class _AppbarHideHelper extends StatelessWidget implements PreferredSizeWidget {
-  final AppBar appBar;
-  final ValueNotifier<bool> _visible = ValueNotifier(true);
-  final ValueNotifier<bool> _showAppbarNotifier = ValueNotifier(true);
-  final AnimationController controller;
-  _AppbarHideHelper(
-      {required this.appBar, required this.controller, super.key}) {
-    controller.addListener(() {
-      // when hiding the appbar, first animate, then replace the appbar
-      if (controller.isCompleted) {
-        _showAppbarNotifier.value = false;
-      }
-    });
-  }
-
-  void toggle() {
-    // When showing the appbar, bring the appbar first then trigger animation
-    final newVal = !_visible.value;
-    if (newVal) {
-      _showAppbarNotifier.value = true;
-    }
-    _visible.value = !_visible.value;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-        valueListenable: _visible,
-        builder: (context, value, _) {
-          value ? controller.reverse() : controller.forward();
-          return SlideTransition(
-            position:
-                Tween<Offset>(begin: Offset.zero, end: const Offset(0, -1))
-                    .animate(
-              CurvedAnimation(parent: controller, curve: Curves.easeInOut),
-            ),
-            child: ValueListenableBuilder(
-              valueListenable: _showAppbarNotifier,
-              builder: (context, showAppbar, _) {
-                return showAppbar ? appBar : const SizedBox.shrink();
-              },
-            ),
-          );
-        });
-  }
-
-  @override
-  Size get preferredSize =>
-      _visible.value ? appBar.preferredSize : const Size(0, 0);
-}
-
 class Page {
   final int pageNum;
   final List<Line> lines;
@@ -126,19 +75,11 @@ class _RPS extends State<ReadQuranPage> with SingleTickerProviderStateMixin {
   final _repaintNotifier = StreamController<int>.broadcast();
   final ItemPositionsListener _itemPositionListener =
       ItemPositionsListener.create();
-  late _AppbarHideHelper _myAppbar;
 
   @override
   void initState() {
     super.initState();
     WakelockPlus.enable(); // disable auto screen turn off
-    _myAppbar = _AppbarHideHelper(
-      appBar: AppBar(title: Text("Reading ${widget.model.currentPara}")),
-      controller: AnimationController(
-        vsync: this,
-        duration: const Duration(milliseconds: 250),
-      ),
-    );
   }
 
   @override
@@ -167,12 +108,6 @@ class _RPS extends State<ReadQuranPage> with SingleTickerProviderStateMixin {
     _pages = pages;
 
     _mutashabihat = await importParaMutashabihas(para - 1);
-
-    Future.delayed(const Duration(seconds: 2), () {
-      _myAppbar._visible.value = false;
-      ;
-    });
-
     return _pages;
   }
 
@@ -383,56 +318,61 @@ class _RPS extends State<ReadQuranPage> with SingleTickerProviderStateMixin {
     return 0;
   }
 
+  bool isMobile() {
+    final platform = Theme.of(context).platform;
+    return platform == TargetPlatform.android || platform == TargetPlatform.iOS;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _myAppbar,
-      body: GestureDetector(
-        onTap: () {
-          _myAppbar.toggle();
-        },
-        child: SafeArea(
-          child: FutureBuilder(
-            future: doload(),
-            builder: (context, snapshot) {
-              if (_pages.isEmpty) return const SizedBox.shrink();
-              return ScrollablePositionedList.builder(
-                itemCount: _pages.length,
-                itemPositionsListener: _itemPositionListener,
-                initialScrollIndex: _getInitialPageIndex(),
-                itemBuilder: (ctx, index) {
-                  return Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.background,
-                      boxShadow: [
-                        BoxShadow(
-                            color: Theme.of(context).shadowColor,
-                            blurRadius: 1,
-                            offset: const Offset(1, 1)),
-                        BoxShadow(
-                            color: Theme.of(context).shadowColor,
-                            blurRadius: 1,
-                            offset: const Offset(-1, -1))
-                      ],
-                    ),
-                    child: ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: PageWidget(
-                        _pages[index].pageNum,
-                        _pages[index].lines,
-                        isAyatInDB: _isAyatInDB,
-                        onAyahTapped: _onAyahTapped,
-                        isMutashabihaAyat: _isMutashabihaAyat,
-                        isAyahFull: _isAyahFull,
-                        repaintStream: _repaintNotifier.stream,
-                      ),
-                    ),
-                  );
-                },
+      appBar: isMobile()
+          ? PreferredSize(
+              preferredSize: const Size(double.infinity, 0),
+              child: AppBar(),
+            )
+          : AppBar(
+              title: Text("Reading para ${widget.model.currentPara}"),
+            ),
+      body: FutureBuilder(
+        future: doload(),
+        builder: (context, snapshot) {
+          if (_pages.isEmpty) return const SizedBox.shrink();
+          return ScrollablePositionedList.builder(
+            itemCount: _pages.length,
+            itemPositionsListener: _itemPositionListener,
+            initialScrollIndex: _getInitialPageIndex(),
+            itemBuilder: (ctx, index) {
+              return Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.background,
+                  boxShadow: [
+                    BoxShadow(
+                        color: Theme.of(context).shadowColor,
+                        blurRadius: 1,
+                        offset: const Offset(1, 1)),
+                    BoxShadow(
+                        color: Theme.of(context).shadowColor,
+                        blurRadius: 1,
+                        offset: const Offset(-1, -1))
+                  ],
+                ),
+                child: ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: PageWidget(
+                    _pages[index].pageNum,
+                    _pages[index].lines,
+                    isAyatInDB: _isAyatInDB,
+                    onAyahTapped: _onAyahTapped,
+                    isMutashabihaAyat: _isMutashabihaAyat,
+                    isAyahFull: _isAyahFull,
+                    repaintStream: _repaintNotifier.stream,
+                  ),
+                ),
               );
             },
-          ),
-        ),
+          );
+        },
       ),
     );
   }
