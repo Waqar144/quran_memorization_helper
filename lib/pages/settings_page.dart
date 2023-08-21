@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
 import 'package:quran_memorization_helper/models/ayat.dart';
 import 'package:quran_memorization_helper/models/settings.dart';
 
@@ -15,20 +17,38 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   int initialValue = Settings.instance.fontSize;
   double wordSpacing = Settings.instance.wordSpacing.toDouble();
-  String? _backupPath;
+  static const platform = MethodChannel('org.quran_rev_helper/backupDB');
 
   Widget _createBackupWidget() {
     return ListTile(
       title: const Text("Backup"),
+      subtitle: const Text("Backup your data"),
+      trailing: ElevatedButton(
+        onPressed: () async {
+          try {
+            await platform.invokeMethod(
+                'backupDB', {'data': widget.paraModel.jsonStringify()});
+          } catch (e) {
+            // do nothing
+            // print("ERROR: $e");
+          }
+        },
+        child: const Text("Backup"),
+      ),
+    );
+  }
       subtitle: _backupPath != null
           ? Text("Backed up at $_backupPath")
           : const Text("Backup your data"),
       trailing: ElevatedButton(
         onPressed: () async {
-          String path = await widget.paraModel.backup();
-          setState(() {
-            _backupPath = path;
-          });
+          try {
+            await platform.invokeMethod(
+                'backupDB', {'data': widget.paraModel.jsonStringify()});
+          } catch (e) {
+            // do nothing
+            // print("ERROR: $e");
+          }
         },
         child: const Text("Backup"),
       ),

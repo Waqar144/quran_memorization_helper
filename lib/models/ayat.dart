@@ -292,10 +292,13 @@ class ParaAyatModel extends ChangeNotifier {
   Future<String> backup() async => await saveToDisk(fileName: "ayatsdb_backup");
 
   Future<String> saveToDisk({String? fileName}) async {
-    String json = const JsonEncoder.withIndent("  ").convert(toJson());
-    String path = await utils.saveJsonToDisk(json, fileName ?? "ayatsdb");
+    String path =
+        await utils.saveJsonToDisk(jsonStringify(), fileName ?? "ayatsdb");
     return path;
   }
+
+  String jsonStringify() =>
+      const JsonEncoder.withIndent("  ").convert(toJson());
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> json = {};
