@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 
 import 'package:quran_memorization_helper/models/ayat.dart';
 import 'package:quran_memorization_helper/models/settings.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:quran_memorization_helper/utils/utils.dart';
 
 class SettingsPage extends StatefulWidget {
   final List<int> fontSizes = [20, 22, 24, 26, 28, 30, 32];
@@ -37,20 +39,36 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
     );
   }
-      subtitle: _backupPath != null
-          ? Text("Backed up at $_backupPath")
-          : const Text("Backup your data"),
+
+  Widget _restoreBackupWidget() {
+    return ListTile(
+      title: const Text("Restore Backup"),
+      subtitle: const Text("Restore previously backed up data"),
       trailing: ElevatedButton(
         onPressed: () async {
-          try {
-            await platform.invokeMethod(
-                'backupDB', {'data': widget.paraModel.jsonStringify()});
-          } catch (e) {
-            // do nothing
-            // print("ERROR: $e");
+          // get the file
+          FilePickerResult? result = await FilePicker.platform.pickFiles(
+              dialogTitle: "Select JSON File",
+              type: FileType.custom,
+              allowedExtensions: ["json"]);
+          if (result == null) return;
+          if (result.paths.isEmpty) return;
+
+          String? path = result.paths.first;
+          if (path == null) return;
+          // ask the para model to load this db
+          final bool readResult = await widget.paraModel.readJsonDB(path: path);
+          if (readResult) {
+            if (mounted) {
+              // success message
+              showSnackBarMessage(
+                  context, "${result.names.first} imported successfully");
+            }
+            // persist
+            widget.paraModel.saveToDisk();
           }
         },
-        child: const Text("Backup"),
+        child: const Text("Restore"),
       ),
     );
   }
@@ -124,7 +142,8 @@ class _SettingsPageState extends State<SettingsPage> {
           _createFontSizeTile(),
           const SizedBox(height: 16),
           _createWordSpacingTile(),
-          _createBackupWidget()
+          _createBackupWidget(),
+          _restoreBackupWidget()
         ],
       ),
     );

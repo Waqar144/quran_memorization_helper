@@ -50,24 +50,6 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     super.didChangeAppLifecycleState(state);
   }
 
-  void _importExistingJson() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-        dialogTitle: "Select JSON File",
-        type: FileType.custom,
-        allowedExtensions: ["json"]);
-    if (result != null && result.paths.isNotEmpty) {
-      String? path = result.paths.first;
-      if (path == null) return;
-      if (await _readJsonFromDisk(path: path)) {
-        if (mounted) {
-          showSnackBarMessage(
-              context, "${result.names.first} imported successfully");
-        }
-        _saveToDisk();
-      }
-    }
-  }
-
   void _openQuizParaSelectionPage() async {
     final quizCreationArgs = await Navigator.of(context)
         .pushNamed(quizSelectionPage) as QuizCreationArgs?;
@@ -91,9 +73,7 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   }
 
   void _saveToDisk() async {
-    String path = await _paraModel.saveToDisk();
-    if (mounted) return;
-    showSnackBarMessage(context, "Saved to file $path");
+    await _paraModel.saveToDisk();
   }
 
   void _openSettings() async {
@@ -124,7 +104,6 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     final Map<String, VoidCallback> actions = {
       'Take Quiz': _openQuizParaSelectionPage,
       'Mutashabihas': _openMutashabihas,
-      'Import Json DB File': _importExistingJson,
       'Settings': _openSettings,
     };
     return PopupMenuButton<String>(
