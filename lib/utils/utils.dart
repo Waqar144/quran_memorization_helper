@@ -31,10 +31,17 @@ Future<String> saveJsonToDisk(String json, String fileName) async {
 
 Future<Map<String, dynamic>?> readJsonFile(String fileName) async {
   final Directory dir = await getApplicationDocumentsDirectory();
-  String path = dir.path;
-  path = "$path${Platform.pathSeparator}$fileName.json";
+  final basePath = "${dir.path}${Platform.pathSeparator}";
+  final path = "$basePath$fileName.json";
   try {
-    return await readJsonFromFilePath(path);
+    // try normal
+    if (await File(path).exists()) {
+      return await readJsonFromFilePath(path);
+    } else {
+      // try backup
+      final backupPath = "$basePath${fileName}_bck.json";
+      return await readJsonFromFilePath(backupPath);
+    }
   } catch (e) {
     return {};
   }
