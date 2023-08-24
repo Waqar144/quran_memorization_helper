@@ -28,7 +28,7 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     _multipleSelectMode.addListener(() => _paraModel.resetSelection());
     _paraModel.onParaChange = (() => _multipleSelectMode.value = false);
 
-    _readJsonFromDisk();
+    _paraModel.readJsonDB();
     Settings.instance.readSettings();
 
     super.initState();
@@ -60,16 +60,6 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     if (!mounted) return;
     if (ayahsToAdd == null || ayahsToAdd.isEmpty) return;
     _paraModel.merge(ayahsToAdd);
-  }
-
-  Future<bool> _readJsonFromDisk({String? path}) async {
-    final bool showError = path != null;
-    final bool result = await _paraModel.readJsonDB(path: path);
-    if (!result && showError && mounted) {
-      showSnackBarMessage(context, "$path doesn't exist", error: true);
-      return false;
-    }
-    return true;
   }
 
   void _saveToDisk() async {

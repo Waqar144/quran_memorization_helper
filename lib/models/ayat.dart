@@ -231,7 +231,7 @@ class ParaAyatModel extends ChangeNotifier {
     }
   }
 
-  void _resetfromJson(Map<String, dynamic> json) async {
+  Future<void> _resetfromJson(Map<String, dynamic> json) async {
     final data = await rootBundle.load("assets/quran.txt");
 
     final Map<int, List<AyatOrMutashabiha>> paraAyats = {};
@@ -292,7 +292,7 @@ class ParaAyatModel extends ChangeNotifier {
     if (json == null) {
       return false;
     }
-    _resetfromJson(json);
+    await _resetfromJson(json);
     return true;
   }
 
