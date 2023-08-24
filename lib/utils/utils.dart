@@ -7,9 +7,25 @@ import 'package:path_provider/path_provider.dart';
 Future<String> saveJsonToDisk(String json, String fileName) async {
   if (json.isEmpty) throw "Empty json";
   Directory dir = await getApplicationDocumentsDirectory();
-  String path = "${dir.path}${Platform.pathSeparator}$fileName.json";
+
+  final basePath = "${dir.path}${Platform.pathSeparator}";
+
+  // 1. Write the file as filename_new
+  final String newFilename = "${fileName}_new.json";
+  final String path = "$basePath$newFilename";
   File f = File(path);
   await f.writeAsString(json);
+
+  // 2. Rename the old file to oldfile_bck.json
+  File oldFile = File("$basePath$fileName.json");
+  if (await oldFile.exists()) {
+    await oldFile.rename("$basePath${fileName}_bck.json");
+  }
+
+  // 3. Rename the new file fileName.json
+  await f.rename("$basePath$fileName.json");
+
+  // done
   return path;
 }
 
