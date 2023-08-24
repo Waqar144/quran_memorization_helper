@@ -67,9 +67,12 @@ class ParaAyatModel extends ChangeNotifier {
   Timer? timer;
 
   @override
-  void dispose() {
+  void dispose() async {
     currentParaNotifier.dispose();
-    _paraAyats = {};
+    if (timer?.isActive ?? false) {
+      timer?.cancel();
+      await saveToDisk();
+    }
     super.dispose();
   }
 
