@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:quran_memorization_helper/models/ayat.dart';
 import 'package:quran_memorization_helper/widgets/ayat_and_mutashabiha_list_view.dart';
 import 'package:quran_memorization_helper/models/settings.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:quran_memorization_helper/pages/page_constants.dart';
 import 'package:quran_memorization_helper/models/quiz.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
-import 'package:quran_memorization_helper/utils/utils.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class MainPage extends StatefulWidget {
@@ -16,7 +14,7 @@ class MainPage extends StatefulWidget {
   State<MainPage> createState() => _MainPageState();
 }
 
-class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
+class _MainPageState extends State<MainPage> {
   final ParaAyatModel _paraModel = ParaAyatModel();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   final ValueNotifier<bool> _multipleSelectMode = ValueNotifier(false);
@@ -41,29 +39,17 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     super.dispose();
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.detached) {
-      _saveToDisk();
-    }
-    super.didChangeAppLifecycleState(state);
-  }
-
   void _openQuizParaSelectionPage() async {
     final quizCreationArgs = await Navigator.of(context)
         .pushNamed(quizSelectionPage) as QuizCreationArgs?;
-    if (!mounted || quizCreationArgs == null) return;
+    if (!mounted) return;
+    if (quizCreationArgs == null) return;
     if (quizCreationArgs.selectedParas.isEmpty) return;
     final ayahsToAdd = await Navigator.of(context).pushNamed(quizPage,
         arguments: quizCreationArgs) as Map<int, List<Ayat>>?;
     if (!mounted) return;
     if (ayahsToAdd == null || ayahsToAdd.isEmpty) return;
     _paraModel.merge(ayahsToAdd);
-  }
-
-  void _saveToDisk() async {
-    await _paraModel.saveToDisk();
   }
 
   void _openSettings() async {
