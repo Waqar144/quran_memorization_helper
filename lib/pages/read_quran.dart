@@ -58,16 +58,17 @@ class Page {
   }
 }
 
-class ReadQuranPage extends StatefulWidget {
+class ReadQuranWidget extends StatefulWidget {
   final ParaAyatModel model;
 
-  const ReadQuranPage(this.model, {super.key});
+  const ReadQuranWidget(this.model, {super.key});
 
   @override
-  State<StatefulWidget> createState() => _RPS();
+  State<StatefulWidget> createState() => _ReadQuranWidget();
 }
 
-class _RPS extends State<ReadQuranPage> with SingleTickerProviderStateMixin {
+class _ReadQuranWidget extends State<ReadQuranWidget>
+    with SingleTickerProviderStateMixin {
   List<Line> lines = [];
   List<Page> _pages = [];
   List<Mutashabiha> _mutashabihat = [];
