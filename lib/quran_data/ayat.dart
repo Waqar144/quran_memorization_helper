@@ -97,7 +97,7 @@ String _getContext(int ayahIdx, String text, final ByteBuffer quranTextUtf8) {
 }
 
 MutashabihaAyat ayatFromJsonObj(
-    dynamic m, final ByteBuffer quranTextUtf8, int ctx) {
+    dynamic m, final ByteBuffer? quranTextUtf8, int ctx) {
   try {
     List<int> ayahIdxes;
     if (m["ayah"] is List) {
@@ -110,12 +110,14 @@ MutashabihaAyat ayatFromJsonObj(
     int surahIdx = -1;
     int paraIdx = -1;
     for (final ayahIdx in ayahIdxes) {
-      final ayahRange = getAyahRange(ayahIdx);
-      final textUtf8 =
-          quranTextUtf8.asUint8List(ayahRange.start, ayahRange.len);
-      text += utf8.decode(textUtf8).trim();
-      if (ayahIdx != ayahIdxes.last) {
-        text += ayahSeparator;
+      if (quranTextUtf8 != null) {
+        final ayahRange = getAyahRange(ayahIdx);
+        final textUtf8 =
+            quranTextUtf8.asUint8List(ayahRange.start, ayahRange.len);
+        text += utf8.decode(textUtf8).trim();
+        if (ayahIdx != ayahIdxes.last) {
+          text += ayahSeparator;
+        }
       }
       if (surahIdx == -1) {
         surahIdx = surahForAyah(ayahIdx);
@@ -125,7 +127,7 @@ MutashabihaAyat ayatFromJsonObj(
     }
 
     final bool showContext = ctx != 0;
-    if (showContext) {
+    if (showContext && quranTextUtf8 != null) {
       text = _getContext(ayahIdxes.last, text, quranTextUtf8);
     }
     return MutashabihaAyat(paraIdx, surahIdx, surahAyahIdxes, text,

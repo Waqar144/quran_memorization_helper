@@ -7,12 +7,11 @@ import 'dart:async';
 import 'package:quran_memorization_helper/models/settings.dart';
 import 'package:quran_memorization_helper/models/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/surahs.dart';
-import 'package:quran_memorization_helper/quran_data/pages.dart';
+// import 'package:quran_memorization_helper/quran_data/pages.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/ayah_offsets.dart';
 import 'package:quran_memorization_helper/widgets/mutashabiha_ayat_list_item.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
-import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class LineAyah {
   final int ayahIndex;
@@ -74,8 +73,8 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
   List<Mutashabiha> _mutashabihat = [];
   ByteBuffer? _quranUtf8;
   final _repaintNotifier = StreamController<int>.broadcast();
-  final ItemPositionsListener _itemPositionListener =
-      ItemPositionsListener.create();
+  // final ItemPositionsListener _itemPositionListener =
+  //     ItemPositionsListener.create();
 
   @override
   void initState() {
@@ -89,11 +88,11 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
     WakelockPlus.disable();
 
     // save position
-    final v = _itemPositionListener.itemPositions.value;
-    if (v.isNotEmpty) {
-      int start = para16LinePageOffsets[widget.model.currentPara - 1] - 1;
-      Settings.instance.currentReadingPage = start + v.last.index;
-    }
+    // final v = _itemPositionListener.itemPositions.value;
+    // if (v.isNotEmpty) {
+    //   int start = para16LinePageOffsets[widget.model.currentPara - 1] - 1;
+    //   Settings.instance.currentReadingPage = start + v.last.index;
+    // }
   }
 
   Future<List<Page>> doload() async {
@@ -303,22 +302,6 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
     }
   }
 
-  int _getInitialPageIndex() {
-    if (_pages.isEmpty) {
-      return 0;
-    }
-    int p = Settings.instance.currentReadingPage;
-    int currentParaIndex = widget.model.currentPara - 1;
-    int start = para16LinePageOffsets[currentParaIndex] - 1;
-    int end = currentParaIndex >= 29
-        ? 548
-        : para16LinePageOffsets[currentParaIndex + 1] - 1;
-    if (p >= start && p < end) {
-      return p - start;
-    }
-    return 0;
-  }
-
   bool isMobile() {
     final platform = Theme.of(context).platform;
     return platform == TargetPlatform.android || platform == TargetPlatform.iOS;
@@ -326,71 +309,60 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: isMobile()
-          ? PreferredSize(
-              preferredSize: const Size(double.infinity, 0),
-              child: AppBar(),
-            )
-          : AppBar(
-              title: Text("Reading para ${widget.model.currentPara}"),
-            ),
-      body: FutureBuilder(
-        future: doload(),
-        builder: (context, snapshot) {
-          if (_pages.isEmpty) return const SizedBox.shrink();
-          return ScrollablePositionedList.builder(
-            itemCount: _pages.length + 1,
-            itemPositionsListener: _itemPositionListener,
-            initialScrollIndex: _getInitialPageIndex(),
-            itemBuilder: (ctx, index) {
-              if (index >= _pages.length) {
-                return Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      widget.model.setCurrentPara(widget.model.currentPara + 1);
-                      setState(() {
-                        _pages.clear();
-                      });
-                    },
-                    icon: const Icon(Icons.arrow_right),
-                    label: const Text("Next Para"),
-                  ),
-                );
-              }
-
-              return Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.background,
-                  boxShadow: [
-                    BoxShadow(
-                        color: Theme.of(context).shadowColor,
-                        blurRadius: 1,
-                        offset: const Offset(1, 1)),
-                    BoxShadow(
-                        color: Theme.of(context).shadowColor,
-                        blurRadius: 1,
-                        offset: const Offset(-1, -1))
-                  ],
-                ),
-                child: ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: PageWidget(
-                    _pages[index].pageNum,
-                    _pages[index].lines,
-                    isAyatInDB: _isAyatInDB,
-                    onAyahTapped: _onAyahTapped,
-                    isMutashabihaAyat: _isMutashabihaAyat,
-                    isAyahFull: _isAyahFull,
-                    repaintStream: _repaintNotifier.stream,
-                  ),
+    return FutureBuilder(
+      future: doload(),
+      builder: (context, snapshot) {
+        if (_pages.isEmpty) return const SizedBox.shrink();
+        return ListView.builder(
+          padding: EdgeInsets.zero,
+          itemCount: _pages.length + 1,
+          itemBuilder: (ctx, index) {
+            if (index >= _pages.length) {
+              return Padding(
+                padding: const EdgeInsets.all(8),
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    widget.model.setCurrentPara(widget.model.currentPara + 1);
+                    setState(() {
+                      _pages.clear();
+                    });
+                  },
+                  icon: const Icon(Icons.arrow_right),
+                  label: const Text("Next Para"),
                 ),
               );
-            },
-          );
-        },
-      ),
+            }
+
+            return Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.background,
+                boxShadow: [
+                  BoxShadow(
+                      color: Theme.of(context).shadowColor,
+                      blurRadius: 1,
+                      offset: const Offset(1, 1)),
+                  BoxShadow(
+                      color: Theme.of(context).shadowColor,
+                      blurRadius: 1,
+                      offset: const Offset(-1, -1))
+                ],
+              ),
+              child: ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: PageWidget(
+                  _pages[index].pageNum,
+                  _pages[index].lines,
+                  isAyatInDB: _isAyatInDB,
+                  onAyahTapped: _onAyahTapped,
+                  isMutashabihaAyat: _isMutashabihaAyat,
+                  isAyahFull: _isAyahFull,
+                  repaintStream: _repaintNotifier.stream,
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
@@ -615,6 +587,7 @@ class _PageWidgetState extends State<PageWidget> {
         Padding(
           padding: const EdgeInsets.only(left: 8, right: 8),
           child: ListView.separated(
+            padding: EdgeInsets.zero,
             separatorBuilder: (ctx, idx) => const Divider(
               color: Colors.grey,
               height: 1,
