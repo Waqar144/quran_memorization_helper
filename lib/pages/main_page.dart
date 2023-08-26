@@ -14,25 +14,50 @@ class MainPage extends StatefulWidget {
   State<MainPage> createState() => _MainPageState();
 }
 
-class _MainPageState extends State<MainPage> {
+class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   final ParaAyatModel _paraModel = ParaAyatModel();
-  bool loaded = false;
+  late final ScrollController _scrollController;
 
   @override
   void initState() {
-    Settings.instance.readSettings();
-    _paraModel.readJsonDB().then((v) {
-      loaded = true;
-      setState(() {});
-    });
-
+    WidgetsBinding.instance.addObserver(this);
     super.initState();
   }
 
   @override
   void dispose() {
     _paraModel.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  Future<void> _load() async {
+    await Settings.instance.readSettings();
+    await _paraModel.readJsonDB();
+    // If the para is same as what's in settings, then try to restore scroll position
+    if (_paraModel.currentPara == Settings.instance.currentReadingPara) {
+      _scrollController = ScrollController(
+          initialScrollOffset: Settings.instance.currentReadingScrollOffset);
+    } else {
+      _scrollController = ScrollController();
+    }
+
+    // remove before adding to ensure we don't listen twice
+    _scrollController.removeListener(_saveScrollPosition);
+    _scrollController.addListener(_saveScrollPosition);
+  }
+
+  void _saveScrollPosition() {
+    Settings.instance.saveScrollPositionDelayed(
+        _paraModel.currentPara, _scrollController.offset);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    if (state == AppLifecycleState.paused) {
+      await Settings.instance
+          .saveScrollPosition(_paraModel.currentPara, _scrollController.offset);
+    }
   }
 
   void _openQuizParaSelectionPage() async {
@@ -132,14 +157,23 @@ class _MainPageState extends State<MainPage> {
             actions: [buildThreeDotMenu()],
           ),
         ],
-        body: loaded == false
-            ? const SizedBox.shrink()
-            : ValueListenableBuilder(
-                valueListenable: _paraModel.currentParaNotifier,
-                builder: (context, _, __) {
-                  return ReadQuranWidget(_paraModel);
-                },
-              ),
+        body: FutureBuilder(
+          future: _load(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              return const SizedBox.shrink();
+            }
+            return ValueListenableBuilder(
+              valueListenable: _paraModel.currentParaNotifier,
+              builder: (context, _, __) {
+                return ReadQuranWidget(
+                  _paraModel,
+                  scrollController: _scrollController,
+                );
+              },
+            );
+          },
+        ),
       ),
       drawer: Drawer(
         child: SafeArea(

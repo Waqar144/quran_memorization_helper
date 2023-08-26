@@ -59,8 +59,10 @@ class Page {
 
 class ReadQuranWidget extends StatefulWidget {
   final ParaAyatModel model;
+  final ScrollController scrollController;
 
-  const ReadQuranWidget(this.model, {super.key});
+  const ReadQuranWidget(this.model,
+      {required this.scrollController, super.key});
 
   @override
   State<StatefulWidget> createState() => _ReadQuranWidget();
@@ -314,6 +316,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
       builder: (context, snapshot) {
         if (_pages.isEmpty) return const SizedBox.shrink();
         return ListView.builder(
+          controller: widget.scrollController,
           padding: EdgeInsets.zero,
           itemCount: _pages.length + 1,
           itemBuilder: (ctx, index) {

@@ -1,12 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'dart:convert';
 import 'dart:async';
+import 'dart:core';
 import 'package:quran_memorization_helper/utils/utils.dart' as utils;
 
 class Settings extends ChangeNotifier {
   static final Settings _instance = Settings._private();
   static Settings get instance => _instance;
-  int _currentReadingPage = -1;
+  int _currentReadingPara = 1;
+  double _currentReadingScroll = 0.0;
   Timer? timer;
 
   // The font size of ayahs
@@ -27,9 +29,15 @@ class Settings extends ChangeNotifier {
     persist();
   }
 
-  int get currentReadingPage => _currentReadingPage;
-  set currentReadingPage(int val) {
-    _currentReadingPage = val;
+  int get currentReadingPara => _currentReadingPara;
+  set currentReadingPara(int val) {
+    _currentReadingPara = val;
+    persist();
+  }
+
+  double get currentReadingScrollOffset => _currentReadingScroll;
+  set currentReadingScrollOffset(double val) {
+    _currentReadingScroll = val;
     persist();
   }
 
@@ -37,28 +45,46 @@ class Settings extends ChangeNotifier {
     return _instance;
   }
 
-  void saveToDisk() async {
+  Future<void> saveToDisk() async {
     Map<String, dynamic> map = {
       'fontSize': fontSize,
       'wordSpacing': wordSpacing,
-      'currentReadingPage': _currentReadingPage
+      'currentReadingPara': _currentReadingPara,
+      'currentReadingScrollOffset': _currentReadingScroll
     };
     String json = const JsonEncoder.withIndent("  ").convert(map);
     await utils.saveJsonToDisk(json, "settings");
   }
 
-  void readSettings() async {
+  Future<void> readSettings() async {
     final Map<String, dynamic>? json = await utils.readJsonFile("settings");
     if (json == null) return;
     _fontSize = json["fontSize"] ?? 24;
     _wordSpacing = json["wordSpacing"] ?? 1;
-    _currentReadingPage = json["currentReadingPage"] ?? 1;
+    _currentReadingPara = json["currentReadingPara"] ?? 1;
+    _currentReadingScroll = json["currentReadingScrollOffset"] ?? 0.0;
   }
 
-  void persist() {
-    if (timer == null || !(timer?.isActive ?? false)) {
-      timer = Timer(const Duration(seconds: 2), saveToDisk);
+  Future<void> saveScrollPosition(int paraNumber, double scrollOffset) async {
+    currentReadingPara = paraNumber;
+    currentReadingScrollOffset = scrollOffset;
+    await saveToDisk();
+  }
+
+  void saveScrollPositionDelayed(int paraNumber, double scrollOffset) {
+    if (paraNumber == currentReadingPara) {
+      if ((currentReadingScrollOffset - scrollOffset).abs() < 15) {
+        return;
+      }
     }
+    currentReadingPara = paraNumber;
+    currentReadingScrollOffset = scrollOffset;
+    persist(seconds: 4);
+  }
+
+  void persist({int seconds = 1}) {
+    timer?.cancel();
+    timer = Timer(Duration(seconds: seconds), saveToDisk);
   }
 
   Settings._private();
