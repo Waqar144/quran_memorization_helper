@@ -10,17 +10,6 @@ import 'package:quran_memorization_helper/pages/quiz_page.dart';
 import 'package:quran_memorization_helper/pages/mutashabihas_page.dart';
 import 'package:quran_memorization_helper/pages/marked_ayahs_page.dart';
 
-String s = '''This is a string''';
-
-String y = '''
-This is a string
-''';
-
-String d = """
-This is a string;
-what is this;
-""";
-
 MaterialPageRoute handleRoute(RouteSettings settings) {
   return switch (settings.name ?? "") {
     // SettingsPage
