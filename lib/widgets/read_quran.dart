@@ -528,8 +528,6 @@ class _PageWidgetState extends State<PageWidget> {
           WidgetSpan(
             alignment: PlaceholderAlignment.middle,
             baseline: TextBaseline.ideographic,
-            style:
-                const TextStyle(color: Colors.black, fontFamily: "Al Mushaf"),
             child: Container(
               margin: const EdgeInsets.only(top: 6),
               decoration: BoxDecoration(
@@ -566,12 +564,12 @@ class _PageWidgetState extends State<PageWidget> {
     return Text.rich(
       TextSpan(children: spans),
       textDirection: TextDirection.rtl,
-      style: TextStyle(
+      style: const TextStyle(
         color: Colors.black,
         fontFamily: "Al Mushaf",
-        fontSize: Settings.instance.fontSize.toDouble(),
+        fontSize: 24,
         letterSpacing: 0,
-        wordSpacing: Settings.instance.wordSpacing.toDouble(),
+        wordSpacing: 1,
       ),
     );
   }
