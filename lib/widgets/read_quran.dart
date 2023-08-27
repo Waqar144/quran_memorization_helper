@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:quran_memorization_helper/models/settings.dart';
 import 'package:quran_memorization_helper/models/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/surahs.dart';
-// import 'package:quran_memorization_helper/quran_data/pages.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/ayah_offsets.dart';
 import 'package:quran_memorization_helper/widgets/mutashabiha_ayat_list_item.dart';
@@ -644,6 +643,7 @@ class _PageWidgetState extends State<PageWidget> {
           (widget.pageNum + 1).toString(),
           style: const TextStyle(fontSize: 12),
         ),
+        const Spacer(),
         Padding(
           padding: const EdgeInsets.only(left: 8, right: 8),
           child: ListView.separated(
@@ -669,7 +669,8 @@ class _PageWidgetState extends State<PageWidget> {
               );
             },
           ),
-        )
+        ),
+        const Spacer(),
       ],
     );
   }
