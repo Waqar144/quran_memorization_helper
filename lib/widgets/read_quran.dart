@@ -59,10 +59,8 @@ class Page {
 
 class ReadQuranWidget extends StatefulWidget {
   final ParaAyatModel model;
-  final ScrollController scrollController;
 
-  const ReadQuranWidget(this.model,
-      {required this.scrollController, super.key});
+  const ReadQuranWidget(this.model, {super.key});
 
   @override
   State<StatefulWidget> createState() => _ReadQuranWidget();
@@ -316,7 +314,8 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
       builder: (context, snapshot) {
         if (_pages.isEmpty) return const SizedBox.shrink();
         return ListView.builder(
-          controller: widget.scrollController,
+          physics: const NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
           padding: EdgeInsets.zero,
           itemCount: _pages.length + 1,
           itemBuilder: (ctx, index) {
@@ -337,6 +336,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
             }
 
             return Container(
+              height: 785,
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.background,
                 boxShadow: [
@@ -438,8 +438,67 @@ class _PageWidgetState extends State<PageWidget> {
     widget.onAyahTapped(surahIdx, ayahIdx, widget.pageNum);
   }
 
+  Widget getTwoLinesBismillah(int surahIdx) {
+    final style = TextStyle(
+      color: Colors.black,
+      fontFamily: "Al Mushaf",
+      fontSize: Settings.instance.fontSize.toDouble(),
+      letterSpacing: 0.0,
+      wordSpacing: Settings.instance.wordSpacing.toDouble(),
+    );
+    SurahData surahData = surahDataForIdx(surahIdx, arabic: true);
+
+    return Column(
+      textDirection: TextDirection.rtl,
+      children: [
+        // surah name and ayah count
+        Container(
+          height: 46,
+          decoration:
+              BoxDecoration(border: Border.all(color: Colors.black, width: 1)),
+          child: Row(
+            children: [
+              Text(
+                "\uFD3Fآیاتھا ${_toUrduNumber(surahData.ayahCount)}\uFD3E",
+                textDirection: TextDirection.rtl,
+                textAlign: TextAlign.center,
+                style: style,
+              ),
+              const Spacer(),
+              Text(
+                "\uFD3Fسورۃ ${surahData.name}\uFD3E",
+                textDirection: TextDirection.rtl,
+                textAlign: TextAlign.center,
+                style: style,
+              ),
+            ],
+          ),
+        ),
+        // bismillah
+        Container(
+          height: 46,
+          width: MediaQuery.of(context).size.width,
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.black, width: 1),
+          ),
+          child: Text(
+            /*data:*/ "بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ",
+            textDirection: TextDirection.rtl,
+            textAlign: TextAlign.center,
+            style: style,
+          ),
+        )
+      ],
+    );
+  }
+
   Widget getBismillah(int surahIdx) {
     surahIdx = -surahIdx;
+
+    if (widget._pageLines.length == 15) {
+      return getTwoLinesBismillah(surahIdx);
+    }
+
     final style = TextStyle(
       color: Colors.black,
       fontFamily: "Al Mushaf",

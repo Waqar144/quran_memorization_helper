@@ -4,6 +4,7 @@ import 'package:quran_memorization_helper/models/settings.dart';
 import 'package:quran_memorization_helper/pages/page_constants.dart';
 import 'package:quran_memorization_helper/models/quiz.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
+import 'package:quran_memorization_helper/quran_data/surahs.dart';
 import 'package:quran_memorization_helper/widgets/read_quran.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
@@ -16,32 +17,45 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   final ParaAyatModel _paraModel = ParaAyatModel();
-  late final ScrollController _scrollController;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
+    _paraModel.currentParaNotifier.addListener(scrollToTop);
     WidgetsBinding.instance.addObserver(this);
     super.initState();
   }
 
   @override
   void dispose() {
+    _paraModel.currentParaNotifier.removeListener(scrollToTop);
     _paraModel.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  void scrollToTop() {
+    if (_scrollController.hasClients) {
+      _scrollController.jumpTo(0.0);
+    }
+  }
+
+  void scrollToPosition() {
+    if (_scrollController.hasClients) {
+      if (_paraModel.currentPara == Settings.instance.currentReadingPara) {
+        _scrollController.jumpTo(Settings.instance.currentReadingScrollOffset);
+      }
+    } else {
+      Future.delayed(const Duration(milliseconds: 50), scrollToPosition);
+    }
   }
 
   Future<void> _load() async {
     await Settings.instance.readSettings();
     await _paraModel.readJsonDB();
     // If the para is same as what's in settings, then try to restore scroll position
-    if (_paraModel.currentPara == Settings.instance.currentReadingPara) {
-      _scrollController = ScrollController(
-          initialScrollOffset: Settings.instance.currentReadingScrollOffset);
-    } else {
-      _scrollController = ScrollController();
-    }
 
+    scrollToPosition();
     // remove before adding to ensure we don't listen twice
     _scrollController.removeListener(_saveScrollPosition);
     _scrollController.addListener(_saveScrollPosition);
@@ -145,44 +159,73 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
         preferredSize: const Size(double.infinity, 0),
         child: AppBar(bottom: null, shadowColor: Colors.transparent),
       ),
-      body: NestedScrollView(
-        floatHeaderSlivers: true,
-        headerSliverBuilder: (ctx, v) => [
-          SliverAppBar(
-            floating: true,
-            forceElevated: true,
-            scrolledUnderElevation: v ? 2 : 1,
-            snap: true,
-            pinned: false,
-            actions: [buildThreeDotMenu()],
-          ),
-        ],
-        body: FutureBuilder(
-          future: _load(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return const SizedBox.shrink();
-            }
-            return ValueListenableBuilder(
-              valueListenable: _paraModel.currentParaNotifier,
-              builder: (context, _, __) {
-                return ReadQuranWidget(
-                  _paraModel,
-                  scrollController: _scrollController,
-                );
-              },
-            );
-          },
-        ),
+      body: FutureBuilder(
+        future: _load(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState != ConnectionState.done) {
+            return const SizedBox.shrink();
+          }
+          return CustomScrollView(
+            controller: _scrollController,
+            slivers: [
+              SliverAppBar(
+                floating: true,
+                forceElevated: true,
+                // scrolledUnderElevation: v ? 2 : 1,
+                snap: true,
+                pinned: false,
+                actions: [buildThreeDotMenu()],
+              ),
+              SliverToBoxAdapter(
+                child: ValueListenableBuilder(
+                  valueListenable: _paraModel.currentParaNotifier,
+                  builder: (context, _, __) {
+                    return ReadQuranWidget(_paraModel);
+                  },
+                ),
+              )
+            ],
+          );
+        },
       ),
       drawer: Drawer(
         child: SafeArea(
-          child: Wrap(
-            alignment: WrapAlignment.start,
-            direction: Axis.vertical,
-            children: List.generate(30, (i) => i).map((index) {
-              return paraListItem(index, 120);
-            }).toList(),
+          child: DefaultTabController(
+            length: 2,
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                Container(
+                  height: 50,
+                  color: Colors.black12,
+                  child: const TabBar(
+                    tabs: [
+                      Tab(text: "Para"),
+                      Tab(text: "Surah"),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: TabBarView(children: [
+                    Wrap(
+                      alignment: WrapAlignment.start,
+                      direction: Axis.vertical,
+                      children: List.generate(30, (i) => i).map((index) {
+                        return paraListItem(index, 120);
+                      }).toList(),
+                    ),
+                    ListView.builder(
+                      itemCount: 114,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          title: Text(surahNameForIdx(index)),
+                        );
+                      },
+                    ),
+                  ]),
+                ),
+              ],
+            ),
           ),
         ),
       ),
