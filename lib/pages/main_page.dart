@@ -4,6 +4,7 @@ import 'package:quran_memorization_helper/models/settings.dart';
 import 'package:quran_memorization_helper/pages/page_constants.dart';
 import 'package:quran_memorization_helper/models/quiz.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
+import 'package:quran_memorization_helper/quran_data/pages.dart';
 import 'package:quran_memorization_helper/quran_data/surahs.dart';
 import 'package:quran_memorization_helper/widgets/read_quran.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -152,6 +153,24 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     );
   }
 
+  void _onSurahTapped(int surahIndex) {
+    Navigator.of(context).pop();
+    if (surahIndex < 0 || surahIndex > 113) {
+      return;
+    }
+    int page = surah16LinePageOffset[surahIndex] - 1;
+    int paraIdx = paraForPage(page);
+    int paraStartPage = para16LinePageOffsets[paraIdx];
+    int jumpToPage = page - paraStartPage;
+    double scrollOffset = jumpToPage * 785;
+    scrollOffset += 50;
+
+    if ((_paraModel.currentPara - 1) != paraIdx) {
+      _paraModel.setCurrentPara(paraIdx + 1);
+    }
+    _scrollController.jumpTo(scrollOffset);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -211,14 +230,18 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
                       alignment: WrapAlignment.start,
                       direction: Axis.vertical,
                       children: List.generate(30, (i) => i).map((index) {
-                        return paraListItem(index, 120);
+                        return paraListItem(index, 100);
                       }).toList(),
                     ),
                     ListView.builder(
+                      scrollDirection: Axis.vertical,
                       itemCount: 114,
+                      prototypeItem: const ListTile(title: Text("")),
                       itemBuilder: (context, index) {
                         return ListTile(
-                          title: Text(surahNameForIdx(index)),
+                          title:
+                              Text("${index + 1}. ${surahNameForIdx(index)}"),
+                          onTap: () => _onSurahTapped(index),
                         );
                       },
                     ),

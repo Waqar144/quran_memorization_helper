@@ -33,6 +33,20 @@ final Uint16List para16LinePageOffsets = Uint16List.fromList([
   528, // 30
 ]);
 
+int paraForPage(int page) {
+  if (page < 0 || page > 548) {
+    throw "Invalid page number: $page";
+  }
+
+  for (int i = 0; i < 30; ++i) {
+    if (page >= para16LinePageOffsets[i]) {
+      continue;
+    }
+    return i - 1;
+  }
+  return 30 - 1;
+}
+
 final Uint16List surah16LinePageOffset = Uint16List.fromList([
   2,
   3,
