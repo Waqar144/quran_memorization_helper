@@ -16,12 +16,19 @@ class MainPage extends StatefulWidget {
   State<MainPage> createState() => _MainPageState();
 }
 
-class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
+class _MainPageState extends State<MainPage>
+    with WidgetsBindingObserver, TickerProviderStateMixin {
   final ParaAyatModel _paraModel = ParaAyatModel();
   final ScrollController _scrollController = ScrollController();
+  final ScrollController _paraListScrollController = ScrollController();
+  final ScrollController _surahListScrollController = ScrollController();
+  late final TabController _drawerTabController;
 
   @override
   void initState() {
+    _drawerTabController = TabController(length: 2, vsync: this);
+    _drawerTabController.addListener(_onDrawerTabChange);
+
     _paraModel.currentParaNotifier.addListener(scrollToTop);
     WidgetsBinding.instance.addObserver(this);
     super.initState();
@@ -29,6 +36,7 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    _drawerTabController.removeListener(_onDrawerTabChange);
     _paraModel.currentParaNotifier.removeListener(scrollToTop);
     _paraModel.dispose();
     WidgetsBinding.instance.removeObserver(this);
@@ -41,13 +49,47 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     }
   }
 
+  void _onDrawerTabChange() {
+    if (_drawerTabController.indexIsChanging) {
+      if (_drawerTabController.index == 0) {
+        _scrollToParaInDrawer();
+      } else if (_drawerTabController.index == 1) {
+        _scrollToPosition(_surahListScrollController, () {
+          int surah = firstSurahInPara(_paraModel.currentPara - 1);
+          return 48 * surah.toDouble();
+        });
+      }
+    }
+  }
+
+  void _scrollToParaInDrawer() {
+    _scrollToPosition(_paraListScrollController, () {
+      int currentParaIdx = _paraModel.currentPara - 1;
+      return 48 * (currentParaIdx - 3);
+    });
+  }
+
+  static void _scrollToPosition(
+      ScrollController controller, double Function() getJumpPos) {
+    if (controller.hasClients) {
+      double jump = getJumpPos();
+      if (jump > controller.position.maxScrollExtent) {
+        jump = controller.position.maxScrollExtent;
+      }
+      controller.jumpTo(jump);
+    } else {
+      Future.delayed(const Duration(milliseconds: 10),
+          () => _scrollToPosition(controller, getJumpPos));
+    }
+  }
+
   void scrollToPosition() {
     if (_scrollController.hasClients) {
       if (_paraModel.currentPara == Settings.instance.currentReadingPara) {
         _scrollController.jumpTo(Settings.instance.currentReadingScrollOffset);
       }
     } else {
-      Future.delayed(const Duration(milliseconds: 50), scrollToPosition);
+      Future.delayed(const Duration(milliseconds: 20), scrollToPosition);
     }
   }
 
@@ -131,25 +173,22 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     );
   }
 
-  Widget paraListItem(int index, double size) {
-    return SizedBox(
-      width: size,
-      child: ValueListenableBuilder(
-        valueListenable: _paraModel.currentParaNotifier,
-        builder: (context, value, _) {
-          return ListTile(
-            minVerticalPadding: 0,
-            visualDensity: VisualDensity.compact,
-            title: Text("Para ${index + 1}"),
-            onTap: () {
-              _paraModel.setCurrentPara(index + 1);
-              Navigator.of(context).pop();
-            },
-            selected: value == (index + 1),
-            selectedTileColor: Theme.of(context).highlightColor,
-          );
-        },
-      ),
+  Widget paraListItem(int index) {
+    return ValueListenableBuilder(
+      valueListenable: _paraModel.currentParaNotifier,
+      builder: (context, value, _) {
+        return ListTile(
+          minVerticalPadding: 0,
+          visualDensity: VisualDensity.compact,
+          title: Text("Para ${index + 1}"),
+          onTap: () {
+            _paraModel.setCurrentPara(index + 1);
+            Navigator.of(context).pop();
+          },
+          selected: value == (index + 1),
+          selectedTileColor: Theme.of(context).highlightColor,
+        );
+      },
     );
   }
 
@@ -210,6 +249,7 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
       drawer: Drawer(
         child: SafeArea(
           child: DefaultTabController(
+            animationDuration: const Duration(milliseconds: 150),
             length: 2,
             child: Column(
               mainAxisSize: MainAxisSize.max,
@@ -217,41 +257,56 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
                 Container(
                   height: 50,
                   color: Colors.black12,
-                  child: const TabBar(
-                    tabs: [
+                  child: TabBar(
+                    controller: _drawerTabController,
+                    tabs: const [
                       Tab(text: "Para"),
                       Tab(text: "Surah"),
                     ],
                   ),
                 ),
                 Expanded(
-                  child: TabBarView(children: [
-                    Wrap(
-                      alignment: WrapAlignment.start,
-                      direction: Axis.vertical,
-                      children: List.generate(30, (i) => i).map((index) {
-                        return paraListItem(index, 100);
-                      }).toList(),
-                    ),
-                    ListView.builder(
-                      scrollDirection: Axis.vertical,
-                      itemCount: 114,
-                      prototypeItem: const ListTile(title: Text("")),
-                      itemBuilder: (context, index) {
-                        return ListTile(
-                          title:
-                              Text("${index + 1}. ${surahNameForIdx(index)}"),
-                          onTap: () => _onSurahTapped(index),
-                        );
-                      },
-                    ),
-                  ]),
+                  child: TabBarView(
+                    controller: _drawerTabController,
+                    children: [
+                      ListView.builder(
+                        controller: _paraListScrollController,
+                        scrollDirection: Axis.vertical,
+                        itemCount: 30,
+                        itemExtent: 48,
+                        itemBuilder: (context, index) {
+                          return paraListItem(index);
+                        },
+                      ),
+                      ListView.builder(
+                        controller: _surahListScrollController,
+                        scrollDirection: Axis.vertical,
+                        itemCount: 114,
+                        itemExtent: 48,
+                        itemBuilder: (context, index) {
+                          return ListTile(
+                            title:
+                                Text("${index + 1}. ${surahNameForIdx(index)}"),
+                            onTap: () => _onSurahTapped(index),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
         ),
       ),
+      onDrawerChanged: (opened) {
+        if (!opened) return;
+        if (_drawerTabController.index != 0) {
+          _drawerTabController.animateTo(0);
+        } else {
+          _scrollToParaInDrawer();
+        }
+      },
     );
   }
 }

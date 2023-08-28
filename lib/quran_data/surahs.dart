@@ -159,7 +159,7 @@ Uint32List getSurahAyahStarts() {
   return _surahAyahOffsets;
 }
 
-List<int> _surahsInPara(int paraIdx) {
+List<int> _surahsStartsInPara(int paraIdx) {
   return switch (paraIdx) {
     0 => const [0, 1],
     1 => const [],
@@ -195,11 +195,36 @@ List<int> _surahsInPara(int paraIdx) {
   };
 }
 
+int firstSurahInPara(int paraIdx) {
+  if (paraIdx == 29) {
+    return 77;
+  } else {
+    final surahs = _surahsStartsInPara(paraIdx);
+    if (surahs.isNotEmpty) {
+      return surahs.first;
+    }
+    return _surahsStartsInPara(paraIdx - 1).first;
+  }
+}
+
 List<int> surahAyahOffsetsForPara(int paraIdx) {
   final List<int> surahs = paraIdx < 29
-      ? _surahsInPara(paraIdx)
+      ? _surahsStartsInPara(paraIdx)
       : [for (int s = 77; s < 114; ++s) s];
   return [for (final s in surahs) _surahAyahOffsets[s]];
+}
+
+int surahForPage(int page) {
+  if (page < 0 || page > 548) {
+    throw "Invalid page number: $page";
+  }
+  for (int i = 0; i < 114; ++i) {
+    if (page >= _surahAyahOffsets[i]) {
+      continue;
+    }
+    return i - 1;
+  }
+  return 114 - 1;
 }
 
 final Uint32List _surahAyahOffsets = Uint32List.fromList([
