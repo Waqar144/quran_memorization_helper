@@ -316,24 +316,9 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           padding: EdgeInsets.zero,
-          itemCount: _pages.length + 1,
+          itemExtent: 785,
+          itemCount: _pages.length,
           itemBuilder: (ctx, index) {
-            if (index >= _pages.length) {
-              return Padding(
-                padding: const EdgeInsets.all(8),
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    widget.model.setCurrentPara(widget.model.currentPara + 1);
-                    setState(() {
-                      _pages.clear();
-                    });
-                  },
-                  icon: const Icon(Icons.arrow_right),
-                  label: const Text("Next Para"),
-                ),
-              );
-            }
-
             return Container(
               height: 785,
               decoration: BoxDecoration(
@@ -643,34 +628,34 @@ class _PageWidgetState extends State<PageWidget> {
           (widget.pageNum + 1).toString(),
           style: const TextStyle(fontSize: 12),
         ),
-        const Spacer(),
-        Padding(
-          padding: const EdgeInsets.only(left: 8, right: 8),
-          child: ListView.separated(
-            padding: EdgeInsets.zero,
-            separatorBuilder: (ctx, idx) => const Divider(
-              color: Colors.grey,
-              height: 1,
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(left: 8, right: 8),
+            child: ListView.separated(
+              padding: EdgeInsets.zero,
+              separatorBuilder: (ctx, idx) => const Divider(
+                color: Colors.grey,
+                height: 1,
+              ),
+              // shrinkWrap: true,
+              itemCount: widget._pageLines.length,
+              physics: const NeverScrollableScrollPhysics(),
+              itemBuilder: (ctx, idx) {
+                final pageLine = widget._pageLines[idx];
+                if (pageLine.lineAyahs.first.ayahIndex < 0) {
+                  return getBismillah(pageLine.lineAyahs.first.ayahIndex);
+                }
+                return SizedBox(
+                  height: 46,
+                  child: FittedBox(
+                    fit: BoxFit.contain,
+                    child: _buildLine(pageLine, idx),
+                  ),
+                );
+              },
             ),
-            shrinkWrap: true,
-            itemCount: widget._pageLines.length,
-            physics: const NeverScrollableScrollPhysics(),
-            itemBuilder: (ctx, idx) {
-              final pageLine = widget._pageLines[idx];
-              if (pageLine.lineAyahs.first.ayahIndex < 0) {
-                return getBismillah(pageLine.lineAyahs.first.ayahIndex);
-              }
-              return SizedBox(
-                height: 46,
-                child: FittedBox(
-                  fit: BoxFit.contain,
-                  child: _buildLine(pageLine, idx),
-                ),
-              );
-            },
           ),
         ),
-        const Spacer(),
       ],
     );
   }

@@ -241,7 +241,16 @@ class _MainPageState extends State<MainPage>
                     return ReadQuranWidget(_paraModel);
                   },
                 ),
-              )
+              ),
+              SliverToBoxAdapter(
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    _paraModel.setCurrentPara(_paraModel.currentPara + 1);
+                  },
+                  icon: const Icon(Icons.arrow_right),
+                  label: const Text("Next Para"),
+                ),
+              ),
             ],
           );
         },
