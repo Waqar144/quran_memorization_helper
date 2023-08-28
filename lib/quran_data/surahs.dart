@@ -159,6 +159,49 @@ Uint32List getSurahAyahStarts() {
   return _surahAyahOffsets;
 }
 
+List<int> _surahsInPara(int paraIdx) {
+  return switch (paraIdx) {
+    0 => const [0, 1],
+    1 => const [],
+    2 => const [2],
+    3 => const [3],
+    4 => const [],
+    5 => const [4],
+    6 => const [5],
+    7 => const [6],
+    8 => const [7],
+    9 => const [8],
+    10 => const [9, 10],
+    11 => const [11],
+    12 => const [12, 13, 14],
+    13 => const [15],
+    14 => const [16, 17],
+    15 => const [18, 19],
+    16 => const [20, 21],
+    17 => const [22, 23, 24],
+    18 => const [25, 26],
+    19 => const [27, 28],
+    20 => const [29, 30, 31, 32],
+    21 => const [33, 34, 35],
+    22 => const [36, 37, 38],
+    23 => const [39, 40],
+    24 => const [41, 42, 43, 44],
+    25 => const [45, 46, 47, 48, 49, 50],
+    26 => const [51, 52, 53, 54, 55, 56],
+    27 => const [57, 58, 59, 60, 61, 62, 63, 64, 65],
+    28 => const [66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76],
+    29 => const [/* 77 - 113 */],
+    _ => throw "Invalid para idx: $paraIdx"
+  };
+}
+
+List<int> surahAyahOffsetsForPara(int paraIdx) {
+  final List<int> surahs = paraIdx < 29
+      ? _surahsInPara(paraIdx)
+      : [for (int s = 77; s < 114; ++s) s];
+  return [for (final s in surahs) _surahAyahOffsets[s]];
+}
+
 final Uint32List _surahAyahOffsets = Uint32List.fromList([
   0,
   7,

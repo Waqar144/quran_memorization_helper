@@ -28,21 +28,21 @@ class Page {
   final List<Line> lines;
   const Page(this.pageNum, this.lines);
 
-  static Page fromJson(dynamic json, Uint32List surahAyahStarts) {
+  static Page fromJson(dynamic json, List<int> surahAyahStarts) {
     int pageNum = json["pageNum"] as int;
     List<dynamic> lineDatas = json["lines"] as List<dynamic>;
     // List<String> lineDatas = data.split('\n');
     List<Line> lines = [];
-    int lastSurahFound = 0;
     for (final lineData in lineDatas) {
       final lineArray = lineData as List<dynamic>;
       List<LineAyah> lineAyahs = [];
 
       int firstAyahIdx = lineArray.first['idx'] as int;
-      int surah = surahAyahStarts.indexOf(firstAyahIdx, lastSurahFound);
-      if (surah > 0) {
+      if (surahAyahStarts.lastOrNull == firstAyahIdx) {
+        int surah = getSurahAyahStarts().indexOf(surahAyahStarts.last);
+        assert(surah != -1);
         lines.add(Line([LineAyah(-surah, "")]));
-        lastSurahFound = surah + 1;
+        surahAyahStarts.removeLast();
       }
 
       for (final lineArrayItem in lineArray) {
@@ -99,10 +99,10 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
     final data = await rootBundle.loadString("assets/16line/$para.json");
     List<dynamic> pagesList = jsonDecode(data);
     List<Page> pages = [];
-    final surahAyahStarts = getSurahAyahStarts();
+    List<int> surahAyahStarts =
+        surahAyahOffsetsForPara(para - 1).reversed.toList();
     for (final p in pagesList) {
-      final page = Page.fromJson(p, surahAyahStarts);
-      pages.add(page);
+      pages.add(Page.fromJson(p, surahAyahStarts));
     }
     _pages = pages;
 
