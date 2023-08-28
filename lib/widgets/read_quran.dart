@@ -289,11 +289,6 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
     }
   }
 
-  bool isMobile() {
-    final platform = Theme.of(context).platform;
-    return platform == TargetPlatform.android || platform == TargetPlatform.iOS;
-  }
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
