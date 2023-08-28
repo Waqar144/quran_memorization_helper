@@ -72,8 +72,6 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
   List<Mutashabiha> _mutashabihat = [];
   ByteBuffer? _quranUtf8;
   final _repaintNotifier = StreamController<int>.broadcast();
-  // final ItemPositionsListener _itemPositionListener =
-  //     ItemPositionsListener.create();
 
   @override
   void initState() {
@@ -85,13 +83,6 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
   void dispose() {
     super.dispose();
     WakelockPlus.disable();
-
-    // save position
-    // final v = _itemPositionListener.itemPositions.value;
-    // if (v.isNotEmpty) {
-    //   int start = para16LinePageOffsets[widget.model.currentPara - 1] - 1;
-    //   Settings.instance.currentReadingPage = start + v.last.index;
-    // }
   }
 
   Future<List<Page>> doload() async {
@@ -223,7 +214,6 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
               ],
             ),
             onTap: () {
-              // widget.model.addAyahs([aOrM.ayat!]);
               widget.model.removeAyats(currentParaIndex, [aOrM.getAyahIdx()]);
               Navigator.of(context).pop();
               sendRepainEvent();
@@ -262,8 +252,6 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
       ));
       return widgets;
     }
-
-    // int firstPageNumber = para16LinePageOffsets[_currentParaIndex] - 1;
 
     List<Mutashabiha> mutashabihat = _getMutashabihaAyat(ayahIdx, surahIdx);
     AyatOrMutashabiha? aOrM = _getAyatInDB(ayahIdx, surahIdx);
@@ -637,7 +625,6 @@ class _PageWidgetState extends State<PageWidget> {
                 color: Colors.grey,
                 height: 1,
               ),
-              // shrinkWrap: true,
               itemCount: widget._pageLines.length,
               physics: const NeverScrollableScrollPhysics(),
               itemBuilder: (ctx, idx) {
