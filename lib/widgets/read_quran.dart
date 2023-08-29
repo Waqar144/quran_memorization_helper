@@ -294,11 +294,10 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
     return FutureBuilder(
       future: doload(),
       builder: (context, snapshot) {
-        if (_pages.isEmpty) return const SizedBox.shrink();
-        return ListView.builder(
-          physics: const NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          padding: EdgeInsets.zero,
+        if (_pages.isEmpty) {
+          return const SliverToBoxAdapter(child: SizedBox.shrink());
+        }
+        return SliverFixedExtentList.builder(
           itemExtent: 785,
           itemCount: _pages.length,
           itemBuilder: (ctx, index) {

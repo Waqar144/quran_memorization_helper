@@ -250,6 +250,12 @@ class _MainPageState extends State<MainPage>
                   buildThreeDotMenu()
                 ],
               ),
+              ValueListenableBuilder(
+                valueListenable: _paraModel.currentParaNotifier,
+                builder: (context, _, __) {
+                  return ReadQuranWidget(_paraModel);
+                },
+              )
             ],
           );
         },
