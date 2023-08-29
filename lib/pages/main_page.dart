@@ -232,24 +232,23 @@ class _MainPageState extends State<MainPage>
                 // scrolledUnderElevation: v ? 2 : 1,
                 snap: true,
                 pinned: false,
-                actions: [buildThreeDotMenu()],
-              ),
-              SliverToBoxAdapter(
-                child: ValueListenableBuilder(
-                  valueListenable: _paraModel.currentParaNotifier,
-                  builder: (context, _, __) {
-                    return ReadQuranWidget(_paraModel);
-                  },
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    _paraModel.setCurrentPara(_paraModel.currentPara + 1);
-                  },
-                  icon: const Icon(Icons.arrow_right),
-                  label: const Text("Next Para"),
-                ),
+                actions: [
+                  IconButton(
+                    tooltip: "Previous Para",
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () {
+                      _paraModel.setCurrentPara(_paraModel.currentPara - 1);
+                    },
+                  ),
+                  IconButton(
+                    tooltip: "Next Para",
+                    icon: const Icon(Icons.arrow_forward),
+                    onPressed: () {
+                      _paraModel.setCurrentPara(_paraModel.currentPara + 1);
+                    },
+                  ),
+                  buildThreeDotMenu()
+                ],
               ),
             ],
           );
