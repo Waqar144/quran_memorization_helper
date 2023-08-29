@@ -11,38 +11,41 @@ class MarkedAyahsPage extends StatefulWidget {
 }
 
 class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
-  final ValueNotifier<bool> _multipleSelectMode = ValueNotifier(false);
-
-  @override
-  void initState() {
-    super.initState();
-    _multipleSelectMode.addListener(widget.model.resetSelection);
-  }
+  bool _multipleSelectMode = false;
 
   @override
   void dispose() {
     super.dispose();
-    _multipleSelectMode.removeListener(widget.model.resetSelection);
     widget.model.resetSelection();
   }
 
   void _onDeletePress() {
-    assert(_multipleSelectMode.value);
+    assert(_multipleSelectMode);
     widget.model.removeSelectedAyahs();
-    _multipleSelectMode.value = false;
+    _onExitMultiSelectMode();
   }
 
   void _onExitMultiSelectMode() {
-    assert(_multipleSelectMode.value == true);
-    _multipleSelectMode.toggle();
+    if (_multipleSelectMode) {
+      setState(() {
+        _multipleSelectMode = false;
+        widget.model.resetSelection();
+      });
+    }
+  }
+
+  void _enterMultiselectMode() {
+    setState(() {
+      _multipleSelectMode = true;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        if (_multipleSelectMode.value) {
-          _multipleSelectMode.value = false;
+        if (_multipleSelectMode) {
+          _onExitMultiSelectMode();
           return false;
         }
         return true;
@@ -50,28 +53,30 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
       child: Scaffold(
         appBar: AppBar(
           title: Text("Marked ayahs for Para ${widget.model.currentPara}"),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.delete),
-              onPressed: _onDeletePress,
-            ),
-            IconButton(
-              icon: const Icon(Icons.select_all),
-              onPressed: () => widget.model.selectAll(),
-            ),
-            IconButton(
-              icon: const Icon(Icons.close),
-              onPressed: _onExitMultiSelectMode,
-            ),
-          ],
+          actions: _multipleSelectMode
+              ? [
+                  IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: _onDeletePress,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.select_all),
+                    onPressed: () => widget.model.selectAll(),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: _onExitMultiSelectMode,
+                  ),
+                ]
+              : null,
         ),
         body: ListenableBuilder(
-          listenable: Listenable.merge([widget.model, _multipleSelectMode]),
+          listenable: widget.model,
           builder: (context, _) {
             return AyatAndMutashabihaListView(
               widget.model.ayahs,
-              selectionMode: _multipleSelectMode.value,
-              onLongPress: () => _multipleSelectMode.value = true,
+              selectionMode: _multipleSelectMode,
+              onLongPress: _enterMultiselectMode,
             );
           },
         ),
