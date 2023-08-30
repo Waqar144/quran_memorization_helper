@@ -161,7 +161,7 @@ class ParaAyatModel extends ChangeNotifier {
     if (para <= 0) {
       para = 30;
     } else if (para > 30) {
-      para = 0;
+      para = 1;
     }
 
     currentParaNotifier.value = para;
