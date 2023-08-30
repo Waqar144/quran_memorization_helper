@@ -5,6 +5,7 @@ import 'package:quran_memorization_helper/pages/page_constants.dart';
 import 'package:quran_memorization_helper/models/quiz.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/pages.dart';
+import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
 import 'package:quran_memorization_helper/quran_data/surahs.dart';
 import 'package:quran_memorization_helper/widgets/read_quran.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -65,7 +66,7 @@ class _MainPageState extends State<MainPage>
   void _scrollToParaInDrawer() {
     _scrollToPosition(_paraListScrollController, () {
       int currentParaIdx = _paraModel.currentPara - 1;
-      return 48 * (currentParaIdx - 3);
+      return currentParaIdx > 8 ? 48 * (currentParaIdx - 3) : 0;
     });
   }
 
@@ -180,7 +181,14 @@ class _MainPageState extends State<MainPage>
         return ListTile(
           minVerticalPadding: 0,
           visualDensity: VisualDensity.compact,
-          title: Text("Para ${index + 1}"),
+          title: Text(
+            "${index + 1}. ${getParaNameForIndex(index)}",
+            style: const TextStyle(
+              letterSpacing: 0,
+              fontSize: 24,
+              fontFamily: 'Al Mushaf',
+            ),
+          ),
           onTap: () {
             _paraModel.setCurrentPara(index + 1);
             Navigator.of(context).pop();
@@ -299,8 +307,14 @@ class _MainPageState extends State<MainPage>
                         itemExtent: 48,
                         itemBuilder: (context, index) {
                           return ListTile(
-                            title:
-                                Text("${index + 1}. ${surahNameForIdx(index)}"),
+                            title: Text(
+                              "${index + 1}. ${surahDataForIdx(index, arabic: true).name}",
+                              style: const TextStyle(
+                                letterSpacing: 0,
+                                fontSize: 24,
+                                fontFamily: 'Al Mushaf',
+                              ),
+                            ),
                             onTap: () => _onSurahTapped(index),
                           );
                         },
