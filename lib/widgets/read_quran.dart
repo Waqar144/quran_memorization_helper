@@ -461,7 +461,12 @@ class _PageWidgetState extends State<PageWidget> {
   Widget getBismillah(int surahIdx) {
     surahIdx = -surahIdx;
 
-    if (widget._pageLines.length == 15) {
+    // 30th para ?
+    if (widget.pageNum >= 528) {
+      if (surahHas2LineHeadress(surahIdx)) {
+        return getTwoLinesBismillah(surahIdx);
+      }
+    } else if (widget._pageLines.length == 15) {
       return getTwoLinesBismillah(surahIdx);
     }
 
