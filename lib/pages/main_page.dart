@@ -231,40 +231,44 @@ class _MainPageState extends State<MainPage>
           if (snapshot.connectionState != ConnectionState.done) {
             return const SizedBox.shrink();
           }
-          return CustomScrollView(
-            controller: _scrollController,
-            slivers: [
-              SliverAppBar(
-                floating: true,
-                forceElevated: true,
-                // scrolledUnderElevation: v ? 2 : 1,
-                snap: true,
-                pinned: false,
-                actions: [
-                  IconButton(
-                    tooltip: "Previous Para",
-                    icon: const Icon(Icons.arrow_back),
-                    onPressed: () {
-                      _paraModel.setCurrentPara(_paraModel.currentPara - 1);
-                    },
-                  ),
-                  IconButton(
-                    tooltip: "Next Para",
-                    icon: const Icon(Icons.arrow_forward),
-                    onPressed: () {
-                      _paraModel.setCurrentPara(_paraModel.currentPara + 1);
-                    },
-                  ),
-                  buildThreeDotMenu()
-                ],
-              ),
-              ValueListenableBuilder(
-                valueListenable: _paraModel.currentParaNotifier,
-                builder: (context, _, __) {
-                  return ReadQuranWidget(_paraModel);
-                },
-              )
-            ],
+          return ScrollConfiguration(
+            // Disable overscroll as it causes performance issues in raster thread
+            behavior: const ScrollBehavior()..copyWith(overscroll: false),
+            child: CustomScrollView(
+              controller: _scrollController,
+              slivers: [
+                SliverAppBar(
+                  floating: true,
+                  forceElevated: true,
+                  // scrolledUnderElevation: v ? 2 : 1,
+                  snap: true,
+                  pinned: false,
+                  actions: [
+                    IconButton(
+                      tooltip: "Previous Para",
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () {
+                        _paraModel.setCurrentPara(_paraModel.currentPara - 1);
+                      },
+                    ),
+                    IconButton(
+                      tooltip: "Next Para",
+                      icon: const Icon(Icons.arrow_forward),
+                      onPressed: () {
+                        _paraModel.setCurrentPara(_paraModel.currentPara + 1);
+                      },
+                    ),
+                    buildThreeDotMenu()
+                  ],
+                ),
+                ValueListenableBuilder(
+                  valueListenable: _paraModel.currentParaNotifier,
+                  builder: (context, _, __) {
+                    return ReadQuranWidget(_paraModel);
+                  },
+                )
+              ],
+            ),
           );
         },
       ),
