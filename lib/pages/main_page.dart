@@ -245,17 +245,17 @@ class _MainPageState extends State<MainPage>
                   pinned: false,
                   actions: [
                     IconButton(
-                      tooltip: "Previous Para",
+                      tooltip: "Next Para",
                       icon: const Icon(Icons.arrow_back),
                       onPressed: () {
-                        _paraModel.setCurrentPara(_paraModel.currentPara - 1);
+                        _paraModel.setCurrentPara(_paraModel.currentPara + 1);
                       },
                     ),
                     IconButton(
-                      tooltip: "Next Para",
+                      tooltip: "Previous Para",
                       icon: const Icon(Icons.arrow_forward),
                       onPressed: () {
-                        _paraModel.setCurrentPara(_paraModel.currentPara + 1);
+                        _paraModel.setCurrentPara(_paraModel.currentPara - 1);
                       },
                     ),
                     buildThreeDotMenu()
