@@ -143,7 +143,7 @@ MutashabihaAyat ayatFromJsonObj(
 }
 
 Future<List<Mutashabiha>> importParaMutashabihas(
-    int paraIdx, final ByteBuffer quranTextUtf8) async {
+    int paraIdx, final ByteBuffer? quranTextUtf8) async {
   final mutashabihasJsonBytes =
       await rootBundle.load("assets/mutashabiha_data.json");
   final mutashabihasJson =

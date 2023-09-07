@@ -8,6 +8,7 @@ import 'package:quran_memorization_helper/models/settings.dart';
 import 'package:quran_memorization_helper/models/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/surahs.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
+import 'package:quran_memorization_helper/quran_data/ayah_offsets.dart';
 import 'package:quran_memorization_helper/widgets/mutashabiha_ayat_list_item.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
@@ -95,12 +96,8 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
     }
     _pages = pages;
 
-    if (_quranUtf8 == null) {
-      final data = await rootBundle.load("assets/quran.txt");
-      _quranUtf8 = data.buffer;
-    }
-
-    _mutashabihat = await importParaMutashabihas(para - 1, _quranUtf8!);
+    // we lazy load the mutashabiha ayat text
+    _mutashabihat = await importParaMutashabihas(para - 1, null);
     return _pages;
   }
 
@@ -206,12 +203,14 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
       }
     }
 
-    // helper function build actions when clicked on mutashabiha
-    List<Widget> buildMutashabihaActions(
-        List<Mutashabiha> mutashabihat, Ayat? aOrM) {
+    List<Mutashabiha> mutashabihat = _getMutashabihaAyat(ayahIdx, surahIdx);
+    Ayat? ayatInDb = _getAyatInDB(ayahIdx, surahIdx);
+    if (mutashabihat.isNotEmpty) {
+      // If the user clicked on a mutashabiha ayat, we show a bottom sheet
+
       List<Widget> widgets = [];
 
-      if (aOrM != null) {
+      if (ayatInDb != null) {
         widgets.add(ListTile(
           title: const Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -221,7 +220,8 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
             ],
           ),
           onTap: () {
-            widget.model.removeAyats(currentParaIndex, aOrM.ayahIdx, wordIdx);
+            widget.model
+                .removeAyats(currentParaIndex, ayatInDb.ayahIdx, wordIdx);
             Navigator.of(context).pop();
             sendRepainEvent();
           },
@@ -245,6 +245,24 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
         ));
       }
 
+      if (_quranUtf8 == null) {
+        final data = await rootBundle.load("assets/quran.txt");
+        _quranUtf8 = data.buffer;
+      }
+
+      for (int i = 0; i < mutashabihat.length; ++i) {
+        final mut = mutashabihat[i];
+        if (mut.src.text.isEmpty) {
+          mut.src.text = getAyahForIdx(mut.src.ayahIdx, _quranUtf8!).text;
+          mutashabihat[i] = mut;
+          for (int j = 0; j < mut.matches.length; ++j) {
+            final match = mut.matches[i];
+            match.text = getAyahForIdx(match.ayahIdx, _quranUtf8!).text;
+            mut.matches[j] = match;
+          }
+        }
+      }
+
       widgets.add(const Divider());
       widgets.add(ListView.separated(
         physics: const NeverScrollableScrollPhysics(),
@@ -255,13 +273,9 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
           return MutashabihaAyatListItem(mutashabiha: mutashabihat[index]);
         },
       ));
-      return widgets;
-    }
 
-    List<Mutashabiha> mutashabihat = _getMutashabihaAyat(ayahIdx, surahIdx);
-    Ayat? ayatInDb = _getAyatInDB(ayahIdx, surahIdx);
-    if (mutashabihat.isNotEmpty) {
-      // If the user clicked on a mutashabiha ayat, we show a bottom sheet
+      if (!mounted) return;
+
       return await showModalBottomSheet(
         context: context,
         builder: (context) {
@@ -270,7 +284,8 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: ListView(
-                  children: buildMutashabihaActions(mutashabihat, ayatInDb)),
+                children: widgets,
+              ),
             ),
           );
         },
