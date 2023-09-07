@@ -547,6 +547,53 @@ class _PageWidgetState extends State<PageWidget> {
     return false;
   }
 
+  bool isSajdaAyat(int surahIndex, int ayahIndex) {
+    return switch (surahIndex) {
+      6 => ayahIndex == 205,
+      12 => ayahIndex == 14,
+      15 => ayahIndex == 49,
+      16 => ayahIndex == 108,
+      18 => ayahIndex == 57,
+      21 => ayahIndex == 17,
+      24 => ayahIndex == 59,
+      26 => ayahIndex == 25,
+      31 => ayahIndex == 14,
+      37 => ayahIndex == 23,
+      40 => ayahIndex == 37,
+      52 => ayahIndex == 61,
+      83 => ayahIndex == 20,
+      95 => ayahIndex == 18,
+      _ => false
+    };
+  }
+
+  (String marker, bool isSajda) getAyahEndMarkerGlyphCode(
+      int surahIndex, int ayahIndex) {
+    if (isSajdaAyat(surahIndex, ayahIndex)) {
+      return (
+        switch (surahIndex) {
+          6 => '\uf68e',
+          12 => '\uf681',
+          15 => '\uf688',
+          16 => '\uf68d',
+          18 => '\uf689',
+          21 => '\uf682',
+          24 => '\uf68a',
+          26 => '\uf686',
+          31 => '\uf68b',
+          37 => '\uf685',
+          40 => '\uf687',
+          52 => '\uf68c',
+          83 => '\uf684',
+          95 => '\uf683',
+          _ => throw "Invalid sajda ayah"
+        },
+        true
+      );
+    }
+    return (String.fromCharCode(0xF500 + ayahIndex), false);
+  }
+
   List<TextSpan> _buildLineSpans(Line line, int lineIdx) {
     List<TextSpan> spans = [];
     for (final a in line.lineAyahs) {
@@ -555,7 +602,15 @@ class _PageWidgetState extends State<PageWidget> {
       final Ayat? ayahInDb = widget.getAyatInDB(surahAyahIdx, surahIdx);
       final bool isMutashabihaAyat =
           widget.isMutashabihaAyat(surahAyahIdx, surahIdx);
-      List<String> words = a.text.split('\u200c'); // zwj
+
+      final (marker, isSajdaAyat) =
+          getAyahEndMarkerGlyphCode(surahIdx, surahAyahIdx);
+      String text = a.text;
+      if (isSajdaAyat) {
+        text = text.replaceFirst('\u06E9', '');
+      }
+
+      List<String> words = text.split('\u200c'); // zwj
       final fullAyahTextWords =
           widget.getFullAyahText(a.ayahIndex, widget.pageNum).split('\u200c');
       int i = fullAyahTextWords.indexOf(words.first);
@@ -590,11 +645,13 @@ class _PageWidgetState extends State<PageWidget> {
       }
 
       if (_shouldDrawAyahEndMarker(a.ayahIndex, lineIdx)) {
+        bool hasRukuMarker = a.text.lastIndexOf("\uE022") != -1;
         spans.add(
           TextSpan(
-            text: String.fromCharCode(0xF500 + surahAyahIdx),
-            style: const TextStyle(
+            text: marker,
+            style: TextStyle(
               color: Colors.black,
+              backgroundColor: hasRukuMarker ? Colors.amber.shade100 : null,
               fontFamily: "AyahNumber",
               fontSize: 24,
             ),
