@@ -62,12 +62,6 @@ class AyatOrMutashabiha {
   }
 }
 
-int _comparator(AyatOrMutashabiha a, AyatOrMutashabiha b) {
-  int aIdx = a.getAyahIdx();
-  int bIdx = b.getAyahIdx();
-  return aIdx - bIdx;
-}
-
 extension ValueNotifierToggle on ValueNotifier<bool> {
   void toggle() {
     value = !value;
@@ -75,7 +69,7 @@ extension ValueNotifierToggle on ValueNotifier<bool> {
 }
 
 class ParaAyatModel extends ChangeNotifier {
-  Map<int, List<AyatOrMutashabiha>> _paraAyats = {};
+  Map<int, List<Ayat>> _paraAyats = {};
   ValueNotifier<int> currentParaNotifier = ValueNotifier<int>(1);
   Timer? timer;
 
@@ -96,7 +90,25 @@ class ParaAyatModel extends ChangeNotifier {
 
   set onParaChange(VoidCallback cb) => currentParaNotifier.addListener(cb);
 
-  List<AyatOrMutashabiha> get ayahs => _paraAyats[currentPara] ?? [];
+  List<Ayat> get ayahs => _paraAyats[currentPara] ?? [];
+
+  List<AyatOrMutashabiha> ayahsAndMutashabihasList(
+      List<Mutashabiha> allParaMutashabihas) {
+    List<AyatOrMutashabiha> list = [];
+    for (final a in ayahs) {
+      bool wasMutashabiha = false;
+      for (final m in allParaMutashabihas) {
+        if (m.src.ayahIdx == a.ayahIdx) {
+          list.add(AyatOrMutashabiha(ayat: null, mutashabiha: m));
+          wasMutashabiha = true;
+        }
+      }
+      if (!wasMutashabiha) {
+        list.add(AyatOrMutashabiha(ayat: a, mutashabiha: null));
+      }
+    }
+    return list;
+  }
 
   int get currentPara => currentParaNotifier.value;
 
@@ -108,50 +120,37 @@ class ParaAyatModel extends ChangeNotifier {
   }
 
   void _setParaAyahs(int para, List<Ayat> newAyahs) {
-    List<AyatOrMutashabiha> existingData = _paraAyats[para] ?? [];
-    final List<Ayat> existingAyahs = [
-      for (final a in existingData)
-        if (a.ayat != null) a.ayat!
-    ];
-    existingData.removeWhere((a) => a.ayat != null);
-
-    Set<Ayat> uniqueAyahs = {};
-    uniqueAyahs.addAll(existingAyahs);
-    uniqueAyahs.addAll(newAyahs);
-    if (uniqueAyahs.isEmpty) return;
-
-    for (final a in uniqueAyahs) {
-      existingData.add(AyatOrMutashabiha(ayat: a, mutashabiha: null));
+    if (newAyahs.isEmpty) {
+      return;
     }
 
-    existingData.sort(_comparator);
-    _paraAyats[para] = existingData;
-    persist();
-  }
+    List<Ayat> existingAyahs = _paraAyats[para] ?? [];
 
-  void setParaMutashabihas(int paraIndex, List<Mutashabiha> newMutashabihas) {
-    List<AyatOrMutashabiha> existingData = _paraAyats[paraIndex + 1] ?? [];
-    // copy out all mutashabihas for this para
-    final List<Mutashabiha> existingMutashabihas = [
-      for (final m in existingData)
-        if (m.mutashabiha != null) m.mutashabiha!
-    ];
-
-    // remove them from main list
-    existingData.removeWhere((a) => a.mutashabiha != null);
-
-    Set<Mutashabiha> uniqueMutashabihas = {};
-    uniqueMutashabihas.addAll(existingMutashabihas);
-    uniqueMutashabihas.addAll(newMutashabihas);
-    if (uniqueMutashabihas.isEmpty) return;
-
-    for (final m in uniqueMutashabihas) {
-      existingData.add(AyatOrMutashabiha(ayat: null, mutashabiha: m));
+    Ayat first = newAyahs.first;
+    for (final a in existingAyahs) {
+      if (a.ayahIdx == first.ayahIdx) {
+        for (final w in first.markedWords) {
+          if (!a.markedWords.contains(w)) {
+            a.markedWords.add(w);
+          }
+        }
+        newAyahs.removeAt(0);
+        if (newAyahs.isEmpty) {
+          break;
+        }
+        first = newAyahs.first;
+      }
     }
 
-    existingData.sort(_comparator);
-    _paraAyats[paraIndex + 1] = existingData;
-    notifyListeners();
+    if (newAyahs.isNotEmpty) {
+      existingAyahs.addAll(newAyahs);
+    }
+
+    existingAyahs.sort((a, b) {
+      return a.ayahIdx - b.ayahIdx;
+    });
+
+    _paraAyats[para] = existingAyahs;
     persist();
   }
 
@@ -175,37 +174,34 @@ class ParaAyatModel extends ChangeNotifier {
   void removeSelectedAyahs() {
     final list = _paraAyats[currentPara];
     if (list == null) return;
-    list.removeWhere((final AyatOrMutashabiha ayah) => ayah.selected);
+    list.removeWhere((final Ayat ayah) => ayah.selected ?? false);
     _paraAyats[currentPara] = list;
     notifyListeners();
     persist();
   }
 
   /// Remove ayats from given para index
-  void removeAyats(int paraIndex, List<int> absoluteAyahIndexes) {
-    final List<AyatOrMutashabiha>? ayahs = _paraAyats[paraIndex + 1];
+  void removeAyats(int paraIndex, int absoluteAyahIndex, int wordIndex) {
+    final List<Ayat>? ayahs = _paraAyats[paraIndex + 1];
     if (ayahs == null) return;
-    ayahs.removeWhere((AyatOrMutashabiha a) =>
-        a.ayat != null && absoluteAyahIndexes.contains(a.getAyahIdx()));
-    _paraAyats[paraIndex + 1] = ayahs;
-    notifyListeners();
-    persist();
-  }
-
-  /// Remove mutashabiha from given para index
-  void removeMutashabihas(int paraIndex, List<Mutashabiha> mutashabihas) {
-    final List<AyatOrMutashabiha>? ayahs = _paraAyats[paraIndex + 1];
-    if (ayahs == null) return;
-    ayahs.removeWhere((AyatOrMutashabiha a) {
-      if (a.mutashabiha != null) {
-        for (final m in mutashabihas) {
-          if (m.src.surahAyahIndexes == a.mutashabiha!.src.surahAyahIndexes) {
-            return true;
+    int removeAyahIndex = -1;
+    int i = 0;
+    for (final a in ayahs) {
+      if (a.ayahIdx == absoluteAyahIndex) {
+        if (a.markedWords.contains(wordIndex)) {
+          a.markedWords.remove(wordIndex);
+          if (a.markedWords.isEmpty) {
+            removeAyahIndex = i;
           }
         }
       }
-      return false;
-    });
+      i++;
+    }
+
+    if (removeAyahIndex != -1) {
+      ayahs.removeAt(removeAyahIndex);
+    }
+
     _paraAyats[paraIndex + 1] = ayahs;
     notifyListeners();
     persist();
@@ -219,7 +215,7 @@ class ParaAyatModel extends ChangeNotifier {
 
   void selectAll() {
     if (ayahs.isEmpty) return;
-    bool value = ayahs.first.selected;
+    bool value = ayahs.first.selected ?? false;
     for (var i = 0; i < ayahs.length; i++) {
       ayahs[i].selected = !value;
     }
@@ -235,7 +231,7 @@ class ParaAyatModel extends ChangeNotifier {
   }
 
   bool isIndexSelected(int index) =>
-      index < ayahs.length && (ayahs[index].selected);
+      index < ayahs.length && (ayahs[index].selected ?? false);
 
   void merge(Map<int, List<Ayat>> paraAyahs) {
     for (final e in paraAyahs.entries) {
@@ -248,43 +244,45 @@ class ParaAyatModel extends ChangeNotifier {
   }
 
   Future<void> _resetfromJson(Map<String, dynamic> json) async {
-    final Map<int, List<AyatOrMutashabiha>> paraAyats = {};
+    final Map<int, List<Ayat>> paraAyats = {};
     try {
       for (final MapEntry<String, dynamic> entry in json.entries) {
         final int? para = int.tryParse(entry.key);
         if (para == null || para > 30 || para < 1) continue;
 
         final paraJson = entry.value as Map<String, dynamic>;
-        List<AyatOrMutashabiha> paraData = [];
+        List<Ayat> paraData = [];
 
         var ayahJsons = paraJson["ayats"] as List<dynamic>?;
         if (ayahJsons != null) {
-          Set<int> uniqueAyahIdexes = {for (final a in ayahJsons) a as int};
-          List<int> ayahIndexes = uniqueAyahIdexes.toList();
-          ayahIndexes.sort();
-          for (int a in ayahIndexes) {
-            paraData.add(AyatOrMutashabiha(
-                ayat: Ayat("", ayahIdx: a), mutashabiha: null));
+          for (final dynamic a in ayahJsons) {
+            if (a is int) {
+              paraData.add(Ayat("", [0], ayahIdx: a));
+            } else {
+              final int idx = a['idx'];
+              final List<int> wordIdxes = [
+                for (final w in a['words']) w as int
+              ];
+              paraData.add(Ayat("", wordIdxes, ayahIdx: idx));
+            }
           }
         }
 
+        // migrate old stuff
         var mutashabihasJson = paraJson["mutashabihas"] as List<dynamic>?;
         if (mutashabihasJson != null) {
           for (final m in mutashabihasJson) {
             if (m == null) continue;
             int ctx = 0; // no context here
             MutashabihaAyat src = ayatFromJsonObj(m["src"], null, ctx);
-            List<MutashabihaAyat> matches = [];
-            for (final match in m["muts"]) {
-              matches.add(ayatFromJsonObj(match, null, ctx));
-            }
-            paraData.add(AyatOrMutashabiha(
-                ayat: null, mutashabiha: Mutashabiha(src, matches)));
+            paraData.add(Ayat("", [0], ayahIdx: src.ayahIdx));
           }
         }
 
         if (paraData.isEmpty) continue;
-        paraData.sort(_comparator);
+        paraData.sort((a, b) {
+          return a.ayahIdx - b.ayahIdx;
+        });
 
         paraAyats[para] = paraData;
       }
@@ -324,15 +322,8 @@ class ParaAyatModel extends ChangeNotifier {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> json = {};
     for (final kv in _paraAyats.entries) {
-      List<Ayat> ayats = [
-        for (final a in kv.value)
-          if (a.ayat != null) a.ayat!
-      ];
-      List<Mutashabiha> mutashabihas = [
-        for (final m in kv.value)
-          if (m.mutashabiha != null) m.mutashabiha!
-      ];
-      json[kv.key.toString()] = {'ayats': ayats, 'mutashabihas': mutashabihas};
+      List<Ayat> ayats = [for (final a in kv.value) a];
+      json[kv.key.toString()] = {'ayats': ayats};
     }
     json["currentPara"] = currentParaNotifier.value;
     return json;

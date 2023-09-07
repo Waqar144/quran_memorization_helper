@@ -142,11 +142,18 @@ class _MainPageState extends State<MainPage>
 
   void _openMarkedAyahsPage() async {
     final data = await rootBundle.load("assets/quran.txt");
-    for (final a in _paraModel.ayahs) {
+    final List<Mutashabiha> mutashabihat =
+        await importParaMutashabihas(_paraModel.currentPara - 1, data.buffer);
+    final ayahAndMutashabihas =
+        _paraModel.ayahsAndMutashabihasList(mutashabihat);
+    for (final a in ayahAndMutashabihas) {
       a.ensureTextIsLoaded(data.buffer);
     }
     if (!mounted) return;
-    Navigator.pushNamed(context, markedAyahsPage, arguments: _paraModel);
+    Navigator.pushNamed(context, markedAyahsPage, arguments: {
+      'model': _paraModel,
+      'ayahAndMutashabihas': ayahAndMutashabihas
+    });
   }
 
   Widget buildThreeDotMenu() {

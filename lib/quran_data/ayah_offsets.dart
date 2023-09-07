@@ -18,10 +18,11 @@ AyahOffset getAyahRange(int ayah) {
   return AyahOffset(s, len);
 }
 
-Ayat getAyahForIdx(int ayahIdx, final ByteBuffer quranText) {
+Ayat getAyahForIdx(int ayahIdx, final ByteBuffer quranText,
+    {List<int> markedWords = const []}) {
   final AyahOffset off = getAyahRange(ayahIdx);
   final text = utf8.decode(quranText.asUint8List(off.start, off.len));
-  return Ayat(text.trim(), ayahIdx: ayahIdx);
+  return Ayat(text.trim(), markedWords, ayahIdx: ayahIdx);
 }
 
 final Uint32List _ayahOffsets = Uint32List.fromList([

@@ -4,7 +4,10 @@ import 'package:quran_memorization_helper/widgets/ayat_and_mutashabiha_list_view
 
 class MarkedAyahsPage extends StatefulWidget {
   final ParaAyatModel model;
-  const MarkedAyahsPage(this.model, {super.key});
+  final List<AyatOrMutashabiha> ayahAndMutashabihas;
+  MarkedAyahsPage(Map<String, dynamic> arguments, {super.key})
+      : model = arguments['model'],
+        ayahAndMutashabihas = arguments['ayahAndMutashabihas'];
 
   @override
   State<StatefulWidget> createState() => _MarkedAyahsPageState();
@@ -74,7 +77,7 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
           listenable: widget.model,
           builder: (context, _) {
             return AyatAndMutashabihaListView(
-              widget.model.ayahs,
+              widget.ayahAndMutashabihas,
               selectionMode: _multipleSelectMode,
               onLongPress: _enterMultiselectMode,
             );

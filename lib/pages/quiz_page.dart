@@ -67,8 +67,11 @@ class _QuizPageState extends State<QuizPage> {
   _QuizAyahQuestion _addQuestion(
       String ayah, String nextAyah, int paraIndex, int ayahIdx) {
     _QuizAyahQuestion nextAyahQuestion() {
-      return _QuizAyahQuestion(Ayat(ayah, ayahIdx: ayahIdx),
-          Ayat(nextAyah, ayahIdx: ayahIdx + 1), QuizMode.nextAyah, paraIndex);
+      return _QuizAyahQuestion(
+          Ayat(ayah, [], ayahIdx: ayahIdx),
+          Ayat(nextAyah, [], ayahIdx: ayahIdx + 1),
+          QuizMode.nextAyah,
+          paraIndex);
     }
 
     _QuizAyahQuestion endAyahQuestion() {
@@ -76,8 +79,8 @@ class _QuizPageState extends State<QuizPage> {
       int replaceStart = min((words.length / 2).ceil(), 6);
       final question =
           "${words.sublist(0, words.length - replaceStart).join(' ')}...";
-      return _QuizAyahQuestion(Ayat(question, ayahIdx: ayahIdx),
-          Ayat(ayah, ayahIdx: ayahIdx), QuizMode.endAyah, paraIndex);
+      return _QuizAyahQuestion(Ayat(question, [], ayahIdx: ayahIdx),
+          Ayat(ayah, [], ayahIdx: ayahIdx), QuizMode.endAyah, paraIndex);
     }
 
     if (widget._creationArgs.mode == QuizMode.nextAyah) {

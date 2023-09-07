@@ -22,15 +22,14 @@ MaterialPageRoute handleRoute(RouteSettings settings) {
     quizPage => MaterialPageRoute(
         builder: (ctx) => QuizPage(settings.arguments as QuizCreationArgs)),
     // MutashabihasPage
-    mutashabihasPage => MaterialPageRoute(
-        builder: (ctx) =>
-            MutashabihasPage(settings.arguments as ParaAyatModel)),
+    mutashabihasPage =>
+      MaterialPageRoute(builder: (ctx) => const MutashabihasPage()),
     // ParaMutashabihas
     paraMutashabihasPage => MaterialPageRoute(
-        builder: (ctx) =>
-            ParaMutashabihas(settings.arguments as ParaMutashabihasArgs)),
+        builder: (ctx) => ParaMutashabihas(settings.arguments as int)),
     markedAyahsPage => MaterialPageRoute(
-        builder: (ctx) => MarkedAyahsPage(settings.arguments as ParaAyatModel)),
+        builder: (ctx) =>
+            MarkedAyahsPage(settings.arguments as Map<String, dynamic>)),
     // MainPage is the default
     _ => MaterialPageRoute(builder: (ctx) => const MainPage())
   };

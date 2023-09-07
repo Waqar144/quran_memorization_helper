@@ -6,7 +6,8 @@ import 'para_bounds.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
 class Ayat {
-  Ayat(this.text, {required this.ayahIdx});
+  Ayat(this.text, this.markedWords, {required this.ayahIdx});
+  List<int> markedWords;
   String text = "";
   final int ayahIdx;
   bool? selected;
@@ -17,7 +18,10 @@ class Ayat {
   }
 
   dynamic toJson() {
-    return ayahIdx;
+    return {
+      'idx': ayahIdx,
+      'words': markedWords,
+    };
   }
 
   /// returns "SurahName":AyahNumInSurah
@@ -36,8 +40,8 @@ class MutashabihaAyat extends Ayat {
   final List<int> surahAyahIndexes;
   final int paraIdx;
   final int surahIdx;
-  MutashabihaAyat(
-      this.paraIdx, this.surahIdx, this.surahAyahIndexes, super.text,
+  MutashabihaAyat(this.paraIdx, this.surahIdx, this.surahAyahIndexes,
+      super.text, super.markedWords,
       {required super.ayahIdx});
 
   String surahAyahIndexesString() {
@@ -130,7 +134,7 @@ MutashabihaAyat ayatFromJsonObj(
     if (showContext && quranTextUtf8 != null) {
       text = _getContext(ayahIdxes.last, text, quranTextUtf8);
     }
-    return MutashabihaAyat(paraIdx, surahIdx, surahAyahIdxes, text,
+    return MutashabihaAyat(paraIdx, surahIdx, surahAyahIdxes, text, [],
         ayahIdx: ayahIdxes.first);
   } catch (e) {
     // print(e);
@@ -138,7 +142,8 @@ MutashabihaAyat ayatFromJsonObj(
   }
 }
 
-Future<List<Mutashabiha>> importParaMutashabihas(int paraIdx) async {
+Future<List<Mutashabiha>> importParaMutashabihas(
+    int paraIdx, final ByteBuffer quranTextUtf8) async {
   final mutashabihasJsonBytes =
       await rootBundle.load("assets/mutashabiha_data.json");
   final mutashabihasJson =
@@ -148,15 +153,14 @@ Future<List<Mutashabiha>> importParaMutashabihas(int paraIdx) async {
   final list = map[paraNum.toString()] as List<dynamic>;
 
   List<Mutashabiha> mutashabihas = [];
-  final ByteData data = await rootBundle.load("assets/quran.txt");
   for (final m in list) {
     if (m == null) continue;
     try {
       int ctx = (m["ctx"] as int?) ?? 0;
-      MutashabihaAyat src = ayatFromJsonObj(m["src"], data.buffer, ctx);
+      MutashabihaAyat src = ayatFromJsonObj(m["src"], quranTextUtf8, ctx);
       List<MutashabihaAyat> matches = [];
       for (final match in m["muts"]) {
-        matches.add(ayatFromJsonObj(match, data.buffer, ctx));
+        matches.add(ayatFromJsonObj(match, quranTextUtf8, ctx));
       }
       mutashabihas.add(Mutashabiha(src, matches));
     } catch (e) {
