@@ -88,6 +88,9 @@ flutter:
     - family: Al Mushaf
       fonts:
         - asset: fonts/PDMS_SALEEM_QURANFONTQESHIP_0.ttf
+    - family: AyahNumber
+      fonts:
+        - asset: fonts/ayahNumFont.ttf
         # - asset: fonts/Al Qalam Quran Majeed 2.ttf
   #   - family: Schyler
   #     fonts:
