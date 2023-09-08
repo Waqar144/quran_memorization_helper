@@ -147,6 +147,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
               foundStart = true;
             }
             text += lineAyah.text;
+            text += "\u200c";
           } else {
             if (foundStart) {
               break;
@@ -594,6 +595,27 @@ class _PageWidgetState extends State<PageWidget> {
     return (String.fromCharCode(0xF500 + ayahIndex), false);
   }
 
+  // Finds the correct position of the first word of the line
+  // in the full ayah text
+  int getFirstWordIndex(
+      List<String> fullAyahWords, List<String> currentLineWords,
+      {int start = -1}) {
+    String first = currentLineWords.first;
+    int idx = fullAyahWords.indexOf(first, start);
+    int c = 0;
+    const int maxMatch = 4;
+    for (int i = idx;
+        i < fullAyahWords.length && c < currentLineWords.length;
+        ++i, ++c) {
+      String next = currentLineWords[c];
+      if (fullAyahWords[i] != next) {
+        return getFirstWordIndex(fullAyahWords, currentLineWords, start: i + 1);
+      }
+      if (c >= maxMatch) break;
+    }
+    return idx;
+  }
+
   List<TextSpan> _buildLineSpans(Line line, int lineIdx) {
     List<TextSpan> spans = [];
     for (final a in line.lineAyahs) {
@@ -606,14 +628,29 @@ class _PageWidgetState extends State<PageWidget> {
       final (marker, isSajdaAyat) =
           getAyahEndMarkerGlyphCode(surahIdx, surahAyahIdx);
       String text = a.text;
+      List<String> fullAyahTextWords =
+          widget.getFullAyahText(a.ayahIndex, widget.pageNum).split('\u200c');
       if (isSajdaAyat) {
         text = text.replaceFirst('\u06E9', '');
+
+        for (int i = fullAyahTextWords.length - 1; i >= 0; --i) {
+          String w = fullAyahTextWords[i];
+          int found = w.indexOf('\u06E9');
+          if (found != -1) {
+            // for whatever reason, dart is unable to replace '\u06E9' from this word
+            // so manually grab substrings of before and after the marker and create
+            // a new string
+            String b = w.substring(0, found);
+            String a = w.substring(found + 1, null);
+            w = b + a;
+            fullAyahTextWords[i] = w;
+            break;
+          }
+        }
       }
 
       List<String> words = text.split('\u200c'); // zwj
-      final fullAyahTextWords =
-          widget.getFullAyahText(a.ayahIndex, widget.pageNum).split('\u200c');
-      int i = fullAyahTextWords.indexOf(words.first);
+      int i = getFirstWordIndex(fullAyahTextWords, words);
 
       for (final w in words) {
         int wordIdx = i;
