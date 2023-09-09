@@ -708,7 +708,7 @@ class _PageWidgetState extends State<PageWidget> {
         fontFamily: "Al Mushaf",
         fontSize: 24,
         letterSpacing: 0,
-        wordSpacing: 6,
+        wordSpacing: 1,
       ),
     );
   }
