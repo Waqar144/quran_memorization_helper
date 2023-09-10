@@ -51,7 +51,8 @@ class _MainPageState extends State<MainPage>
   }
 
   void _onDrawerTabChange() {
-    if (_drawerTabController.indexIsChanging) {
+    if (!_drawerTabController.indexIsChanging) {
+      //listen to false so we handle both drag and tap
       if (_drawerTabController.index == 0) {
         _scrollToParaInDrawer();
       } else if (_drawerTabController.index == 1) {
