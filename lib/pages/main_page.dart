@@ -183,6 +183,7 @@ class _MainPageState extends State<MainPage>
   }
 
   Widget paraListItem(int index) {
+    int count = _paraModel.markedAyahCountForPara(index);
     return ValueListenableBuilder(
       valueListenable: _paraModel.currentParaNotifier,
       builder: (context, value, _) {
@@ -190,12 +191,22 @@ class _MainPageState extends State<MainPage>
           minVerticalPadding: 0,
           visualDensity: VisualDensity.compact,
           title: Text(
-            "${index + 1}. ${getParaNameForIndex(index)}",
+            getParaNameForIndex(index),
             style: const TextStyle(
               letterSpacing: 0,
               fontSize: 24,
               fontFamily: 'Al Mushaf',
             ),
+          ),
+          leading: Text(
+            "${index + 1}.",
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 20),
+          ),
+          trailing: Text(
+            count > 0 ? "$count" : "",
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 16, color: Colors.red),
           ),
           onTap: () {
             _paraModel.setCurrentPara(index + 1);

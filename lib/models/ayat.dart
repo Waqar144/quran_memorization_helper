@@ -171,6 +171,10 @@ class ParaAyatModel extends ChangeNotifier {
     persist();
   }
 
+  int markedAyahCountForPara(int paraIdx) {
+    return _paraAyats[paraIdx + 1]?.length ?? 0;
+  }
+
   void removeSelectedAyahs() {
     final list = _paraAyats[currentPara];
     if (list == null) return;
