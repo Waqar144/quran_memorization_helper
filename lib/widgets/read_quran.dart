@@ -728,7 +728,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
 
       List<Widget> widgets = [];
 
-      if (ayatInDb != null) {
+      if (ayatInDb != null && ayatInDb.markedWords.contains(wordIdx)) {
         widgets.add(ListTile(
           title: const Row(
             mainAxisAlignment: MainAxisAlignment.center,
