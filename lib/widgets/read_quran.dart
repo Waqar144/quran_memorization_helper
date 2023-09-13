@@ -8,7 +8,6 @@ import 'package:quran_memorization_helper/models/settings.dart';
 import 'package:quran_memorization_helper/models/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/surahs.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
-import 'package:quran_memorization_helper/quran_data/ayah_offsets.dart';
 import 'package:quran_memorization_helper/widgets/mutashabiha_ayat_list_item.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
@@ -528,6 +527,22 @@ bool _shouldAddSpaces(int pageNum, int lineIdx) {
   };
   return pageToLines[pageNum]?.contains(lineIdx) ?? false;
 }
+
+final _markedWordStyle = TextStyle(
+  inherit: true,
+  backgroundColor: Colors.red.shade100,
+  color: Colors.red,
+);
+final _markedAyahBGStyle = TextStyle(
+  inherit: true,
+  backgroundColor: Colors.red.shade100,
+);
+final _markedMutAyahBGStyle = TextStyle(
+  inherit: true,
+  color: Colors.indigo,
+  backgroundColor: Colors.red.shade100,
+);
+const TextStyle _mutStyle = TextStyle(inherit: true, color: Colors.indigo);
 
 class LineAyah {
   final int ayahIndex;
@@ -1162,30 +1177,26 @@ class _PageWidgetState extends State<PageWidget> {
 
       for (final w in words) {
         int wordIdx = i;
+        final tapHandler = TapGestureRecognizer()
+          ..onTap = () => _tapHandler(surahIdx, surahAyahIdx, wordIdx);
+        TextStyle? style;
+
         if (ayahInDb != null) {
-          spans.add(TextSpan(
-              text: w,
-              recognizer: TapGestureRecognizer()
-                ..onTap = () => _tapHandler(surahIdx, surahAyahIdx, wordIdx),
-              style: TextStyle(
-                inherit: true,
-                backgroundColor: Colors.red.shade100,
-                color:
-                    ayahInDb.markedWords.contains(wordIdx) ? Colors.red : null,
-              )));
+          if (ayahInDb.markedWords.contains(wordIdx)) {
+            style = _markedWordStyle;
+          } else if (isMutashabihaAyat) {
+            style = _markedMutAyahBGStyle;
+          } else {
+            style = _markedAyahBGStyle;
+          }
         } else if (isMutashabihaAyat) {
-          spans.add(TextSpan(
-              text: w,
-              recognizer: TapGestureRecognizer()
-                ..onTap = () => _tapHandler(surahIdx, surahAyahIdx, wordIdx),
-              style: const TextStyle(inherit: true, color: Colors.indigo)));
-        } else {
-          spans.add(TextSpan(
-              recognizer: TapGestureRecognizer()
-                ..onTap = () => _tapHandler(surahIdx, surahAyahIdx, wordIdx),
-              text: w));
+          style = _mutStyle;
         }
+        // word
+        spans.add(TextSpan(recognizer: tapHandler, text: w, style: style));
+        // separator
         spans.add(const TextSpan(text: '\u200c'));
+        // space
         if (_shouldAddSpaces(widget.pageNum, lineIdx)) {
           spans.add(const TextSpan(text: ' '));
         }
