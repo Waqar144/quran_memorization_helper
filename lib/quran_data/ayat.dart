@@ -50,6 +50,17 @@ class MutashabihaAyat extends Ayat {
     });
   }
 
+  void loadText(final ByteBuffer quranTextUtf8) {
+    if (text.isNotEmpty) return;
+    for (final a in surahAyahIndexes) {
+      final absIdx = toAbsoluteAyahOffset(surahIdx, a);
+      text += getAyahForIdx(absIdx, quranTextUtf8).text;
+      if (a != surahAyahIndexes.last) {
+        text += ayahSeparator;
+      }
+    }
+  }
+
   @override
   Map<String, dynamic> toJson() {
     return surahAyahIndexes.length == 1
@@ -78,6 +89,17 @@ class Mutashabiha {
       'src': src.toJson(),
       'muts': matches.map((m) => m.toJson()).toList()
     };
+  }
+
+  void loadText(final ByteBuffer quranTextUtf8) {
+    if (src.text.isEmpty) {
+      src.loadText(quranTextUtf8);
+      for (int j = 0; j < matches.length; ++j) {
+        final match = matches[j];
+        match.loadText(quranTextUtf8);
+        matches[j] = match;
+      }
+    }
   }
 
   @override

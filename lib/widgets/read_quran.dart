@@ -769,16 +769,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
       }
 
       for (int i = 0; i < mutashabihat.length; ++i) {
-        final mut = mutashabihat[i];
-        if (mut.src.text.isEmpty) {
-          mut.src.text = getAyahForIdx(mut.src.ayahIdx, _quranUtf8!).text;
-          mutashabihat[i] = mut;
-          for (int j = 0; j < mut.matches.length; ++j) {
-            final match = mut.matches[i];
-            match.text = getAyahForIdx(match.ayahIdx, _quranUtf8!).text;
-            mut.matches[j] = match;
-          }
-        }
+        mutashabihat[i].loadText(_quranUtf8!);
       }
 
       widgets.add(const Divider());
