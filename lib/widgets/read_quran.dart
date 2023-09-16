@@ -544,6 +544,23 @@ final _markedMutAyahBGStyle = TextStyle(
 );
 const TextStyle _mutStyle = TextStyle(inherit: true, color: Colors.indigo);
 
+class CustomPageViewScrollPhysics extends ScrollPhysics {
+  const CustomPageViewScrollPhysics({ScrollPhysics? parent})
+      : super(parent: parent);
+
+  @override
+  CustomPageViewScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return CustomPageViewScrollPhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  SpringDescription get spring => const SpringDescription(
+        mass: 100,
+        stiffness: 100,
+        damping: 1.2,
+      );
+}
+
 class LineAyah {
   final int ayahIndex;
   final String text;
@@ -589,8 +606,9 @@ class Page {
 
 class ReadQuranWidget extends StatefulWidget {
   final ParaAyatModel model;
+  final PageController pageController;
 
-  const ReadQuranWidget(this.model, {super.key});
+  const ReadQuranWidget(this.model, {required this.pageController, super.key});
 
   @override
   State<StatefulWidget> createState() => _ReadQuranWidget();
@@ -837,38 +855,77 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
         if (_pages.isEmpty) {
           return const SliverToBoxAdapter(child: SizedBox.shrink());
         }
-        return SliverFixedExtentList.builder(
-          itemExtent: 785,
-          itemCount: _pages.length,
-          itemBuilder: (ctx, index) {
-            return Container(
-              height: 785,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.background,
-                boxShadow: [
-                  BoxShadow(
-                      color: Theme.of(context).shadowColor,
-                      blurRadius: 1,
-                      offset: const Offset(1, 1)),
-                  BoxShadow(
-                      color: Theme.of(context).shadowColor,
-                      blurRadius: 1,
-                      offset: const Offset(-1, -1))
-                ],
-              ),
-              child: ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: PageWidget(
-                  _pages[index].pageNum,
-                  _pages[index].lines,
-                  getAyatInDB: _getAyatInDB,
-                  onAyahTapped: _onAyahTapped,
-                  isMutashabihaAyat: _isMutashabihaAyat,
-                  isAyahFull: _isAyahFull,
-                  getFullAyahText: _getFullAyahText,
-                  repaintStream: _repaintNotifier.stream,
+
+        return ListenableBuilder(
+          listenable: Settings.instance,
+          builder: (context, _) {
+            // Page View
+            if (Settings.instance.pageView) {
+              return SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 785,
+                  child: PageView.builder(
+                    controller: widget.pageController,
+                    reverse: true,
+                    itemCount: _pages.length,
+                    scrollBehavior: const ScrollBehavior()
+                      ..copyWith(overscroll: false),
+                    physics: const CustomPageViewScrollPhysics(),
+                    itemBuilder: (ctx, index) {
+                      return ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: PageWidget(
+                          _pages[index].pageNum,
+                          _pages[index].lines,
+                          getAyatInDB: _getAyatInDB,
+                          onAyahTapped: _onAyahTapped,
+                          isMutashabihaAyat: _isMutashabihaAyat,
+                          isAyahFull: _isAyahFull,
+                          getFullAyahText: _getFullAyahText,
+                          repaintStream: _repaintNotifier.stream,
+                        ),
+                      );
+                    },
+                  ),
                 ),
-              ),
+              );
+            }
+
+            // Vertical Scroll View
+            return SliverFixedExtentList.builder(
+              itemExtent: 785,
+              itemCount: _pages.length,
+              itemBuilder: (ctx, index) {
+                return Container(
+                  height: 785,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.background,
+                    boxShadow: [
+                      BoxShadow(
+                          color: Theme.of(context).shadowColor,
+                          blurRadius: 1,
+                          offset: const Offset(1, 1)),
+                      BoxShadow(
+                          color: Theme.of(context).shadowColor,
+                          blurRadius: 1,
+                          offset: const Offset(-1, -1))
+                    ],
+                  ),
+                  child: ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: PageWidget(
+                      _pages[index].pageNum,
+                      _pages[index].lines,
+                      getAyatInDB: _getAyatInDB,
+                      onAyahTapped: _onAyahTapped,
+                      isMutashabihaAyat: _isMutashabihaAyat,
+                      isAyahFull: _isAyahFull,
+                      getFullAyahText: _getFullAyahText,
+                      repaintStream: _repaintNotifier.stream,
+                    ),
+                  ),
+                );
+              },
             );
           },
         );

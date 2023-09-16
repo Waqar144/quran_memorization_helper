@@ -10,6 +10,7 @@ class Settings extends ChangeNotifier {
   int _currentReadingPara = 1;
   double _currentReadingScroll = 0.0;
   Timer? timer;
+  bool _pageView = true;
 
   // The font size of ayahs
   int _fontSize = 24;
@@ -41,6 +42,13 @@ class Settings extends ChangeNotifier {
     persist();
   }
 
+  bool get pageView => _pageView;
+  set pageView(v) {
+    _pageView = v;
+    persist();
+    notifyListeners();
+  }
+
   factory Settings() {
     return _instance;
   }
@@ -50,7 +58,8 @@ class Settings extends ChangeNotifier {
       'fontSize': fontSize,
       'wordSpacing': wordSpacing,
       'currentReadingPara': _currentReadingPara,
-      'currentReadingScrollOffset': _currentReadingScroll
+      'currentReadingScrollOffset': _currentReadingScroll,
+      'pageView': _pageView,
     };
     String json = const JsonEncoder.withIndent("  ").convert(map);
     await utils.saveJsonToDisk(json, "settings");
@@ -63,6 +72,7 @@ class Settings extends ChangeNotifier {
     _wordSpacing = json["wordSpacing"] ?? 1;
     _currentReadingPara = json["currentReadingPara"] ?? 1;
     _currentReadingScroll = json["currentReadingScrollOffset"] ?? 0.0;
+    _pageView = json["pageView"] ?? true;
   }
 
   Future<void> saveScrollPosition(int paraNumber, double scrollOffset) async {

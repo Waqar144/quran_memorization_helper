@@ -24,6 +24,7 @@ class _MainPageState extends State<MainPage>
   final ScrollController _paraListScrollController = ScrollController();
   final ScrollController _surahListScrollController = ScrollController();
   late final TabController _drawerTabController;
+  final PageController _pageController = PageController();
 
   @override
   void initState() {
@@ -47,6 +48,9 @@ class _MainPageState extends State<MainPage>
   void scrollToTop() {
     if (_scrollController.hasClients) {
       _scrollController.jumpTo(0.0);
+    }
+    if (Settings.instance.pageView && _pageController.hasClients) {
+      _pageController.jumpToPage(0);
     }
   }
 
@@ -86,8 +90,17 @@ class _MainPageState extends State<MainPage>
   }
 
   void scrollToPosition() {
-    if (_scrollController.hasClients) {
-      if (_paraModel.currentPara == Settings.instance.currentReadingPara) {
+    bool hasClients() {
+      if (Settings.instance.pageView) return _pageController.hasClients;
+      return _scrollController.hasClients;
+    }
+
+    if (hasClients() &&
+        _paraModel.currentPara == Settings.instance.currentReadingPara) {
+      if (Settings.instance.pageView) {
+        _pageController.jumpToPage(
+            (Settings.instance.currentReadingScrollOffset / 500).floor());
+      } else {
         _scrollController.jumpTo(Settings.instance.currentReadingScrollOffset);
       }
     } else {
@@ -104,18 +117,32 @@ class _MainPageState extends State<MainPage>
     // remove before adding to ensure we don't listen twice
     _scrollController.removeListener(_saveScrollPosition);
     _scrollController.addListener(_saveScrollPosition);
+    _pageController.removeListener(_saveScrollPosition);
+    _pageController.addListener(_saveScrollPosition);
   }
 
   void _saveScrollPosition() {
-    Settings.instance.saveScrollPositionDelayed(
-        _paraModel.currentPara, _scrollController.offset);
+    if (!Settings.instance.pageView) {
+      Settings.instance.saveScrollPositionDelayed(
+          _paraModel.currentPara, _scrollController.offset);
+    } else {
+      // multiply by 500 to make the offset bigger so it can be saved, otherwise it gets ignored
+      // as the difference between last save value and this one might be too small
+      Settings.instance.saveScrollPositionDelayed(_paraModel.currentPara,
+          (_pageController.page?.toDouble() ?? 0) * 500);
+    }
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.paused) {
-      await Settings.instance
-          .saveScrollPosition(_paraModel.currentPara, _scrollController.offset);
+      if (!Settings.instance.pageView) {
+        Settings.instance.saveScrollPosition(
+            _paraModel.currentPara, _scrollController.offset);
+      } else {
+        Settings.instance.saveScrollPosition(_paraModel.currentPara,
+            (_pageController.page?.toDouble() ?? 0) * 500);
+      }
     }
   }
 
@@ -234,7 +261,12 @@ class _MainPageState extends State<MainPage>
     if ((_paraModel.currentPara - 1) != paraIdx) {
       _paraModel.setCurrentPara(paraIdx + 1);
     }
-    _scrollController.jumpTo(scrollOffset);
+
+    if (Settings.instance.pageView) {
+      _pageController.jumpToPage(jumpToPage);
+    } else {
+      _scrollController.jumpTo(scrollOffset);
+    }
   }
 
   @override
@@ -281,7 +313,10 @@ class _MainPageState extends State<MainPage>
               ValueListenableBuilder(
                 valueListenable: _paraModel.currentParaNotifier,
                 builder: (context, _, __) {
-                  return ReadQuranWidget(_paraModel);
+                  return ReadQuranWidget(
+                    _paraModel,
+                    pageController: _pageController,
+                  );
                 },
               )
             ],
