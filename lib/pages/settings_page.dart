@@ -19,7 +19,6 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   int initialValue = Settings.instance.fontSize;
   double wordSpacing = Settings.instance.wordSpacing.toDouble();
-  bool pageView = Settings.instance.pageView;
   static const platform = MethodChannel('org.quran_rev_helper/backupDB');
 
   Widget _createBackupWidget() {
@@ -132,21 +131,6 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  Widget _createPageViewTile() {
-    return ListTile(
-      title: const Text("Page View"),
-      subtitle: const Text("Show quran page by page or scroll vertically"),
-      trailing: Switch(
-        value: pageView,
-        onChanged: (newValue) {
-          pageView = newValue;
-          Settings.instance.pageView = pageView;
-          setState(() {});
-        },
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -158,7 +142,6 @@ class _SettingsPageState extends State<SettingsPage> {
           _createFontSizeTile(),
           const SizedBox(height: 16),
           _createWordSpacingTile(),
-          _createPageViewTile(),
           _createBackupWidget(),
           _restoreBackupWidget()
         ],

@@ -8,9 +8,8 @@ class Settings extends ChangeNotifier {
   static final Settings _instance = Settings._private();
   static Settings get instance => _instance;
   int _currentReadingPara = 1;
-  double _currentReadingScroll = 0.0;
+  int _currentReadingPage = 0;
   Timer? timer;
-  bool _pageView = true;
 
   // The font size of ayahs
   int _fontSize = 24;
@@ -36,17 +35,10 @@ class Settings extends ChangeNotifier {
     persist();
   }
 
-  double get currentReadingScrollOffset => _currentReadingScroll;
-  set currentReadingScrollOffset(double val) {
-    _currentReadingScroll = val;
+  int get currentReadingPage => _currentReadingPage;
+  set currentReadingPage(int val) {
+    _currentReadingPage = val;
     persist();
-  }
-
-  bool get pageView => _pageView;
-  set pageView(v) {
-    _pageView = v;
-    persist();
-    notifyListeners();
   }
 
   factory Settings() {
@@ -58,8 +50,7 @@ class Settings extends ChangeNotifier {
       'fontSize': fontSize,
       'wordSpacing': wordSpacing,
       'currentReadingPara': _currentReadingPara,
-      'currentReadingScrollOffset': _currentReadingScroll,
-      'pageView': _pageView,
+      'currentReadingScrollOffset': _currentReadingPage,
     };
     String json = const JsonEncoder.withIndent("  ").convert(map);
     await utils.saveJsonToDisk(json, "settings");
@@ -71,24 +62,18 @@ class Settings extends ChangeNotifier {
     _fontSize = json["fontSize"] ?? 24;
     _wordSpacing = json["wordSpacing"] ?? 1;
     _currentReadingPara = json["currentReadingPara"] ?? 1;
-    _currentReadingScroll = json["currentReadingScrollOffset"] ?? 0.0;
-    _pageView = json["pageView"] ?? true;
+    _currentReadingPage = json["currentReadingScrollOffset"] ?? 0.0;
   }
 
-  Future<void> saveScrollPosition(int paraNumber, double scrollOffset) async {
+  Future<void> saveScrollPosition(int paraNumber, int page) async {
     currentReadingPara = paraNumber;
-    currentReadingScrollOffset = scrollOffset;
+    currentReadingPage = page;
     await saveToDisk();
   }
 
-  void saveScrollPositionDelayed(int paraNumber, double scrollOffset) {
-    if (paraNumber == currentReadingPara) {
-      if ((currentReadingScrollOffset - scrollOffset).abs() < 15) {
-        return;
-      }
-    }
+  void saveScrollPositionDelayed(int paraNumber, int page) {
     currentReadingPara = paraNumber;
-    currentReadingScrollOffset = scrollOffset;
+    currentReadingPage = page;
     persist(seconds: 4);
   }
 

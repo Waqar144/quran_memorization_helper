@@ -19,19 +19,19 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage>
     with WidgetsBindingObserver, TickerProviderStateMixin {
-  final ParaAyatModel _paraModel = ParaAyatModel();
+  late final ParaAyatModel _paraModel;
   final ScrollController _scrollController = ScrollController();
   final ScrollController _paraListScrollController = ScrollController();
   final ScrollController _surahListScrollController = ScrollController();
   late final TabController _drawerTabController;
-  final PageController _pageController = PageController();
+  PageController _pageController = PageController(keepPage: false);
 
   @override
   void initState() {
+    _paraModel = ParaAyatModel(onParaChanged);
     _drawerTabController = TabController(length: 2, vsync: this);
     _drawerTabController.addListener(_onDrawerTabChange);
 
-    _paraModel.currentParaNotifier.addListener(scrollToTop);
     WidgetsBinding.instance.addObserver(this);
     super.initState();
   }
@@ -39,19 +39,24 @@ class _MainPageState extends State<MainPage>
   @override
   void dispose() {
     _drawerTabController.removeListener(_onDrawerTabChange);
-    _paraModel.currentParaNotifier.removeListener(scrollToTop);
     _paraModel.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
-  void scrollToTop() {
-    if (_scrollController.hasClients) {
-      _scrollController.jumpTo(0.0);
+  void onParaChanged(int para, bool showLastPage, {int jumpToPage = -1}) {
+    _pageController.dispose();
+    int page = 1;
+    if (showLastPage) {
+      page = pageCountForPara(para - 1);
     }
-    if (Settings.instance.pageView && _pageController.hasClients) {
-      _pageController.jumpToPage(0);
+    if (jumpToPage != -1) {
+      page = jumpToPage;
     }
+    _pageController = PageController(initialPage: (page - 1), keepPage: false);
+    // reinstall listeners
+    _pageController.removeListener(_saveScrollPosition);
+    _pageController.addListener(_saveScrollPosition);
   }
 
   void _onDrawerTabChange() {
@@ -89,60 +94,29 @@ class _MainPageState extends State<MainPage>
     }
   }
 
-  void scrollToPosition() {
-    bool hasClients() {
-      if (Settings.instance.pageView) return _pageController.hasClients;
-      return _scrollController.hasClients;
-    }
-
-    if (hasClients() &&
-        _paraModel.currentPara == Settings.instance.currentReadingPara) {
-      if (Settings.instance.pageView) {
-        _pageController.jumpToPage(
-            (Settings.instance.currentReadingScrollOffset / 500).floor());
-      } else {
-        _scrollController.jumpTo(Settings.instance.currentReadingScrollOffset);
-      }
-    } else {
-      Future.delayed(const Duration(milliseconds: 20), scrollToPosition);
-    }
-  }
-
   Future<void> _load() async {
     await Settings.instance.readSettings();
     await _paraModel.readJsonDB();
     // If the para is same as what's in settings, then try to restore scroll position
-
-    scrollToPosition();
-    // remove before adding to ensure we don't listen twice
-    _scrollController.removeListener(_saveScrollPosition);
-    _scrollController.addListener(_saveScrollPosition);
-    _pageController.removeListener(_saveScrollPosition);
-    _pageController.addListener(_saveScrollPosition);
+    int jumpToPage = 0;
+    if (Settings.instance.currentReadingPara == _paraModel.currentPara) {
+      jumpToPage = Settings.instance.currentReadingPage + 1;
+    }
+    onParaChanged(_paraModel.currentPara, false, jumpToPage: jumpToPage);
   }
 
   void _saveScrollPosition() {
-    if (!Settings.instance.pageView) {
-      Settings.instance.saveScrollPositionDelayed(
-          _paraModel.currentPara, _scrollController.offset);
-    } else {
-      // multiply by 500 to make the offset bigger so it can be saved, otherwise it gets ignored
-      // as the difference between last save value and this one might be too small
-      Settings.instance.saveScrollPositionDelayed(_paraModel.currentPara,
-          (_pageController.page?.toDouble() ?? 0) * 500);
-    }
+    // multiply by 500 to make the offset bigger so it can be saved, otherwise it gets ignored
+    // as the difference between last save value and this one might be too small
+    Settings.instance.saveScrollPositionDelayed(
+        _paraModel.currentPara, _pageController.page?.floor() ?? 0);
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.paused) {
-      if (!Settings.instance.pageView) {
-        Settings.instance.saveScrollPosition(
-            _paraModel.currentPara, _scrollController.offset);
-      } else {
-        Settings.instance.saveScrollPosition(_paraModel.currentPara,
-            (_pageController.page?.toDouble() ?? 0) * 500);
-      }
+      Settings.instance.saveScrollPosition(
+          _paraModel.currentPara, _pageController.page?.floor() ?? 0);
     }
   }
 
@@ -255,18 +229,11 @@ class _MainPageState extends State<MainPage>
     int paraIdx = paraForPage(page);
     int paraStartPage = para16LinePageOffsets[paraIdx];
     int jumpToPage = page - paraStartPage;
-    double scrollOffset = jumpToPage * 785;
-    scrollOffset += 50;
 
     if ((_paraModel.currentPara - 1) != paraIdx) {
       _paraModel.setCurrentPara(paraIdx + 1);
     }
-
-    if (Settings.instance.pageView) {
-      _pageController.jumpToPage(jumpToPage);
-    } else {
-      _scrollController.jumpTo(scrollOffset);
-    }
+    _pageController.jumpToPage(jumpToPage);
   }
 
   @override

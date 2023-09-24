@@ -105,6 +105,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
   List<Mutashabiha> _mutashabihat = [];
   ByteBuffer? _quranUtf8;
   final _repaintNotifier = StreamController<int>.broadcast();
+  Timer? _nextParaLoadTimer;
 
   @override
   void initState() {
@@ -116,6 +117,12 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
   void dispose() {
     super.dispose();
     WakelockPlus.disable();
+  }
+
+  @override
+  void didUpdateWidget(ReadQuranWidget old) {
+    _pages.clear();
+    super.didUpdateWidget(old);
   }
 
   Future<List<Page>> doload() async {
@@ -312,63 +319,42 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
         if (_pages.isEmpty) {
           return const SliverToBoxAdapter(child: SizedBox.shrink());
         }
+        return SliverToBoxAdapter(
+          child: SizedBox(
+            height: 785,
+            child: NotificationListener<OverscrollNotification>(
+              onNotification: (noti) {
+                if (noti.depth == 0) {
+                  int dir = noti.overscroll >= 0 ? 1 : -1;
+                  int currentPara = widget.model.currentPara;
+                  int nextPara = currentPara + dir;
 
-        return ListenableBuilder(
-          listenable: Settings.instance,
-          builder: (context, _) {
-            // Page View
-            if (Settings.instance.pageView) {
-              return SliverToBoxAdapter(
-                child: SizedBox(
-                  height: 785,
-                  child: PageView.builder(
-                    controller: widget.pageController,
-                    reverse: true,
-                    itemCount: _pages.length,
-                    scrollBehavior: const ScrollBehavior()
-                      ..copyWith(overscroll: false),
-                    physics: const CustomPageViewScrollPhysics(),
-                    itemBuilder: (ctx, index) {
-                      return ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: PageWidget(
-                          _pages[index].pageNum,
-                          _pages[index].lines,
-                          getAyatInDB: _getAyatInDB,
-                          onAyahTapped: _onAyahTapped,
-                          isMutashabihaAyat: _isMutashabihaAyat,
-                          isAyahFull: _isAyahFull,
-                          getFullAyahText: _getFullAyahText,
-                          repaintStream: _repaintNotifier.stream,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              );
-            }
+                  if (nextPara <= 0) {
+                    nextPara = 30;
+                  } else if (nextPara > 30) {
+                    nextPara = 1;
+                  }
 
-            // Vertical Scroll View
-            return SliverFixedExtentList.builder(
-              itemExtent: 785,
-              itemCount: _pages.length,
-              itemBuilder: (ctx, index) {
-                return Container(
-                  height: 785,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.background,
-                    boxShadow: [
-                      BoxShadow(
-                          color: Theme.of(context).shadowColor,
-                          blurRadius: 1,
-                          offset: const Offset(1, 1)),
-                      BoxShadow(
-                          color: Theme.of(context).shadowColor,
-                          blurRadius: 1,
-                          offset: const Offset(-1, -1))
-                    ],
-                  ),
-                  child: ListTile(
+                  // debounce as there are a lot of notifications
+                  _nextParaLoadTimer?.cancel();
+                  _nextParaLoadTimer =
+                      Timer(const Duration(milliseconds: 50), () {
+                    bool lastpage = dir < 0;
+                    widget.model
+                        .setCurrentPara(nextPara, showLastPage: lastpage);
+                  });
+                }
+                return false;
+              },
+              child: PageView.builder(
+                controller: widget.pageController,
+                reverse: true,
+                itemCount: _pages.length,
+                scrollBehavior: const ScrollBehavior()
+                  ..copyWith(overscroll: false),
+                physics: const CustomPageViewScrollPhysics(),
+                itemBuilder: (ctx, index) {
+                  return ListTile(
                     contentPadding: EdgeInsets.zero,
                     title: PageWidget(
                       _pages[index].pageNum,
@@ -380,11 +366,11 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
                       getFullAyahText: _getFullAyahText,
                       repaintStream: _repaintNotifier.stream,
                     ),
-                  ),
-                );
-              },
-            );
-          },
+                  );
+                },
+              ),
+            ),
+          ),
         );
       },
     );

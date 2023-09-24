@@ -71,7 +71,10 @@ extension ValueNotifierToggle on ValueNotifier<bool> {
 class ParaAyatModel extends ChangeNotifier {
   Map<int, List<Ayat>> _paraAyats = {};
   ValueNotifier<int> currentParaNotifier = ValueNotifier<int>(1);
+  final void Function(int, bool) onParaChanged;
   Timer? timer;
+
+  ParaAyatModel(this.onParaChanged);
 
   @override
   void dispose() async {
@@ -154,7 +157,7 @@ class ParaAyatModel extends ChangeNotifier {
     persist();
   }
 
-  void setCurrentPara(int para) {
+  void setCurrentPara(int para, {bool showLastPage = false}) {
     if (para == currentPara) return;
     // wrap around
     if (para <= 0) {
@@ -162,6 +165,8 @@ class ParaAyatModel extends ChangeNotifier {
     } else if (para > 30) {
       para = 1;
     }
+
+    onParaChanged(para, showLastPage);
 
     currentParaNotifier.value = para;
     resetSelection();
