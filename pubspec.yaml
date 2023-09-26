@@ -70,6 +70,7 @@ flutter:
   #   - images/a_dot_ham.jpeg
   assets:
     - assets/quran.txt
+    - assets/ur.jalandhry.txt
     - assets/mutashabiha_data.json
     - assets/16line/
 
@@ -91,6 +92,9 @@ flutter:
     - family: AyahNumber
       fonts:
         - asset: fonts/ayahNumFont.ttf
+    - family: Urdu
+      fonts:
+        - asset: fonts/Mehr_Nastaliq_Web v. 2.0.ttf
         # - asset: fonts/Al Qalam Quran Majeed 2.ttf
   #   - family: Schyler
   #     fonts:

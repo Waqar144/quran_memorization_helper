@@ -6,6 +6,7 @@ import 'dart:async';
 import 'package:quran_memorization_helper/models/settings.dart';
 import 'package:quran_memorization_helper/models/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/surahs.dart';
+import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/should_add_spaces.dart';
 import 'package:quran_memorization_helper/widgets/mutashabiha_ayat_list_item.dart';
@@ -27,6 +28,160 @@ final _markedMutAyahBGStyle = TextStyle(
   backgroundColor: Colors.red.shade100,
 );
 const TextStyle _mutStyle = TextStyle(inherit: true, color: Colors.indigo);
+
+class TranslationTile extends StatefulWidget {
+  final String translation;
+  final String metadata;
+  final bool expanded;
+  const TranslationTile(this.translation,
+      {required this.metadata, required this.expanded, super.key});
+
+  @override
+  State<StatefulWidget> createState() => _TranslationTileState();
+}
+
+class _TranslationTileState extends State<TranslationTile> {
+  late final ValueNotifier<bool> expanded;
+
+  @override
+  void initState() {
+    expanded = ValueNotifier(widget.expanded);
+    super.initState();
+  }
+
+  @override
+  dispose() {
+    expanded.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: expanded,
+      builder: (context, value, _) {
+        return ListTile(
+          leading: widget.expanded
+              ? null
+              : Icon(!value ? Icons.chevron_right : Icons.expand_more),
+          title: !value
+              ? const Text("Show Translation")
+              : Column(
+                  children: [
+                    Text(
+                      widget.metadata,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                    Text(
+                      widget.translation,
+                      textDirection: TextDirection.rtl,
+                      style: const TextStyle(
+                          fontFamily: "Urdu",
+                          fontSize: 22,
+                          letterSpacing: 0.0,
+                          height: 1.8),
+                    ),
+                  ],
+                ),
+          onTap: () {
+            if (widget.expanded) return;
+            expanded.value = !expanded.value;
+          },
+        );
+      },
+    );
+  }
+}
+
+class LongPressActionSheet extends StatefulWidget {
+  final Widget? mutashabihaList;
+  final ByteBuffer transUtf8;
+  final List<int> transLineOffsets;
+  final int currentParaIdx;
+
+  /// absoluteAyah index of tapped ayah
+  final int tappedAyahIdx;
+
+  const LongPressActionSheet({
+    super.key,
+    required this.mutashabihaList,
+    required this.transUtf8,
+    required this.transLineOffsets,
+    required this.currentParaIdx,
+    required this.tappedAyahIdx,
+  });
+
+  @override
+  State<StatefulWidget> createState() => _LongPressActionSheetState();
+}
+
+class _LongPressActionSheetState extends State<LongPressActionSheet> {
+  late final int _paraFirstAyah;
+  late final int _totalAyahsInPara;
+  late PageController _controller;
+
+  @override
+  void initState() {
+    _totalAyahsInPara = paraAyahCount[widget.currentParaIdx];
+    _paraFirstAyah = getFirstAyahOfPara(widget.currentParaIdx);
+    int currentAyah = widget.tappedAyahIdx - _paraFirstAyah;
+    _controller = PageController(initialPage: currentAyah);
+
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  String surahAyahText(int ayahIdx) {
+    int surah = surahForAyah(ayahIdx);
+    int ayah = toSurahAyahOffset(surah, ayahIdx);
+    return "${surahNameForIdx(surah)}:${ayah + 1}";
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PageView.builder(
+      reverse: true,
+      itemCount: _totalAyahsInPara,
+      controller: _controller,
+      itemBuilder: (context, index) {
+        int ayah = _paraFirstAyah + index;
+        int s = widget.transLineOffsets[ayah];
+        int e = widget.transLineOffsets[ayah + 1];
+        String translation =
+            utf8.decode(widget.transUtf8.asUint8List(s, e - s));
+        String metadata = surahAyahText(ayah);
+
+        bool expanded = widget.mutashabihaList == null;
+        final translationWidget = TranslationTile(translation,
+            metadata: metadata, expanded: expanded);
+
+        if (widget.tappedAyahIdx == ayah && widget.mutashabihaList != null) {
+          return ListView(
+            children: [
+              translationWidget,
+              const Divider(),
+              widget.mutashabihaList!
+            ],
+          );
+        }
+
+        return ListView(
+          children: [
+            translationWidget,
+          ],
+        );
+      },
+    );
+  }
+}
 
 class CustomPageViewScrollPhysics extends ScrollPhysics {
   const CustomPageViewScrollPhysics({ScrollPhysics? parent})
@@ -104,6 +259,8 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
   List<Page> _pages = [];
   List<Mutashabiha> _mutashabihat = [];
   ByteBuffer? _quranUtf8;
+  ByteBuffer? _transUtf8;
+  List<int>? _transLineOffsets;
   final _repaintNotifier = StreamController<int>.broadcast();
   Timer? _nextParaLoadTimer;
 
@@ -228,30 +385,47 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
   void _onAyahLongPressed(
       int surahIdx, int ayahIdx, int wordIdx, int pageNum) async {
     List<Mutashabiha> mutashabihat = _getMutashabihaAyat(ayahIdx, surahIdx);
-    if (mutashabihat.isEmpty) {
-      return;
-    }
 
     if (_quranUtf8 == null) {
       final data = await rootBundle.load("assets/quran.txt");
       _quranUtf8 = data.buffer;
     }
 
+    if (_transUtf8 == null) {
+      final data = await rootBundle.load("assets/ur.jalandhry.txt");
+      _transUtf8 = data.buffer;
+
+      _transLineOffsets = [];
+      _transLineOffsets!.add(0);
+      int start = 0;
+      final utf = _transUtf8!.asUint8List();
+      int next = utf.indexOf(10);
+      while (next != -1) {
+        _transLineOffsets!.add(next);
+
+        start = next + 1;
+        next = utf.indexOf(10, start);
+      }
+    }
+
     for (int i = 0; i < mutashabihat.length; ++i) {
       mutashabihat[i].loadText(_quranUtf8!);
     }
 
-    List<Widget> widgets = [];
-    widgets.add(const Divider());
-    widgets.add(ListView.separated(
-      physics: const NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      separatorBuilder: (ctx, index) => const Divider(height: 1),
-      itemCount: mutashabihat.length,
-      itemBuilder: (ctx, index) {
-        return MutashabihaAyatListItem(mutashabiha: mutashabihat[index]);
-      },
-    ));
+    int tappedAyah = toAbsoluteAyahOffset(surahIdx, ayahIdx);
+
+    Widget? mutashabihaWidget;
+    if (mutashabihat.isNotEmpty) {
+      mutashabihaWidget = ListView.separated(
+        physics: const NeverScrollableScrollPhysics(),
+        shrinkWrap: true,
+        separatorBuilder: (ctx, index) => const Divider(height: 1),
+        itemCount: mutashabihat.length,
+        itemBuilder: (ctx, index) {
+          return MutashabihaAyatListItem(mutashabiha: mutashabihat[index]);
+        },
+      );
+    }
 
     if (!mounted) return;
 
@@ -259,11 +433,15 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
       context: context,
       builder: (context) {
         return SizedBox(
-          width: MediaQuery.of(context).size.width - 32,
+          width: MediaQuery.of(context).size.width,
           child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ListView(
-              children: widgets,
+            padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+            child: LongPressActionSheet(
+              mutashabihaList: mutashabihaWidget,
+              transUtf8: _transUtf8!,
+              transLineOffsets: _transLineOffsets!,
+              currentParaIdx: widget.model.currentPara - 1,
+              tappedAyahIdx: tappedAyah,
             ),
           ),
         );
