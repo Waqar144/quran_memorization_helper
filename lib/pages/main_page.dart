@@ -44,7 +44,7 @@ class _MainPageState extends State<MainPage>
     super.dispose();
   }
 
-  void onParaChanged(int para, bool showLastPage, {int jumpToPage = -1}) {
+  void onParaChanged(int para, bool showLastPage, int jumpToPage) {
     _pageController.dispose();
     int page = 1;
     if (showLastPage) {
@@ -102,7 +102,7 @@ class _MainPageState extends State<MainPage>
     if (Settings.instance.currentReadingPara == _paraModel.currentPara) {
       jumpToPage = Settings.instance.currentReadingPage + 1;
     }
-    onParaChanged(_paraModel.currentPara, false, jumpToPage: jumpToPage);
+    onParaChanged(_paraModel.currentPara, false, jumpToPage);
   }
 
   void _saveScrollPosition() {
@@ -231,9 +231,8 @@ class _MainPageState extends State<MainPage>
     int jumpToPage = page - paraStartPage;
 
     if ((_paraModel.currentPara - 1) != paraIdx) {
-      _paraModel.setCurrentPara(paraIdx + 1);
+      _paraModel.setCurrentPara(paraIdx + 1, jumpToPage: jumpToPage + 1);
     }
-    _pageController.jumpToPage(jumpToPage);
   }
 
   @override
