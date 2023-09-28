@@ -328,8 +328,13 @@ class _MainPageState extends State<MainPage>
                         itemExtent: 48,
                         itemBuilder: (context, index) {
                           return ListTile(
+                            leading: Text(
+                              "${index + 1}.",
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(fontSize: 20),
+                            ),
                             title: Text(
-                              "${index + 1}. ${surahDataForIdx(index, arabic: true).name}",
+                              surahDataForIdx(index, arabic: true).name,
                               style: const TextStyle(
                                 letterSpacing: 0,
                                 fontSize: 24,
