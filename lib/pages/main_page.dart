@@ -232,6 +232,8 @@ class _MainPageState extends State<MainPage>
 
     if ((_paraModel.currentPara - 1) != paraIdx) {
       _paraModel.setCurrentPara(paraIdx + 1, jumpToPage: jumpToPage + 1);
+    } else {
+      _pageController.jumpToPage(jumpToPage);
     }
   }
 
