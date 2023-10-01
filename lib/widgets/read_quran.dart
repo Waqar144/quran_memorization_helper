@@ -881,7 +881,7 @@ class _PageWidgetState extends State<PageWidget> {
         spans.add(const TextSpan(text: '\u200c'));
         // space
         if (shouldAddSpaces(widget.pageNum, lineIdx)) {
-          spans.add(const TextSpan(text: ' '));
+          spans.add(TextSpan(text: ' ', style: style));
         }
         i++;
       }
