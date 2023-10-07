@@ -76,7 +76,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _createFontSizeTile() {
     return ListTile(
       title: const Text("Ayat font size"),
-      subtitle: const Text("Font size in the ayats list (not implemented)"),
+      subtitle: const Text("Font size in the ayats list (not while reading)"),
       trailing: SizedBox(
         width: 80,
         child: DropdownButtonFormField(
