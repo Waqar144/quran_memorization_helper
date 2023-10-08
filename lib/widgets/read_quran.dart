@@ -787,7 +787,7 @@ class _PageWidgetState extends State<PageWidget> {
     return false;
   }
 
-  bool isSajdaAyat(int surahIndex, int ayahIndex) {
+  static bool isSajdaAyat(int surahIndex, int ayahIndex) {
     return switch (surahIndex) {
       6 => ayahIndex == 205,
       12 => ayahIndex == 14,
@@ -807,7 +807,7 @@ class _PageWidgetState extends State<PageWidget> {
     };
   }
 
-  (String marker, bool isSajda) getAyahEndMarkerGlyphCode(
+  static (String marker, bool isSajda) getAyahEndMarkerGlyphCode(
       int surahIndex, int ayahIndex) {
     if (isSajdaAyat(surahIndex, ayahIndex)) {
       return (
@@ -836,7 +836,7 @@ class _PageWidgetState extends State<PageWidget> {
 
   // Finds the correct position of the first word of the line
   // in the full ayah text
-  int getFirstWordIndex(
+  static int getFirstWordIndex(
       List<String> fullAyahWords, List<String> currentLineWords,
       {int start = -1}) {
     String first = currentLineWords.first;
