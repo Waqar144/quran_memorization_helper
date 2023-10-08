@@ -95,7 +95,6 @@ class _MainPageState extends State<MainPage>
   }
 
   Future<void> _load() async {
-    await Settings.instance.readSettings();
     await _paraModel.readJsonDB();
     // If the para is same as what's in settings, then try to restore scroll position
     int jumpToPage = 0;
@@ -240,6 +239,8 @@ class _MainPageState extends State<MainPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor:
+          Theme.of(context).brightness == Brightness.dark ? Colors.black : null,
       appBar: PreferredSize(
         preferredSize: const Size(double.infinity, 0),
         child: AppBar(bottom: null, shadowColor: Colors.transparent),
@@ -299,9 +300,8 @@ class _MainPageState extends State<MainPage>
             child: Column(
               mainAxisSize: MainAxisSize.max,
               children: [
-                Container(
+                SizedBox(
                   height: 50,
-                  color: Colors.black12,
                   child: TabBar(
                     controller: _drawerTabController,
                     tabs: const [

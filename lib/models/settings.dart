@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'dart:async';
 import 'dart:core';
@@ -10,6 +11,7 @@ class Settings extends ChangeNotifier {
   int _currentReadingPara = 1;
   int _currentReadingPage = 0;
   Timer? timer;
+  ThemeMode _themeMode = ThemeMode.system;
 
   // The font size of ayahs
   int _fontSize = 24;
@@ -41,6 +43,15 @@ class Settings extends ChangeNotifier {
     persist();
   }
 
+  ThemeMode get themeMode => _themeMode;
+  set themeMode(ThemeMode m) {
+    if (m != _themeMode) {
+      _themeMode = m;
+      notifyListeners();
+      persist();
+    }
+  }
+
   factory Settings() {
     return _instance;
   }
@@ -51,6 +62,7 @@ class Settings extends ChangeNotifier {
       'wordSpacing': wordSpacing,
       'currentReadingPara': _currentReadingPara,
       'currentReadingScrollOffset': _currentReadingPage,
+      'themeMode': _themeMode.index,
     };
     String json = const JsonEncoder.withIndent("  ").convert(map);
     await utils.saveJsonToDisk(json, "settings");
@@ -62,7 +74,8 @@ class Settings extends ChangeNotifier {
     _fontSize = json["fontSize"] ?? 24;
     _wordSpacing = json["wordSpacing"] ?? 1;
     _currentReadingPara = json["currentReadingPara"] ?? 1;
-    _currentReadingPage = json["currentReadingScrollOffset"] ?? 0.0;
+    _currentReadingPage = json["currentReadingScrollOffset"] ?? 0;
+    _themeMode = ThemeMode.values[json["themeMode"] ?? ThemeMode.system.index];
   }
 
   Future<void> saveScrollPosition(int paraNumber, int page) async {

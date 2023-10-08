@@ -6,9 +6,18 @@ import 'package:quran_memorization_helper/models/settings.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:quran_memorization_helper/utils/utils.dart';
 
+String _themeModeToString(ThemeMode m) {
+  return switch (m) {
+    ThemeMode.system => "System",
+    ThemeMode.light => "Light",
+    ThemeMode.dark => "Dark",
+  };
+}
+
 class SettingsPage extends StatefulWidget {
   final List<int> fontSizes = [20, 22, 24, 26, 28, 30, 32];
   final List<double> wordSpacings = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0];
+  final List<ThemeMode> themeModes = ThemeMode.values;
   final ParaAyatModel paraModel;
   SettingsPage(this.paraModel, {super.key});
 
@@ -19,6 +28,7 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   int initialValue = Settings.instance.fontSize;
   double wordSpacing = Settings.instance.wordSpacing.toDouble();
+  ThemeMode themeMode = Settings.instance.themeMode;
   static const platform = MethodChannel('org.quran_rev_helper/backupDB');
 
   Widget _createBackupWidget() {
@@ -69,6 +79,35 @@ class _SettingsPageState extends State<SettingsPage> {
           }
         },
         child: const Text("Restore"),
+      ),
+    );
+  }
+
+  Widget _createThemeModeTile() {
+    return ListTile(
+      title: const Text("Theme"),
+      subtitle: const Text("Switch between light or dark mode"),
+      trailing: SizedBox(
+        width: 100,
+        child: DropdownButtonFormField<ThemeMode>(
+          borderRadius: const BorderRadius.all(Radius.circular(5)),
+          decoration: const InputDecoration(contentPadding: EdgeInsets.all(8)),
+          value: themeMode,
+          onChanged: (ThemeMode? val) {
+            if (val != null) {
+              themeMode = val;
+              Settings.instance.themeMode = val;
+            }
+          },
+          padding: EdgeInsets.zero,
+          items: [
+            for (final themeMode in widget.themeModes)
+              DropdownMenuItem(
+                value: themeMode,
+                child: Text(_themeModeToString(themeMode)),
+              )
+          ],
+        ),
       ),
     );
   }
@@ -139,6 +178,7 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
       body: Column(
         children: [
+          _createThemeModeTile(),
           _createFontSizeTile(),
           const SizedBox(height: 16),
           _createWordSpacingTile(),

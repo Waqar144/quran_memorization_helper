@@ -13,21 +13,63 @@ import 'package:quran_memorization_helper/widgets/mutashabiha_ayat_list_item.dar
 import 'package:quran_memorization_helper/widgets/tap_and_longpress_gesture_recognizer.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
-final _markedWordStyle = TextStyle(
+final _markedWordStyleLight = TextStyle(
   inherit: true,
   backgroundColor: Colors.red.shade100,
   color: Colors.red,
 );
-final _markedAyahBGStyle = TextStyle(
+final _markedWordStyleDark = TextStyle(
+  inherit: true,
+  backgroundColor: Colors.red.withAlpha(80),
+  color: Colors.red,
+);
+
+TextStyle _markedWordStyle(bool dark) {
+  if (dark) {
+    return _markedWordStyleDark;
+  }
+  return _markedWordStyleLight;
+}
+
+final _markedAyahBGStyleLight = TextStyle(
   inherit: true,
   backgroundColor: Colors.red.shade100,
 );
-final _markedMutAyahBGStyle = TextStyle(
+final _markedAyahBGStyleDark = TextStyle(
+  inherit: true,
+  backgroundColor: Colors.red.withAlpha(80),
+);
+
+TextStyle _markedAyahBGStyle(bool dark) {
+  if (dark) {
+    return _markedAyahBGStyleDark;
+  }
+  return _markedAyahBGStyleLight;
+}
+
+final _markedMutAyahBGStyleLight = TextStyle(
   inherit: true,
   color: Colors.indigo,
   backgroundColor: Colors.red.shade100,
 );
-const TextStyle _mutStyle = TextStyle(inherit: true, color: Colors.indigo);
+final _markedMutAyahBGStyleDark = _markedMutAyahBGStyleLight.copyWith(
+  color: Colors.indigo.shade200,
+  backgroundColor: Colors.red.withAlpha(80),
+);
+TextStyle _markedMutAyahBGStyle(bool dark) {
+  if (dark) {
+    return _markedMutAyahBGStyleDark;
+  }
+  return _markedMutAyahBGStyleLight;
+}
+
+const TextStyle _mutStyleLight = TextStyle(inherit: true, color: Colors.indigo);
+TextStyle _mutStyle(bool dark) {
+  if (dark) {
+    return _mutStyleLight.copyWith(color: Colors.indigo.shade200);
+  }
+  return _mutStyleLight;
+}
 
 class TranslationTile extends StatefulWidget {
   final String translation;
@@ -627,14 +669,7 @@ class _PageWidgetState extends State<PageWidget> {
     widget.onAyahTapped(surahIdx, ayahIdx, wordIdx, widget.pageNum, longPress);
   }
 
-  Widget getTwoLinesBismillah(int surahIdx) {
-    final style = TextStyle(
-      color: Colors.black,
-      fontFamily: "Al Mushaf",
-      fontSize: Settings.instance.fontSize.toDouble(),
-      letterSpacing: 0.0,
-      wordSpacing: Settings.instance.wordSpacing.toDouble(),
-    );
+  Widget getTwoLinesBismillah(int surahIdx, TextStyle style) {
     SurahData surahData = surahDataForIdx(surahIdx, arabic: true);
 
     return Column(
@@ -643,8 +678,9 @@ class _PageWidgetState extends State<PageWidget> {
         // surah name and ayah count
         Container(
           height: 46,
-          decoration:
-              BoxDecoration(border: Border.all(color: Colors.black, width: 1)),
+          decoration: BoxDecoration(
+              border:
+                  Border.all(color: Theme.of(context).dividerColor, width: 1)),
           child: Row(
             children: [
               Text(
@@ -668,7 +704,7 @@ class _PageWidgetState extends State<PageWidget> {
           height: 46,
           width: MediaQuery.of(context).size.width,
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.black, width: 1),
+            border: Border.all(color: Theme.of(context).dividerColor, width: 1),
           ),
           child: Text(
             /*data:*/ "بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ",
@@ -683,28 +719,28 @@ class _PageWidgetState extends State<PageWidget> {
 
   Widget getBismillah(int surahIdx) {
     surahIdx = -surahIdx;
-
-    // 30th para ?
-    if (widget.pageNum >= 528) {
-      if (surahHas2LineHeadress(surahIdx)) {
-        return getTwoLinesBismillah(surahIdx);
-      }
-    } else if (widget._pageLines.length == 15) {
-      return getTwoLinesBismillah(surahIdx);
-    }
-
     final style = TextStyle(
-      color: Colors.black,
+      color: Theme.of(context).textTheme.bodyMedium?.color,
       fontFamily: "Al Mushaf",
       fontSize: Settings.instance.fontSize.toDouble(),
       letterSpacing: 0.0,
       wordSpacing: Settings.instance.wordSpacing.toDouble(),
     );
+
+    // 30th para ?
+    if (widget.pageNum >= 528) {
+      if (surahHas2LineHeadress(surahIdx)) {
+        return getTwoLinesBismillah(surahIdx, style);
+      }
+    } else if (widget._pageLines.length == 15) {
+      return getTwoLinesBismillah(surahIdx, style);
+    }
+
     SurahData surahData = surahDataForIdx(surahIdx, arabic: true);
     return Container(
       width: MediaQuery.of(context).size.width,
-      decoration:
-          BoxDecoration(border: Border.all(color: Colors.black, width: 1)),
+      decoration: BoxDecoration(
+          border: Border.all(color: Theme.of(context).dividerColor, width: 1)),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         textDirection: TextDirection.rtl,
@@ -852,6 +888,7 @@ class _PageWidgetState extends State<PageWidget> {
         }
       }
 
+      bool darkMode = Theme.of(context).brightness == Brightness.dark;
       List<String> words = text.split('\u200c'); // zwj
       int i = getFirstWordIndex(fullAyahTextWords, words);
 
@@ -866,14 +903,14 @@ class _PageWidgetState extends State<PageWidget> {
 
         if (ayahInDb != null) {
           if (ayahInDb.markedWords.contains(wordIdx)) {
-            style = _markedWordStyle;
+            style = _markedWordStyle(darkMode);
           } else if (isMutashabihaAyat) {
-            style = _markedMutAyahBGStyle;
+            style = _markedMutAyahBGStyle(darkMode);
           } else {
-            style = _markedAyahBGStyle;
+            style = _markedAyahBGStyle(darkMode);
           }
         } else if (isMutashabihaAyat) {
-          style = _mutStyle;
+          style = _mutStyle(darkMode);
         }
         // word
         spans.add(TextSpan(recognizer: tapHandler, text: w, style: style));
@@ -892,8 +929,12 @@ class _PageWidgetState extends State<PageWidget> {
           TextSpan(
             text: marker,
             style: TextStyle(
-              color: Colors.black,
-              backgroundColor: hasRukuMarker ? Colors.amber.shade100 : null,
+              color: Theme.of(context).textTheme.bodyMedium?.color,
+              backgroundColor: hasRukuMarker
+                  ? (darkMode
+                      ? Colors.amber.shade700.withAlpha(125)
+                      : Colors.amber.shade100)
+                  : null,
               fontFamily: "AyahNumber",
               fontSize: 24,
             ),
@@ -908,8 +949,8 @@ class _PageWidgetState extends State<PageWidget> {
     return Text.rich(
       TextSpan(children: _buildLineSpans(line, lineIdx)),
       textDirection: TextDirection.rtl,
-      style: const TextStyle(
-        color: Colors.black,
+      style: TextStyle(
+        color: Theme.of(context).textTheme.bodyMedium?.color,
         fontFamily: "Al Mushaf",
         fontSize: 24,
         letterSpacing: 0,
