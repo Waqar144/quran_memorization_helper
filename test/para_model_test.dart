@@ -32,7 +32,7 @@ dynamic getDiskJson() async {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  ParaAyatModel model = ParaAyatModel();
+  ParaAyatModel model = ParaAyatModel((a, b, c) {});
 
   setUpAll(() async {
     PathProviderPlatform.instance = FakePath();
@@ -61,11 +61,13 @@ void main() {
     model.addAyahs([]);
     expect(model.ayahs.length, 3);
 
-    model.addAyahs([Ayat("", ayahIdx: 4)]);
+    model.addAyahs([
+      Ayat("", [0], ayahIdx: 4)
+    ]);
     expect(model.ayahs.length, 4);
     expect(model.timer!.isActive, isTrue);
 
-    expect(model.ayahs.first.ayat!.ayahIdx, 4);
+    expect(model.ayahs.first.ayahIdx, 4);
 
     // wait one and a half second for save to happen
     await Future.delayed(const Duration(seconds: 1, milliseconds: 500), () {});
@@ -79,7 +81,7 @@ void main() {
         File("$docPath${Platform.pathSeparator}ayatsdb_bck.json").existsSync(),
         isTrue);
 
-    model.removeAyats(0, [4]);
+    model.removeAyats(0, 4, 0);
     expect(model.ayahs.length, 3);
     expect(model.timer!.isActive, isTrue);
 
@@ -120,26 +122,9 @@ String initData = '''
 {
   "1": {
     "ayats": [
-      141,
-      144
-    ],
-    "mutashabihas": [
-      {
-        "src": {
-          "ayah": 9
-        },
-        "muts": [
-          {
-            "ayah": 1162
-          },
-          {
-            "ayah": 3161
-          },
-          {
-            "ayah": 3472
-          }
-        ]
-      }
+      {"idx": 9, "words": [0]},
+      {"idx": 141, "words": [0]},
+      {"idx": 144, "words": [0]}
     ]
   },
   "currentPara": 3

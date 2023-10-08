@@ -308,6 +308,7 @@ class ParaAyatModel extends ChangeNotifier {
   }
 
   Future<bool> readJsonDB({String? path}) async {
+    // TODO Handle this better, perhaps throw the error and show in UI
     final Map<String, dynamic>? json = path == null
         ? await utils.readJsonFile("ayatsdb")
         : await utils.readJsonFromFilePath(path);
