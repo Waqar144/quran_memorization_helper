@@ -232,17 +232,6 @@ class ParaAyatModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setIndexSelected(int index, bool select) {
-    if (ayahs.isNotEmpty && index < ayahs.length) {
-      ayahs[index].selected = select ? select : false;
-    } else {
-      throw "Invalid index to select: $index";
-    }
-  }
-
-  bool isIndexSelected(int index) =>
-      index < ayahs.length && (ayahs[index].selected ?? false);
-
   void merge(Map<int, List<Ayat>> paraAyahs) {
     for (final e in paraAyahs.entries) {
       _setParaAyahs(e.key, e.value);
