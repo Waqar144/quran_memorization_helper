@@ -69,13 +69,17 @@ class Settings extends ChangeNotifier {
   }
 
   Future<void> readSettings() async {
-    final Map<String, dynamic>? json = await utils.readJsonFile("settings");
-    if (json == null) return;
-    _fontSize = json["fontSize"] ?? 24;
-    _wordSpacing = json["wordSpacing"] ?? 1;
-    _currentReadingPara = json["currentReadingPara"] ?? 1;
-    _currentReadingPage = json["currentReadingScrollOffset"] ?? 0;
-    _themeMode = ThemeMode.values[json["themeMode"] ?? ThemeMode.system.index];
+    try {
+      final Map<String, dynamic> json = await utils.readJsonFile("settings");
+      _fontSize = json["fontSize"] ?? 24;
+      _wordSpacing = json["wordSpacing"] ?? 1;
+      _currentReadingPara = json["currentReadingPara"] ?? 1;
+      _currentReadingPage = json["currentReadingScrollOffset"] ?? 0;
+      _themeMode =
+          ThemeMode.values[json["themeMode"] ?? ThemeMode.system.index];
+    } catch (e) {
+      // nothing for now
+    }
   }
 
   Future<void> saveScrollPosition(int paraNumber, int page) async {
