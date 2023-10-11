@@ -79,6 +79,10 @@ class Settings extends ChangeNotifier {
   }
 
   Future<void> saveScrollPosition(int paraNumber, int page) async {
+    // nothing changed?
+    if (currentReadingPara == paraNumber && page == currentReadingPage) {
+      return;
+    }
     currentReadingPara = paraNumber;
     currentReadingPage = page;
     await saveToDisk();

@@ -119,7 +119,7 @@ class _MainPageState extends State<MainPage>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.paused) {
-      Settings.instance.saveScrollPosition(
+      await Settings.instance.saveScrollPosition(
           _paraModel.currentPara, _pageController.page?.floor() ?? 0);
     }
   }
