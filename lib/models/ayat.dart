@@ -297,7 +297,6 @@ class ParaAyatModel extends ChangeNotifier {
         paraAyats[para] = paraData;
       }
     } catch (e) {
-      print(e);
       rethrow;
     }
 
@@ -307,19 +306,17 @@ class ParaAyatModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> readJsonDB({String? path}) async {
-    // TODO Handle this better, perhaps throw the error and show in UI
-    final Map<String, dynamic>? json = path == null
-        ? await utils.readJsonFile("ayatsdb")
-        : await utils.readJsonFromFilePath(path);
-    if (json == null) {
-      return false;
+  Future<(bool, Object?)> readJsonDB({String? path}) async {
+    try {
+      final Map<String, dynamic> json = path == null
+          ? await utils.readJsonFile("ayatsdb")
+          : await utils.readJsonFromFilePath(path);
+      await _resetfromJson(json);
+      return (true, null);
+    } catch (e) {
+      return (false, e);
     }
-    await _resetfromJson(json);
-    return true;
   }
-
-  Future<String> backup() async => await saveToDisk(fileName: "ayatsdb_backup");
 
   Future<String> saveToDisk({String? fileName}) async {
     String path =

@@ -31,6 +31,34 @@ class _SettingsPageState extends State<SettingsPage> {
   ThemeMode themeMode = Settings.instance.themeMode;
   static const platform = MethodChannel('org.quran_rev_helper/backupDB');
 
+  void _showError(String message) async {
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Error'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(message),
+                const Text(
+                    "Please try again. If the error persists please report a bug."),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Ok'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _createBackupWidget() {
     return ListTile(
       title: const Text("Backup"),
@@ -40,9 +68,11 @@ class _SettingsPageState extends State<SettingsPage> {
           try {
             await platform.invokeMethod(
                 'backupDB', {'data': widget.paraModel.jsonStringify()});
+            // success message
+            if (mounted) showSnackBarMessage(context, "Backup Succesful");
           } catch (e) {
             // do nothing
-            // print("ERROR: $e");
+            _showError("Error creating backup: $e");
           }
         },
         child: const Text("Backup"),
@@ -67,8 +97,8 @@ class _SettingsPageState extends State<SettingsPage> {
           String? path = result.paths.first;
           if (path == null) return;
           // ask the para model to load this db
-          final bool readResult = await widget.paraModel.readJsonDB(path: path);
-          if (readResult) {
+          final (ok, error) = await widget.paraModel.readJsonDB(path: path);
+          if (ok) {
             if (mounted) {
               // success message
               showSnackBarMessage(
@@ -76,6 +106,8 @@ class _SettingsPageState extends State<SettingsPage> {
             }
             // persist
             widget.paraModel.saveToDisk();
+          } else {
+            _showError("Error while restoring: $error");
           }
         },
         child: const Text("Restore"),

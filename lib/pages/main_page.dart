@@ -8,6 +8,7 @@ import 'package:quran_memorization_helper/quran_data/pages.dart';
 import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
 import 'package:quran_memorization_helper/quran_data/surahs.dart';
 import 'package:quran_memorization_helper/widgets/read_quran.dart';
+import 'package:quran_memorization_helper/utils/utils.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
 class MainPage extends StatefulWidget {
@@ -95,13 +96,17 @@ class _MainPageState extends State<MainPage>
   }
 
   Future<void> _load() async {
-    await _paraModel.readJsonDB();
-    // If the para is same as what's in settings, then try to restore scroll position
-    int jumpToPage = 0;
-    if (Settings.instance.currentReadingPara == _paraModel.currentPara) {
-      jumpToPage = Settings.instance.currentReadingPage + 1;
+    final (ok, error) = await _paraModel.readJsonDB();
+    if (ok) {
+      // If the para is same as what's in settings, then try to restore scroll position
+      int jumpToPage = 0;
+      if (Settings.instance.currentReadingPara == _paraModel.currentPara) {
+        jumpToPage = Settings.instance.currentReadingPage + 1;
+      }
+      onParaChanged(_paraModel.currentPara, false, jumpToPage);
+    } else {
+      if (mounted) showSnackBarMessage(context, error: true, "Error: $error");
     }
-    onParaChanged(_paraModel.currentPara, false, jumpToPage);
   }
 
   void _saveScrollPosition() {

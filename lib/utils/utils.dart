@@ -29,7 +29,7 @@ Future<String> saveJsonToDisk(String json, String fileName) async {
   return path;
 }
 
-Future<Map<String, dynamic>?> readJsonFile(String fileName) async {
+Future<Map<String, dynamic>> readJsonFile(String fileName) async {
   final Directory dir = await getApplicationDocumentsDirectory();
   final basePath = "${dir.path}${Platform.pathSeparator}";
   final path = "$basePath$fileName.json";
@@ -40,28 +40,36 @@ Future<Map<String, dynamic>?> readJsonFile(String fileName) async {
     } else {
       // try backup
       final backupPath = "$basePath${fileName}_bck.json";
-      return await readJsonFromFilePath(backupPath);
+      if (await File(backupPath).exists()) {
+        return await readJsonFromFilePath(backupPath);
+      }
+      // otherwise just return empty
+      return {};
     }
   } catch (e) {
-    return {};
+    rethrow;
   }
 }
 
-Future<Map<String, dynamic>?> readJsonFromFilePath(String path) async {
-  final jsonFile = File(path);
-  if (!await jsonFile.exists()) {
-    throw "file: '$path' doesn't exits!";
-  }
+Future<Map<String, dynamic>> readJsonFromFilePath(String path) async {
+  try {
+    final jsonFile = File(path);
+    if (!await jsonFile.exists()) {
+      throw "file: '$path' doesn't exits!";
+    }
 
-  final String contents = await jsonFile.readAsString();
-  return jsonDecode(contents);
+    final String contents = await jsonFile.readAsString();
+    return jsonDecode(contents);
+  } catch (e) {
+    rethrow;
+  }
 }
 
 void showSnackBarMessage(BuildContext context, String message,
     {bool error = false}) {
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
     content: Text(message),
-    duration: const Duration(seconds: 2),
+    duration: Duration(seconds: error ? 5 : 2),
     backgroundColor: error ? Colors.red : Colors.green,
   ));
 }
