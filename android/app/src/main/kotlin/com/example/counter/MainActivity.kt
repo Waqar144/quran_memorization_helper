@@ -31,8 +31,10 @@ class MainActivity : FlutterActivity() {
                     data = jsonData
                     backupDatabase()
                 } else {
-                    result.notImplemented()
+                    result.error("ERROR", "No data provided", null)
                 }
+            } else {
+                result.notImplemented()
             }
         }
     }
@@ -55,7 +57,7 @@ class MainActivity : FlutterActivity() {
                 if (uri != null) {
                     writeInFile(uri)
                 } else {
-                    result.error("NO DATA", "No data", null)
+                    result.error("ERROR", "No uri", null)
                 }
             } else {
                 result.success("CANCELED")
@@ -64,20 +66,17 @@ class MainActivity : FlutterActivity() {
     }
 
     private fun writeInFile(uri: Uri){
-        val outputStream: OutputStream?
         try {
-            outputStream = contentResolver.openOutputStream(uri)
+            val outputStream = contentResolver.openOutputStream(uri)
             if (outputStream == null) {
                 result.error("ERROR", "Failed to get output stream", null)
                 return
             }
-            val bw = BufferedWriter(OutputStreamWriter(outputStream))
-            bw.write(data)
-            bw.flush()
-            bw.close()
+            outputStream.write(data.toByteArray())
+            outputStream.close()
             result.success("SUCCESS")
         } catch (e:Exception){
-            result.error("ERROR", "Unable to write", null)
+            result.error("ERROR", "Unable to write: $e", null)
         }
     }
 }

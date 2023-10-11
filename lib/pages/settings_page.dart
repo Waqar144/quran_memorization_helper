@@ -90,6 +90,7 @@ class _SettingsPageState extends State<SettingsPage> {
       trailing: ElevatedButton(
         onPressed: () async {
           // get the file
+          await FilePicker.platform.clearTemporaryFiles();
           FilePickerResult? result = await FilePicker.platform.pickFiles(
               dialogTitle: "Select JSON File",
               type: FileType.custom,
