@@ -66,8 +66,11 @@ class _SettingsPageState extends State<SettingsPage> {
       trailing: ElevatedButton(
         onPressed: () async {
           try {
-            await platform.invokeMethod(
+            final res = await platform.invokeMethod(
                 'backupDB', {'data': widget.paraModel.jsonStringify()});
+            if (res == "CANCELED") {
+              return;
+            }
             // success message
             if (mounted) showSnackBarMessage(context, "Backup Succesful");
           } catch (e) {

@@ -58,7 +58,7 @@ class MainActivity : FlutterActivity() {
                     result.error("NO DATA", "No data", null)
                 }
             } else {
-                result.error("CANCELED", "User cancelled", null)
+                result.success("CANCELED")
             }
         }
     }
