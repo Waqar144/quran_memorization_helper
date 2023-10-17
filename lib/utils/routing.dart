@@ -11,26 +11,22 @@ import 'package:quran_memorization_helper/pages/mutashabihas_page.dart';
 import 'package:quran_memorization_helper/pages/marked_ayahs_page.dart';
 
 MaterialPageRoute handleRoute(RouteSettings settings) {
-  return switch (settings.name ?? "") {
-    // SettingsPage
-    settingsPageRoute => MaterialPageRoute(
-        builder: (ctx) => SettingsPage(settings.arguments as ParaAyatModel)),
-    // QuizParaSelectionPage
-    quizSelectionPage =>
-      MaterialPageRoute(builder: (ctx) => QuizParaSelectionPage()),
-    // QuizPage
-    quizPage => MaterialPageRoute(
-        builder: (ctx) => QuizPage(settings.arguments as QuizCreationArgs)),
-    // MutashabihasPage
-    mutashabihasPage =>
-      MaterialPageRoute(builder: (ctx) => const MutashabihasPage()),
-    // ParaMutashabihas
-    paraMutashabihasPage => MaterialPageRoute(
-        builder: (ctx) => ParaMutashabihas(settings.arguments as int)),
-    markedAyahsPage => MaterialPageRoute(
-        builder: (ctx) =>
-            MarkedAyahsPage(settings.arguments as Map<String, dynamic>)),
-    // MainPage is the default
-    _ => MaterialPageRoute(builder: (ctx) => const MainPage())
-  };
+  return MaterialPageRoute(builder: (ctx) {
+    return switch (settings.name ?? "") {
+      // SettingsPage
+      settingsPageRoute => SettingsPage(settings.arguments as ParaAyatModel),
+      // QuizParaSelectionPage
+      quizSelectionPage => QuizParaSelectionPage(),
+      // QuizPage
+      quizPage => QuizPage(settings.arguments as QuizCreationArgs),
+      // MutashabihasPage
+      mutashabihasPage => const MutashabihasPage(),
+      // ParaMutashabihas
+      paraMutashabihasPage => ParaMutashabihas(settings.arguments as int),
+      markedAyahsPage =>
+        MarkedAyahsPage(settings.arguments as Map<String, dynamic>),
+      // MainPage is the default
+      _ => const MainPage()
+    };
+  });
 }
