@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:quran_memorization_helper/models/ayat.dart';
 import 'package:quran_memorization_helper/models/settings.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:quran_memorization_helper/utils/utils.dart';
+
+const String appVersion = "1.0.0";
 
 String _themeModeToString(ThemeMode m) {
   return switch (m) {
@@ -206,6 +209,63 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  Widget _version() {
+    return ListTile(
+      leading: const Icon(Icons.app_settings_alt),
+      title: const Text("App version"),
+      subtitle: const Text(appVersion),
+      onTap: () async {
+        await launchUrl(
+            Uri.parse(
+                "https://github.com/Waqar144/quran_memorization_helper/releases"),
+            mode: LaunchMode.externalApplication);
+      },
+    );
+  }
+
+  Widget _reportAnIssue() {
+    return ListTile(
+      leading: const Icon(Icons.bug_report),
+      title: const Text("Report a bug/issue"),
+      subtitle:
+          const Text("Faced an issue or have a suggestion? Tap to report"),
+      onTap: () async {
+        await launchUrl(
+            Uri.parse(
+                "https://github.com/Waqar144/quran_memorization_helper/issues"),
+            mode: LaunchMode.externalApplication);
+      },
+    );
+  }
+
+  Widget _email() {
+    return ListTile(
+      leading: const Icon(Icons.email),
+      title: const Text("Email support"),
+      subtitle: const Text("Reach out to us via email directly"),
+      onTap: () async {
+        await launchUrl(Uri.parse("support@streetwriters.co"),
+            mode: LaunchMode.externalApplication);
+      },
+    );
+  }
+
+  Widget _licenses() {
+    return ListTile(
+      leading: const Icon(Icons.policy),
+      title: const Text("View licenses"),
+      subtitle:
+          const Text("View licenses of open source libraries used in this app"),
+      onTap: () async {
+        showLicensePage(
+          context: context,
+          applicationVersion: appVersion,
+          applicationName: "Quran 16 Line",
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -216,10 +276,15 @@ class _SettingsPageState extends State<SettingsPage> {
         children: [
           _createThemeModeTile(),
           _createFontSizeTile(),
-          const SizedBox(height: 16),
           _createWordSpacingTile(),
           _createBackupWidget(),
-          _restoreBackupWidget()
+          _restoreBackupWidget(),
+          const Divider(),
+          _reportAnIssue(),
+          _email(),
+          const Divider(),
+          _licenses(),
+          _version(),
         ],
       ),
     );
