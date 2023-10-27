@@ -39,6 +39,7 @@ dependencies:
   path_provider: ^2.0.15
   file_picker: ^5.3.2
   wakelock_plus: ^1.1.1
+  url_launcher: ^6.2.1
 
 dev_dependencies:
   flutter_test:
@@ -73,6 +74,7 @@ flutter:
     - assets/ur.jalandhry.txt
     - assets/mutashabiha_data.json
     - assets/16line/
+    - android/app/src/main/res/mipmap-hdpi/ic_launcher.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
