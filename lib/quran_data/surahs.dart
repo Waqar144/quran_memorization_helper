@@ -231,7 +231,7 @@ int surahForPage(int page) {
 /// should occupy two lines
 /// NOTE: This function should only be used for last para
 bool surahHas2LineHeadress(int surah) {
-  return [77, 78, 103, 109, 110, 112, 113].contains(surah);
+  return [77, 78, 79, 103, 109, 110, 112, 113].contains(surah);
 }
 
 final Uint32List _surahAyahOffsets = Uint32List.fromList([
