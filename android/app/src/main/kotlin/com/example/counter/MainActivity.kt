@@ -10,6 +10,7 @@ import io.flutter.plugin.common.MethodChannel
 import java.io.BufferedWriter
 import java.io.OutputStream
 import java.io.OutputStreamWriter
+import java.io.FileOutputStream
 
 class MainActivity : FlutterActivity() {
     private val CHANNEL_NAME = "org.quran_rev_helper/backupDB"
@@ -67,11 +68,12 @@ class MainActivity : FlutterActivity() {
 
     private fun writeInFile(uri: Uri){
         try {
-            val outputStream = contentResolver.openOutputStream(uri)
+            val outputStream = contentResolver.openOutputStream(uri) as FileOutputStream?
             if (outputStream == null) {
                 result.error("ERROR", "Failed to get output stream", null)
                 return
             }
+            outputStream.channel.truncate(0)
             outputStream.write(data.toByteArray())
             outputStream.close()
             result.success("SUCCESS")
