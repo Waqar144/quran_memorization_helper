@@ -7,7 +7,7 @@ import 'package:quran_memorization_helper/models/settings.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:quran_memorization_helper/utils/utils.dart';
 
-const String appVersion = "1.1.0";
+const String appVersion = "1.1.1";
 
 String _themeModeToString(ThemeMode m) {
   return switch (m) {
