@@ -201,7 +201,10 @@ class _LongPressActionSheetState extends State<LongPressActionSheet> {
             utf8.decode(widget.transUtf8.asUint8List(s, e - s));
         String metadata = surahAyahText(ayah);
 
-        bool expanded = widget.mutashabihaList == null;
+        // if mutashabiha is null, we always expand
+        bool expanded = widget.mutashabihaList == null ||
+            // else if user has swiped, then we expand
+            (widget.mutashabihaList != null && widget.tappedAyahIdx != ayah);
         final translationWidget = TranslationTile(translation,
             metadata: metadata, expanded: expanded);
 
