@@ -45,13 +45,12 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: _multipleSelectMode == false,
+      onPopInvoked: (_) async {
         if (_multipleSelectMode) {
           _onExitMultiSelectMode();
-          return false;
         }
-        return true;
       },
       child: Scaffold(
         appBar: AppBar(
