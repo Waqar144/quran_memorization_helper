@@ -5,9 +5,9 @@ import 'package:quran_memorization_helper/pages/page_constants.dart';
 import 'package:quran_memorization_helper/models/quiz.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/pages.dart';
-import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
-import 'package:quran_memorization_helper/quran_data/surahs.dart';
 import 'package:quran_memorization_helper/widgets/read_quran.dart';
+import 'package:quran_memorization_helper/widgets/surah_list_view.dart';
+import 'package:quran_memorization_helper/widgets/para_list_view.dart';
 import 'package:quran_memorization_helper/utils/utils.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
@@ -148,43 +148,6 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  Widget paraListItem(int index) {
-    int count = _paraModel.markedAyahCountForPara(index);
-    return ValueListenableBuilder(
-      valueListenable: _paraModel.currentParaNotifier,
-      builder: (context, value, _) {
-        return ListTile(
-          minVerticalPadding: 0,
-          visualDensity: VisualDensity.compact,
-          title: Text(
-            getParaNameForIndex(index),
-            style: const TextStyle(
-              letterSpacing: 0,
-              fontSize: 24,
-              fontFamily: 'Al Mushaf',
-            ),
-          ),
-          leading: Text(
-            "${index + 1}.",
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 20),
-          ),
-          trailing: Text(
-            count > 0 ? "$count" : "",
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 16, color: Colors.red),
-          ),
-          onTap: () {
-            _paraModel.setCurrentPara(index + 1);
-            Navigator.of(context).pop();
-          },
-          selected: value == (index + 1),
-          selectedTileColor: Theme.of(context).highlightColor,
-        );
-      },
-    );
-  }
-
   void _onSurahTapped(int surahIndex) {
     Navigator.of(context).pop();
     if (surahIndex < 0 || surahIndex > 113) {
@@ -259,32 +222,8 @@ class _MainPageState extends State<MainPage>
         },
       ),
       drawer: Builder(builder: (context) {
-        int maxVisibleItems =
-            ((MediaQuery.of(context).size.height - (48 + 4)) / 48).floor();
-        const totalParas = 30;
-        final maxScrollablePara = totalParas -
-            maxVisibleItems; // if we scroll to the bottom, this para is visible at top
-
-        int currentParaIdx = _paraModel.currentPara - 1;
-        int paraScrollTo = 0;
-        if (currentParaIdx > 8 && currentParaIdx < 20) {
-          paraScrollTo = 48 * (currentParaIdx - 3);
-        } else if (currentParaIdx > maxScrollablePara) {
-          paraScrollTo = 48 * maxScrollablePara;
-        }
-
-        final paraListScrollController = ScrollController(
-            initialScrollOffset: paraScrollTo.toDouble(),
-            keepScrollOffset: false);
-
-        int surah = firstSurahInPara(_paraModel.currentPara - 1);
-        double surahScrollTo = 48 * surah.toDouble();
-        final surahListScrollController = ScrollController(
-            initialScrollOffset: surahScrollTo, keepScrollOffset: false);
-        int currentPage = (_pageController.page?.floor() ?? 0) +
-            para16LinePageOffsets[currentParaIdx];
-        int currentSurah = surahForPage(currentPage) + 1;
-
+        final int currentParaIdx = _paraModel.currentPara - 1;
+        final int currentPageInPara = (_pageController.page?.floor() ?? 0);
         return Drawer(
           child: SafeArea(
             child: DefaultTabController(
@@ -307,41 +246,18 @@ class _MainPageState extends State<MainPage>
                     child: TabBarView(
                       controller: _drawerTabController,
                       children: [
-                        ListView.builder(
-                          controller: paraListScrollController,
-                          scrollDirection: Axis.vertical,
-                          itemCount: 30,
-                          itemExtent: 48,
-                          itemBuilder: (context, index) {
-                            return paraListItem(index);
+                        ParaListView(
+                          model: _paraModel,
+                          currentParaIdx: currentParaIdx,
+                          onParaTapped: (idx) {
+                            _paraModel.setCurrentPara(idx + 1);
+                            Navigator.of(context).pop();
                           },
                         ),
-                        ListView.builder(
-                          controller: surahListScrollController,
-                          scrollDirection: Axis.vertical,
-                          itemCount: 114,
-                          itemExtent: 48,
-                          itemBuilder: (context, index) {
-                            return ListTile(
-                              leading: Text(
-                                "${index + 1}.",
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(fontSize: 20),
-                              ),
-                              title: Text(
-                                surahDataForIdx(index, arabic: true).name,
-                                style: const TextStyle(
-                                  letterSpacing: 0,
-                                  fontSize: 24,
-                                  fontFamily: 'Al Mushaf',
-                                ),
-                              ),
-                              selected: currentSurah == index,
-                              selectedTileColor:
-                                  Theme.of(context).highlightColor,
-                              onTap: () => _onSurahTapped(index),
-                            );
-                          },
+                        SurahListView(
+                          currentParaIdx: currentParaIdx,
+                          currentPageInPara: currentPageInPara,
+                          onSurahTapped: _onSurahTapped,
                         ),
                       ],
                     ),
