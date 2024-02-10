@@ -209,6 +209,14 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  Widget _translationInfo() {
+    return const ListTile(
+      leading: Icon(Icons.translate),
+      title: Text("Translation"),
+      subtitle: Text("Molana Fateh Muhammad Jalandhari"),
+    );
+  }
+
   Widget _version() {
     return ListTile(
       leading: const Icon(Icons.app_settings_alt),
@@ -272,7 +280,7 @@ class _SettingsPageState extends State<SettingsPage> {
       appBar: AppBar(
         title: const Text("Settings"),
       ),
-      body: Column(
+      body: ListView(
         children: [
           _createThemeModeTile(),
           _createFontSizeTile(),
@@ -283,6 +291,7 @@ class _SettingsPageState extends State<SettingsPage> {
           _reportAnIssue(),
           _email(),
           const Divider(),
+          _translationInfo(),
           _licenses(),
           _version(),
         ],
