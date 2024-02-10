@@ -229,8 +229,7 @@ class _LongPressActionSheetState extends State<LongPressActionSheet> {
 }
 
 class CustomPageViewScrollPhysics extends ScrollPhysics {
-  const CustomPageViewScrollPhysics({ScrollPhysics? parent})
-      : super(parent: parent);
+  const CustomPageViewScrollPhysics({super.parent});
 
   @override
   CustomPageViewScrollPhysics applyTo(ScrollPhysics? ancestor) {

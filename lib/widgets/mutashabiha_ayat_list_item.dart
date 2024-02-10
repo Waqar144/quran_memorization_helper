@@ -15,8 +15,7 @@ class _AyatListItemWithMetadata extends StatelessWidget {
       {this.onTap,
       this.leading,
       this.onLongPress,
-      this.selectionMode = false,
-      super.key}) {
+      this.selectionMode = false}) {
     _leadingNotifier.value = _ayah.selected ?? false;
   }
 
