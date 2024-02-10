@@ -153,7 +153,7 @@ class _MainPageState extends State<MainPage>
     if (surahIndex < 0 || surahIndex > 113) {
       return;
     }
-    int page = surah16LinePageOffset[surahIndex] - 1;
+    int page = surah16LinePageOffset[surahIndex];
     int paraIdx = paraForPage(page);
     int paraStartPage = para16LinePageOffsets[paraIdx];
     int jumpToPage = page - paraStartPage;
