@@ -741,6 +741,7 @@ class _PageWidgetState extends State<PageWidget> {
     }
 
     SurahData surahData = surahDataForIdx(surahIdx, arabic: true);
+    final isSurahTawba = surahIdx == 8;
     return Container(
       width: MediaQuery.of(context).size.width,
       decoration: BoxDecoration(
@@ -757,7 +758,7 @@ class _PageWidgetState extends State<PageWidget> {
             style: style,
           ),
           Text(
-            /*data:*/ "بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ",
+            isSurahTawba ? "-" : "بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ",
             textDirection: TextDirection.rtl,
             textAlign: TextAlign.center,
             style: style,
