@@ -281,6 +281,9 @@ class _MainPageState extends State<MainPage>
         double surahScrollTo = 48 * surah.toDouble();
         final surahListScrollController = ScrollController(
             initialScrollOffset: surahScrollTo, keepScrollOffset: false);
+        int currentPage = (_pageController.page?.floor() ?? 0) +
+            para16LinePageOffsets[currentParaIdx];
+        int currentSurah = surahForPage(currentPage) + 1;
 
         return Drawer(
           child: SafeArea(
@@ -333,6 +336,9 @@ class _MainPageState extends State<MainPage>
                                   fontFamily: 'Al Mushaf',
                                 ),
                               ),
+                              selected: currentSurah == index,
+                              selectedTileColor:
+                                  Theme.of(context).highlightColor,
                               onTap: () => _onSurahTapped(index),
                             );
                           },

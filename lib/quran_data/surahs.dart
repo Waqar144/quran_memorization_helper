@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'pages.dart';
 
 int toSurahAyahOffset(int surahIdx, int absoluteAyah) {
   if (surahIdx > _surahAyahOffsets.length) {
@@ -219,7 +220,7 @@ int surahForPage(int page) {
     throw "Invalid page number: $page";
   }
   for (int i = 0; i < 114; ++i) {
-    if (page >= _surahAyahOffsets[i]) {
+    if (page >= surah16LinePageOffset[i]) {
       continue;
     }
     return i - 1;
