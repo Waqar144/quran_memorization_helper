@@ -118,7 +118,7 @@ class _TranslationTileState extends State<TranslationTile> {
                       ),
                     ),
                     Text(
-                      widget.translation,
+                      widget.translation.trim(),
                       textDirection: TextDirection.rtl,
                       style: const TextStyle(
                           fontFamily: "Urdu",
