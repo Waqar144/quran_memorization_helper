@@ -12,6 +12,7 @@ import 'package:quran_memorization_helper/quran_data/should_add_spaces.dart';
 import 'package:quran_memorization_helper/widgets/mutashabiha_ayat_list_item.dart';
 import 'package:quran_memorization_helper/widgets/tap_and_longpress_gesture_recognizer.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 final _markedWordStyleLight = TextStyle(
   inherit: true,
@@ -184,6 +185,7 @@ class _LongPressActionSheetState extends State<LongPressActionSheet> {
   String surahAyahText(int ayahIdx) {
     int surah = surahForAyah(ayahIdx);
     int ayah = toSurahAyahOffset(surah, ayahIdx);
+    print("IS: $surah:$ayah");
     return "${surahNameForIdx(surah)}:${ayah + 1}";
   }
 
@@ -194,12 +196,14 @@ class _LongPressActionSheetState extends State<LongPressActionSheet> {
       itemCount: _totalAyahsInPara,
       controller: _controller,
       itemBuilder: (context, index) {
-        int ayah = _paraFirstAyah + index;
-        int s = widget.transLineOffsets[ayah];
-        int e = widget.transLineOffsets[ayah + 1];
+        final int ayah = _paraFirstAyah + index;
+        final int s = widget.transLineOffsets[ayah];
+        final int e = widget.transLineOffsets[ayah + 1];
         String translation =
             utf8.decode(widget.transUtf8.asUint8List(s, e - s));
         String metadata = surahAyahText(ayah);
+        final int surahIdx = surahForAyah(ayah);
+        final int surahAyahIdx = toSurahAyahOffset(surahIdx, ayah);
 
         // if mutashabiha is null, we always expand
         bool expanded = widget.mutashabihaList == null ||
@@ -208,9 +212,19 @@ class _LongPressActionSheetState extends State<LongPressActionSheet> {
         final translationWidget = TranslationTile(translation,
             metadata: metadata, expanded: expanded);
 
+        final openOnQuranCom = TextButton.icon(
+          onPressed: () {
+            launchUrl(Uri.parse(
+                "https://quran.com/${surahIdx + 1}:${surahAyahIdx + 1}"));
+          },
+          icon: const Icon(Icons.open_in_new),
+          label: const Text("Open on Quran.com"),
+        );
+
         if (widget.tappedAyahIdx == ayah && widget.mutashabihaList != null) {
           return ListView(
             children: [
+              openOnQuranCom,
               translationWidget,
               const Divider(),
               widget.mutashabihaList!
@@ -220,6 +234,7 @@ class _LongPressActionSheetState extends State<LongPressActionSheet> {
 
         return ListView(
           children: [
+            openOnQuranCom,
             translationWidget,
           ],
         );
