@@ -95,6 +95,24 @@ void main() {
     print("test modify model OK");
   });
 
+  test('test add invalid ayah', () async {
+    model.setCurrentPara(1);
+    expect(model.currentPara, 1);
+    expect(model.ayahs.length, 3);
+
+    model.addAyahs([
+      Ayat("", [0], ayahIdx: 1041)
+    ]);
+    expect(model.ayahs.length, 3);
+
+    model.addAyahs([
+      Ayat("", [0], ayahIdx: 9999)
+    ]);
+    expect(model.ayahs.length, 3);
+
+    print("test add invalid ayah OK");
+  });
+
   tearDownAll(() async {
     Directory docs = await getApplicationDocumentsDirectory();
     File jsonFile = File("${docs.path}${Platform.pathSeparator}ayatsdb.json");

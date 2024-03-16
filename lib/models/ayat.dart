@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:quran_memorization_helper/utils/utils.dart' as utils;
 import 'package:quran_memorization_helper/quran_data/ayah_offsets.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
+import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
 
 /// Represents an item that is shown in main page ayah list
 class AyatOrMutashabiha {
@@ -145,8 +146,15 @@ class ParaAyatModel extends ChangeNotifier {
       }
     }
 
-    if (newAyahs.isNotEmpty) {
-      existingAyahs.addAll(newAyahs);
+    // validate and add
+    for (final a in newAyahs) {
+      int p = paraForAyah(a.ayahIdx) + 1;
+      if (p == currentPara) {
+        existingAyahs.add(Ayat(a.text, [...a.markedWords], ayahIdx: a.ayahIdx));
+      } else {
+        // ignore: avoid_print
+        print("Invalid ayah addition, for different para $currentPara vs $p");
+      }
     }
 
     existingAyahs.sort((a, b) {
