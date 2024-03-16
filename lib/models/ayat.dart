@@ -202,22 +202,16 @@ class ParaAyatModel extends ChangeNotifier {
   void removeAyats(int paraIndex, int absoluteAyahIndex, int wordIndex) {
     final List<Ayat>? ayahs = _paraAyats[paraIndex + 1];
     if (ayahs == null) return;
-    int removeAyahIndex = -1;
-    int i = 0;
-    for (final a in ayahs) {
+
+    for (final (i, a) in ayahs.indexed) {
       if (a.ayahIdx == absoluteAyahIndex) {
-        if (a.markedWords.contains(wordIndex)) {
-          a.markedWords.remove(wordIndex);
+        if (a.markedWords.remove(wordIndex)) {
           if (a.markedWords.isEmpty) {
-            removeAyahIndex = i;
+            ayahs.removeAt(i);
+            break;
           }
         }
       }
-      i++;
-    }
-
-    if (removeAyahIndex != -1) {
-      ayahs.removeAt(removeAyahIndex);
     }
 
     _paraAyats[paraIndex + 1] = ayahs;
