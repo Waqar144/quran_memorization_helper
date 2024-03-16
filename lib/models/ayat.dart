@@ -269,17 +269,6 @@ class ParaAyatModel extends ChangeNotifier {
           }
         }
 
-        // migrate old stuff
-        var mutashabihasJson = paraJson["mutashabihas"] as List<dynamic>?;
-        if (mutashabihasJson != null) {
-          for (final m in mutashabihasJson) {
-            if (m == null) continue;
-            int ctx = 0; // no context here
-            MutashabihaAyat src = ayatFromJsonObj(m["src"], null, ctx);
-            paraData.add(Ayat("", [0], ayahIdx: src.ayahIdx));
-          }
-        }
-
         if (paraData.isEmpty) continue;
         paraData.sort((a, b) {
           return a.ayahIdx - b.ayahIdx;
