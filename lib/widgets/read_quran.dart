@@ -320,7 +320,6 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
   ByteBuffer? _transUtf8;
   List<int>? _transLineOffsets;
   final _repaintNotifier = StreamController<int>.broadcast();
-  Timer? _nextParaLoadTimer;
 
   @override
   void initState() {
@@ -549,6 +548,8 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
 
   @override
   Widget build(BuildContext context) {
+    // set to true when swiping to load next para
+    bool loadingNext = false;
     return FutureBuilder(
       future: doload(),
       builder: (context, snapshot) {
@@ -571,14 +572,13 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
                     nextPara = 1;
                   }
 
-                  // debounce as there are a lot of notifications
-                  _nextParaLoadTimer?.cancel();
-                  _nextParaLoadTimer =
-                      Timer(const Duration(milliseconds: 50), () {
-                    bool lastpage = dir < 0;
-                    widget.model
-                        .setCurrentPara(nextPara, showLastPage: lastpage);
-                  });
+                  if (loadingNext) {
+                    return false;
+                  }
+                  loadingNext = true;
+
+                  bool lastpage = dir < 0;
+                  widget.model.setCurrentPara(nextPara, showLastPage: lastpage);
                 }
                 return false;
               },
