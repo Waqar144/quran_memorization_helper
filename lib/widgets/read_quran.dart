@@ -185,7 +185,6 @@ class _LongPressActionSheetState extends State<LongPressActionSheet> {
   String surahAyahText(int ayahIdx) {
     int surah = surahForAyah(ayahIdx);
     int ayah = toSurahAyahOffset(surah, ayahIdx);
-    print("IS: $surah:$ayah");
     return "${surahNameForIdx(surah)}:${ayah + 1}";
   }
 
