@@ -148,10 +148,10 @@ class ParaAyatModel extends ChangeNotifier {
 
     // validate and add
     for (final a in newAyahs) {
-      int p = paraForAyah(a.ayahIdx) + 1;
-      if (p == currentPara) {
+      if (ayahBelongsToPara(a.ayahIdx, currentPara - 1)) {
         existingAyahs.add(Ayat(a.text, [...a.markedWords], ayahIdx: a.ayahIdx));
       } else {
+        int p = paraForAyah(a.ayahIdx) + 1;
         // ignore: avoid_print
         print("Invalid ayah addition, for different para $currentPara vs $p");
       }
@@ -257,14 +257,18 @@ class ParaAyatModel extends ChangeNotifier {
         var ayahJsons = paraJson["ayats"] as List<dynamic>?;
         if (ayahJsons != null) {
           for (final dynamic a in ayahJsons) {
-            if (a is int) {
-              paraData.add(Ayat("", [0], ayahIdx: a));
-            } else {
+            try {
               final int idx = a['idx'];
+              if (!ayahBelongsToPara(idx, para - 1)) {
+                continue;
+              }
+
               final List<int> wordIdxes = [
                 for (final w in a['words']) w as int
               ];
               paraData.add(Ayat("", wordIdxes, ayahIdx: idx));
+            } catch (_) {
+              continue;
             }
           }
         }

@@ -18,6 +18,13 @@ int paraForAyah(int absoluteAyah) {
   return 29;
 }
 
+bool ayahBelongsToPara(int absoluteAyah, int paraIdx) {
+  if (paraIdx < 0 || paraIdx > 29) return false;
+  int s = _paraAyahOffset[paraIdx];
+  int e = s + paraAyahCount[paraIdx];
+  return s <= absoluteAyah && absoluteAyah < e;
+}
+
 int getFirstAyahOfPara(int paraIndex) {
   if (paraIndex < 0 || paraIndex > 29) throw "Invalid paraIndex: $paraIndex";
   return _paraAyahOffset[paraIndex];
@@ -125,7 +132,7 @@ const List<ParaBounds> paraByteBounds = [
   ParaBounds(717703, 740472),
 ];
 
-const List<int> paraAyahCount = [
+final Uint32List paraAyahCount = Uint32List.fromList([
   148, // 0
   111, // 1
   125, // 2
@@ -156,7 +163,7 @@ const List<int> paraAyahCount = [
   137, // 27
   431, // 28
   564, // 29
-];
+]);
 
 final Uint32List _paraAyahOffset = Uint32List.fromList([
   0, // 1
