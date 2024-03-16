@@ -8,9 +8,10 @@ class ParaBounds {
 
 const String ayahSeparator = " ۞ ";
 
+/// Returns the para idx for given ayah idx
 int paraForAyah(int absoluteAyah) {
   for (int i = 0; i < _paraAyahOffset.length; ++i) {
-    if (absoluteAyah > _paraAyahOffset[i]) continue;
+    if (absoluteAyah >= _paraAyahOffset[i]) continue;
     return i - 1;
   }
   // last para
