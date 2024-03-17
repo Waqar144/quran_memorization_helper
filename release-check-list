@@ -1,0 +1,5 @@
+- bump flutter to correct version for fdroid
+- bump version in settings.dart
+- bump version in pubspec.yaml
+- create appbundle for playstore `flutter build appbundle`
+- create tag for fdroid release
