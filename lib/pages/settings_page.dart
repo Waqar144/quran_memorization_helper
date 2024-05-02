@@ -67,6 +67,10 @@ class _ChangeTranslationDialogState extends State<_ChangeTranslationDialog> {
               label: const Text("Restore Default"),
               onPressed: () {
                 Settings.instance.translationFile = "";
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+                  showSnackBarMessage(context, "Restored default translation");
+                }
               },
             ),
             ElevatedButton.icon(
@@ -87,6 +91,10 @@ class _ChangeTranslationDialogState extends State<_ChangeTranslationDialog> {
                   });
                 } else {
                   Settings.instance.translationFile = path;
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                    showSnackBarMessage(context, "Succesfully loaded $path");
+                  }
                 }
               },
             )
