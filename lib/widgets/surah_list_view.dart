@@ -20,7 +20,6 @@ class SurahListView extends StatelessWidget {
         initialScrollOffset: surahScrollTo, keepScrollOffset: false);
     int currentPage = currentPageInPara + para16LinePageOffsets[currentParaIdx];
     int currentSurah = surahForPage(currentPage);
-    print("Page: $currentPageInPara Current Surah: $currentSurah");
 
     return ListView.builder(
       controller: surahListScrollController,

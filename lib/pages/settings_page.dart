@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -8,6 +10,92 @@ import 'package:file_picker/file_picker.dart';
 import 'package:quran_memorization_helper/utils/utils.dart';
 
 const String appVersion = "1.2.1";
+
+class _ChangeTranslationDialog extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() => _ChangeTranslationDialogState();
+}
+
+class _ChangeTranslationDialogState extends State<_ChangeTranslationDialog> {
+  String error = "";
+
+  @override
+  Widget build(BuildContext context) {
+    return SimpleDialog(
+      title: const Text("Change Translation"),
+      contentPadding: const EdgeInsets.all(16),
+      children: [
+        const Text.rich(TextSpan(children: [
+          TextSpan(text: "You can download translations from "),
+          TextSpan(
+              text: "https://tanzil.net/trans/",
+              style: TextStyle(decoration: TextDecoration.underline)),
+          TextSpan(
+              text:
+                  " and then load them using the 'Load' button below. Please select "),
+          TextSpan(
+              text: "Text",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                decoration: TextDecoration.underline,
+              )),
+          TextSpan(text: " as the "),
+          TextSpan(
+              text: "File Format",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                decoration: TextDecoration.underline,
+              )),
+          TextSpan(text: " before downloading."),
+        ])),
+        if (error.isNotEmpty)
+          Text("Error: $error", style: const TextStyle(color: Colors.red)),
+        Wrap(
+          direction: Axis.horizontal,
+          alignment: WrapAlignment.spaceAround,
+          // mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            ElevatedButton.icon(
+              icon: const Icon(Icons.open_in_new),
+              label: const Text("Goto tanzil.net"),
+              onPressed: () {
+                launchUrl(Uri.parse("https://tanzil.net/trans/"));
+              },
+            ),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.restore),
+              label: const Text("Restore Default"),
+              onPressed: () {
+                Settings.instance.translationFile = "";
+              },
+            ),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.upload_file),
+              label: const Text("Load..."),
+              onPressed: () async {
+                FilePickerResult? result = await FilePicker.platform.pickFiles(
+                    dialogTitle: "Select translation File",
+                    type: FileType.custom,
+                    allowedExtensions: ["txt"]);
+                if (result == null || !result.isSinglePick) return;
+                String? path = result.paths.first;
+                if (path == null) return;
+                final lines = File(path).readAsLinesSync();
+                if (lines.length < 6237) {
+                  setState(() {
+                    error = "Invalid translation file";
+                  });
+                } else {
+                  Settings.instance.translationFile = path;
+                }
+              },
+            )
+          ],
+        )
+      ],
+    );
+  }
+}
 
 String _themeModeToString(ThemeMode m) {
   return switch (m) {
@@ -209,6 +297,24 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  Widget _customTranslationTile() {
+    return ListTile(
+      title: const Text("Change Translation"),
+      subtitle: const Text("Load a different translation"),
+      trailing: ElevatedButton(
+        child: const Text("Change..."),
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) {
+              return _ChangeTranslationDialog();
+            },
+          );
+        },
+      ),
+    );
+  }
+
   Widget _translationInfo() {
     return const ListTile(
       leading: Icon(Icons.translate),
@@ -285,6 +391,7 @@ class _SettingsPageState extends State<SettingsPage> {
           _createThemeModeTile(),
           _createFontSizeTile(),
           _createWordSpacingTile(),
+          _customTranslationTile(),
           _createBackupWidget(),
           _restoreBackupWidget(),
           const Divider(),

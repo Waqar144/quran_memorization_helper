@@ -11,6 +11,7 @@ class Settings extends ChangeNotifier {
   int _currentReadingPage = 0;
   Timer? timer;
   ThemeMode _themeMode = ThemeMode.system;
+  String _translationFile = "";
 
   // The font size of ayahs
   int _fontSize = 24;
@@ -46,6 +47,15 @@ class Settings extends ChangeNotifier {
   set themeMode(ThemeMode m) {
     if (m != _themeMode) {
       _themeMode = m;
+      notifyListeners();
+      persist();
+    }
+  }
+
+  String get translationFile => _translationFile;
+  set translationFile(String file) {
+    if (file != _translationFile) {
+      _translationFile = file;
       notifyListeners();
       persist();
     }

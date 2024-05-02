@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:convert';
@@ -72,11 +74,34 @@ TextStyle _mutStyle(bool dark) {
   return _mutStyleLight;
 }
 
+class Translation {
+  /// The filename of translation
+  final String fileName;
+
+  /// The translation buffer
+  final ByteBuffer transUtf8;
+
+  /// The line offsets into the buffer
+  final List<int> transLineOffsets;
+
+  /// Is this translation the builtin one?
+  final bool isBundledTranslation;
+
+  bool get isUrdu => isBundledTranslation || fileName.startsWith("ur.");
+
+  Translation(
+      {required this.fileName,
+      required this.transUtf8,
+      required this.transLineOffsets,
+      required this.isBundledTranslation});
+}
+
 class TranslationTile extends StatefulWidget {
   final String translation;
+  final bool isUrduTranslation;
   final String metadata;
   final bool expanded;
-  const TranslationTile(this.translation,
+  const TranslationTile(this.translation, this.isUrduTranslation,
       {required this.metadata, required this.expanded, super.key});
 
   @override
@@ -120,12 +145,15 @@ class _TranslationTileState extends State<TranslationTile> {
                     ),
                     Text(
                       widget.translation.trim(),
-                      textDirection: TextDirection.rtl,
-                      style: const TextStyle(
-                          fontFamily: "Urdu",
-                          fontSize: 22,
-                          letterSpacing: 0.0,
-                          height: 1.8),
+                      textDirection:
+                          widget.isUrduTranslation ? TextDirection.rtl : null,
+                      style: widget.isUrduTranslation
+                          ? const TextStyle(
+                              fontFamily: "Urdu",
+                              fontSize: 22,
+                              letterSpacing: 0.0,
+                              height: 1.8)
+                          : null,
                     ),
                   ],
                 ),
@@ -141,8 +169,7 @@ class _TranslationTileState extends State<TranslationTile> {
 
 class LongPressActionSheet extends StatefulWidget {
   final Widget? mutashabihaList;
-  final ByteBuffer transUtf8;
-  final List<int> transLineOffsets;
+  final Translation translation;
   final int currentParaIdx;
 
   /// absoluteAyah index of tapped ayah
@@ -151,8 +178,7 @@ class LongPressActionSheet extends StatefulWidget {
   const LongPressActionSheet({
     super.key,
     required this.mutashabihaList,
-    required this.transUtf8,
-    required this.transLineOffsets,
+    required this.translation,
     required this.currentParaIdx,
     required this.tappedAyahIdx,
   });
@@ -196,10 +222,10 @@ class _LongPressActionSheetState extends State<LongPressActionSheet> {
       controller: _controller,
       itemBuilder: (context, index) {
         final int ayah = _paraFirstAyah + index;
-        final int s = widget.transLineOffsets[ayah];
-        final int e = widget.transLineOffsets[ayah + 1];
+        final int s = widget.translation.transLineOffsets[ayah];
+        final int e = widget.translation.transLineOffsets[ayah + 1];
         String translation =
-            utf8.decode(widget.transUtf8.asUint8List(s, e - s));
+            utf8.decode(widget.translation.transUtf8.asUint8List(s, e - s));
         String metadata = surahAyahText(ayah);
         final int surahIdx = surahForAyah(ayah);
         final int surahAyahIdx = toSurahAyahOffset(surahIdx, ayah);
@@ -208,7 +234,8 @@ class _LongPressActionSheetState extends State<LongPressActionSheet> {
         bool expanded = widget.mutashabihaList == null ||
             // else if user has swiped, then we expand
             (widget.mutashabihaList != null && widget.tappedAyahIdx != ayah);
-        final translationWidget = TranslationTile(translation,
+        final translationWidget = TranslationTile(
+            translation, widget.translation.isUrdu,
             metadata: metadata, expanded: expanded);
 
         final openOnQuranCom = TextButton.icon(
@@ -317,20 +344,25 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
   List<Page> _pages = [];
   List<Mutashabiha> _mutashabihat = [];
   ByteBuffer? _quranUtf8;
-  ByteBuffer? _transUtf8;
-  List<int>? _transLineOffsets;
+  Translation? _translation;
   final _repaintNotifier = StreamController<int>.broadcast();
 
   @override
   void initState() {
+    Settings.instance.addListener(clearCachedTranslation);
     super.initState();
     WakelockPlus.enable(); // disable auto screen turn off
   }
 
   @override
   void dispose() {
+    Settings.instance.removeListener(clearCachedTranslation);
     super.dispose();
     WakelockPlus.disable();
+  }
+
+  void clearCachedTranslation() {
+    _translation = null;
   }
 
   @override
@@ -448,21 +480,33 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
       _quranUtf8 = data.buffer;
     }
 
-    if (_transUtf8 == null) {
-      final data = await rootBundle.load("assets/ur.jalandhry.txt");
-      _transUtf8 = data.buffer;
+    if (_translation == null) {
+      ByteBuffer transUtf8;
+      final isBundledTranslation = Settings.instance.translationFile.isEmpty;
+      if (isBundledTranslation) {
+        transUtf8 = (await rootBundle.load("assets/ur.jalandhry.txt")).buffer;
+      } else {
+        final data = File(Settings.instance.translationFile).readAsBytesSync();
+        transUtf8 = data.buffer;
+      }
 
-      _transLineOffsets = [];
-      _transLineOffsets!.add(0);
+      List<int> transLineOffsets = [];
+      transLineOffsets.add(0);
       int start = 0;
-      final utf = _transUtf8!.asUint8List();
+      final utf = transUtf8.asUint8List();
       int next = utf.indexOf(10);
       while (next != -1) {
-        _transLineOffsets!.add(next);
+        transLineOffsets.add(next);
 
         start = next + 1;
         next = utf.indexOf(10, start);
       }
+
+      _translation = Translation(
+          fileName: Settings.instance.translationFile,
+          transUtf8: transUtf8,
+          transLineOffsets: transLineOffsets,
+          isBundledTranslation: isBundledTranslation);
     }
 
     for (int i = 0; i < mutashabihat.length; ++i) {
@@ -495,8 +539,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
             padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
             child: LongPressActionSheet(
               mutashabihaList: mutashabihaWidget,
-              transUtf8: _transUtf8!,
-              transLineOffsets: _transLineOffsets!,
+              translation: _translation!,
               currentParaIdx: widget.model.currentPara - 1,
               tappedAyahIdx: tappedAyah,
             ),
