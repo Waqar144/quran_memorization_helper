@@ -551,7 +551,9 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
 
   void _onAyahTapped(int surahIdx, int ayahIdx, int wordIdx, int pageNum,
       bool longPress) async {
-    if (longPress) {
+    bool tapToShowBottomSheet = Settings.instance.tapToShowTranslation;
+    if ((longPress && !tapToShowBottomSheet) ||
+        (!longPress && tapToShowBottomSheet)) {
       _onAyahLongPressed(surahIdx, ayahIdx, wordIdx, pageNum);
       return;
     }

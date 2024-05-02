@@ -12,6 +12,7 @@ class Settings extends ChangeNotifier {
   Timer? timer;
   ThemeMode _themeMode = ThemeMode.system;
   String _translationFile = "";
+  bool _tapToShowTranslation = false;
 
   // The font size of ayahs
   int _fontSize = 24;
@@ -61,6 +62,15 @@ class Settings extends ChangeNotifier {
     }
   }
 
+  bool get tapToShowTranslation => _tapToShowTranslation;
+  set tapToShowTranslation(bool newValue) {
+    if (newValue != _tapToShowTranslation) {
+      _tapToShowTranslation = newValue;
+      notifyListeners();
+      persist();
+    }
+  }
+
   factory Settings() {
     return _instance;
   }
@@ -72,6 +82,8 @@ class Settings extends ChangeNotifier {
       'currentReadingPara': _currentReadingPara,
       'currentReadingScrollOffset': _currentReadingPage,
       'themeMode': _themeMode.index,
+      'translationFile': _translationFile,
+      'tapToShowTranslation': _tapToShowTranslation
     };
     String json = const JsonEncoder.withIndent("  ").convert(map);
     await utils.saveJsonToDisk(json, "settings");
@@ -86,6 +98,8 @@ class Settings extends ChangeNotifier {
       _currentReadingPage = json["currentReadingScrollOffset"] ?? 0;
       _themeMode =
           ThemeMode.values[json["themeMode"] ?? ThemeMode.system.index];
+      _translationFile = json["translationFile"] ?? "";
+      _tapToShowTranslation = json["tapToShowTranslation"] ?? false;
     } catch (e) {
       // nothing for now
     }

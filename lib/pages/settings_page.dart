@@ -297,6 +297,19 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  Widget _tapToShowTranslationTile() {
+    return ListTile(
+      title: const Text("Tap to show translation"),
+      subtitle: const Text("Long press will mark a mistake"),
+      trailing: Switch(
+        value: Settings.instance.tapToShowTranslation,
+        onChanged: (bool newValue) {
+          Settings.instance.tapToShowTranslation = newValue;
+        },
+      ),
+    );
+  }
+
   Widget _customTranslationTile() {
     return ListTile(
       title: const Text("Change Translation"),
@@ -391,6 +404,7 @@ class _SettingsPageState extends State<SettingsPage> {
           _createThemeModeTile(),
           _createFontSizeTile(),
           _createWordSpacingTile(),
+          _tapToShowTranslationTile(),
           _customTranslationTile(),
           _createBackupWidget(),
           _restoreBackupWidget(),
