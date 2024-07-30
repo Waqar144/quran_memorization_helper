@@ -125,8 +125,6 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  int initialValue = Settings.instance.fontSize;
-  double wordSpacing = Settings.instance.wordSpacing.toDouble();
   ThemeMode themeMode = Settings.instance.themeMode;
   static const platform = MethodChannel('org.quran_rev_helper/backupDB');
 
@@ -247,64 +245,6 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  Widget _createFontSizeTile() {
-    return ListTile(
-      title: const Text("Ayat font size"),
-      subtitle: const Text("Font size in the ayats list (not while reading)"),
-      trailing: SizedBox(
-        width: 80,
-        child: DropdownButtonFormField(
-          borderRadius: const BorderRadius.all(Radius.circular(5)),
-          decoration: const InputDecoration(contentPadding: EdgeInsets.all(8)),
-          value: initialValue,
-          onChanged: (int? val) {
-            if (val != null) {
-              Settings.instance.fontSize = val;
-              initialValue = val;
-            }
-          },
-          padding: EdgeInsets.zero,
-          items: [
-            for (final size in widget.fontSizes)
-              DropdownMenuItem(
-                value: size,
-                child: Text(size.toString()),
-              )
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _createWordSpacingTile() {
-    return ListTile(
-      title: const Text("Word spacing"),
-      subtitle: const Text("Space between words of an ayah"),
-      trailing: SizedBox(
-        width: 80,
-        child: DropdownButtonFormField<double>(
-          borderRadius: const BorderRadius.all(Radius.circular(5)),
-          decoration: const InputDecoration(contentPadding: EdgeInsets.all(8)),
-          value: wordSpacing,
-          onChanged: (double? val) {
-            if (val != null) {
-              wordSpacing = val;
-              Settings.instance.wordSpacing = val.toInt();
-            }
-          },
-          padding: EdgeInsets.zero,
-          items: [
-            for (final size in widget.wordSpacings)
-              DropdownMenuItem(
-                value: size,
-                child: Text(size.toString()),
-              )
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _tapToShowTranslationTile() {
     return ListTile(
       title: const Text("Tap to show translation"),
@@ -410,8 +350,6 @@ class _SettingsPageState extends State<SettingsPage> {
       body: ListView(
         children: [
           _createThemeModeTile(),
-          _createFontSizeTile(),
-          _createWordSpacingTile(),
           _tapToShowTranslationTile(),
           _customTranslationTile(),
           _createBackupWidget(),

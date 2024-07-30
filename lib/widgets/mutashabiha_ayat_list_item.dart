@@ -60,11 +60,11 @@ class _AyatListItemWithMetadata extends StatelessWidget {
         softWrap: true,
         textAlign: TextAlign.right,
         textDirection: TextDirection.rtl,
-        style: TextStyle(
+        style: const TextStyle(
             fontFamily: "Al Mushaf",
-            fontSize: Settings.instance.fontSize.toDouble(),
+            fontSize: Settings.fontSize,
             letterSpacing: 0.0,
-            wordSpacing: Settings.instance.wordSpacing.toDouble()),
+            wordSpacing: Settings.wordSpacing),
       ),
       subtitle: Text(
           "${surahNameForIdx(_ayah.surahIdx)}:${_ayah.surahAyahIndexesString()} - Para: ${_ayah.paraIdx + 1}"),

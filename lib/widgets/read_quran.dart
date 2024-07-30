@@ -785,9 +785,9 @@ class _PageWidgetState extends State<PageWidget> {
     final style = TextStyle(
       color: Theme.of(context).textTheme.bodyMedium?.color,
       fontFamily: "Al Mushaf",
-      fontSize: Settings.instance.fontSize.toDouble(),
+      fontSize: Settings.fontSize,
       letterSpacing: 0.0,
-      wordSpacing: Settings.instance.wordSpacing.toDouble(),
+      wordSpacing: Settings.wordSpacing,
     );
 
     // 30th para ?

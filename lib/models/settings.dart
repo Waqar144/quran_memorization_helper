@@ -14,23 +14,9 @@ class Settings extends ChangeNotifier {
   String _translationFile = "";
   bool _tapToShowTranslation = false;
 
-  // The font size of ayahs
-  int _fontSize = 24;
-  int get fontSize => _fontSize;
-  set fontSize(int val) {
-    _fontSize = val;
-    notifyListeners();
-    persist();
-  }
-
-  // The word spacing between words of ayah
-  int _wordSpacing = 1;
-  int get wordSpacing => _wordSpacing;
-  set wordSpacing(int val) {
-    _wordSpacing = val;
-    notifyListeners();
-    persist();
-  }
+  // constants
+  static const double fontSize = 24;
+  static const double wordSpacing = 1.0;
 
   int get currentReadingPara => _currentReadingPara;
   set currentReadingPara(int val) {
@@ -77,8 +63,6 @@ class Settings extends ChangeNotifier {
 
   Future<void> saveToDisk() async {
     Map<String, dynamic> map = {
-      'fontSize': fontSize,
-      'wordSpacing': wordSpacing,
       'currentReadingPara': _currentReadingPara,
       'currentReadingScrollOffset': _currentReadingPage,
       'themeMode': _themeMode.index,
@@ -92,8 +76,6 @@ class Settings extends ChangeNotifier {
   Future<void> readSettings() async {
     try {
       final Map<String, dynamic> json = await utils.readJsonFile("settings");
-      _fontSize = json["fontSize"] ?? 24;
-      _wordSpacing = json["wordSpacing"] ?? 1;
       _currentReadingPara = json["currentReadingPara"] ?? 1;
       _currentReadingPage = json["currentReadingScrollOffset"] ?? 0;
       _themeMode =
