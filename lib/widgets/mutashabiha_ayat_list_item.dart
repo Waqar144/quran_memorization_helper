@@ -98,7 +98,7 @@ class MutashabihaAyatListItem extends StatelessWidget {
       padding: const EdgeInsets.all(4.0),
       child: Container(
         decoration: BoxDecoration(
-          color: theme.colorScheme.background,
+          color: theme.colorScheme.surface,
           border: Border.all(color: theme.colorScheme.inversePrimary, width: 1),
           boxShadow: [
             BoxShadow(

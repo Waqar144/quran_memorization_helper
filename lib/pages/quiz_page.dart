@@ -206,7 +206,7 @@ class _QuizPageState extends State<QuizPage> {
               children: [
                 ElevatedButton(
                   style: ButtonStyle(
-                      backgroundColor: MaterialStatePropertyAll(
+                      backgroundColor: WidgetStatePropertyAll(
                           Theme.of(context).colorScheme.errorContainer)),
                   child: Text(
                     "No",
@@ -217,7 +217,7 @@ class _QuizPageState extends State<QuizPage> {
                 ),
                 ElevatedButton(
                   style: const ButtonStyle(
-                      backgroundColor: MaterialStatePropertyAll(Colors.green)),
+                      backgroundColor: WidgetStatePropertyAll(Colors.green)),
                   child: const Text(
                     "Yes",
                     style: TextStyle(color: Colors.white),
