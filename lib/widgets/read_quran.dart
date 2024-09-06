@@ -635,18 +635,16 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
                   ..copyWith(overscroll: false),
                 physics: const CustomPageViewScrollPhysics(),
                 itemBuilder: (ctx, index) {
-                  return ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: PageWidget(
-                      _pages[index].pageNum,
-                      _pages[index].lines,
-                      getAyatInDB: _getAyatInDB,
-                      onAyahTapped: _onAyahTapped,
-                      isMutashabihaAyat: _isMutashabihaAyat,
-                      isAyahFull: _isAyahFull,
-                      getFullAyahText: _getFullAyahText,
-                      repaintStream: _repaintNotifier.stream,
-                    ),
+                  return PageWidget(
+                    _pages[index].pageNum,
+                    _pages[index].lines,
+                    paraNum: widget.model.currentPara,
+                    getAyatInDB: _getAyatInDB,
+                    onAyahTapped: _onAyahTapped,
+                    isMutashabihaAyat: _isMutashabihaAyat,
+                    isAyahFull: _isAyahFull,
+                    getFullAyahText: _getFullAyahText,
+                    repaintStream: _repaintNotifier.stream,
                   );
                 },
               ),
@@ -660,6 +658,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
 
 class PageWidget extends StatefulWidget {
   final int pageNum;
+  final int paraNum;
   final List<Line> _pageLines;
   final bool Function(int ayahIdx, int surahIdx) isMutashabihaAyat;
   final Ayat? Function(int ayahIdx, int surahIdx) getAyatInDB;
@@ -671,7 +670,8 @@ class PageWidget extends StatefulWidget {
   final Stream<int> repaintStream;
 
   const PageWidget(this.pageNum, this._pageLines,
-      {required this.isMutashabihaAyat,
+      {required this.paraNum,
+      required this.isMutashabihaAyat,
       required this.getAyatInDB,
       required this.onAyahTapped,
       required this.repaintStream,
@@ -1024,14 +1024,41 @@ class _PageWidgetState extends State<PageWidget> {
     );
   }
 
+  Widget _pageTopBorder() {
+    return Row(
+      children: [
+        const SizedBox(width: 8),
+        Text(
+          surahDataForIdx(
+                  surahForAyah(widget._pageLines.last.lineAyahs.last.ayahIndex),
+                  arabic: true)
+              .name,
+          style: const TextStyle(
+              fontSize: 16, fontFamily: "Al Mushaf", letterSpacing: 0),
+        ),
+        const Spacer(),
+        Text(
+          (widget.pageNum + 1).toString(),
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 12),
+        ),
+        const Spacer(),
+        Text(
+          getParaNameForIndex(widget.paraNum - 1),
+          style: const TextStyle(
+              fontSize: 16, fontFamily: "Al Mushaf", letterSpacing: 0),
+        ),
+        const SizedBox(width: 8),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(
-          (widget.pageNum + 1).toString(),
-          style: const TextStyle(fontSize: 12),
-        ),
+        _pageTopBorder(),
+        const Divider(indent: 8, endIndent: 8, color: Colors.grey, height: 1),
         Expanded(
           child: Padding(
             padding: const EdgeInsets.only(left: 8, right: 8),
