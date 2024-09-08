@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:quran_memorization_helper/quran_data/surahs.dart';
 import 'package:quran_memorization_helper/quran_data/pages.dart';
+import 'package:quran_memorization_helper/utils/utils.dart';
 
 class SurahListView extends StatelessWidget {
   final int currentParaIdx;
@@ -27,24 +28,38 @@ class SurahListView extends StatelessWidget {
       itemCount: 114,
       itemExtent: 48,
       itemBuilder: (context, index) {
-        return ListTile(
-          leading: Text(
-            "${index + 1}.",
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 20),
-          ),
-          title: Text(
-            surahDataForIdx(index, arabic: true).name,
-            style: const TextStyle(
-              letterSpacing: 0,
-              fontSize: 24,
-              fontFamily: 'Al Mushaf',
-            ),
-          ),
-          selected: currentSurah == index,
-          selectedTileColor: Theme.of(context).highlightColor,
-          onTap: () => onSurahTapped(index),
-        );
+        return Directionality(
+            textDirection: TextDirection.rtl,
+            child: ListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 15),
+              leading: Text(
+                "${toUrduNumber(index + 1)}$urduKhatma",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    color: Theme.of(context).textTheme.bodyMedium?.color,
+                    fontFamily: "Urdu",
+                    fontSize: 22,
+                    letterSpacing: 0.0),
+              ),
+              title: Text(
+                surahDataForIdx(index, arabic: true).name,
+                style: const TextStyle(
+                  letterSpacing: 0,
+                  fontSize: 26,
+                  fontFamily: 'Al Mushaf',
+                ),
+              ),
+              trailing: Text(
+                "${surah16LinePageOffset[index] + 1}",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    fontSize: 16,
+                    color: Theme.of(context).textTheme.bodyMedium?.color),
+              ),
+              selected: currentSurah == index,
+              selectedTileColor: Theme.of(context).highlightColor,
+              onTap: () => onSurahTapped(index),
+            ));
       },
     );
   }
