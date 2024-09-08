@@ -28,6 +28,7 @@ class _MainPageState extends State<MainPage>
   @override
   void initState() {
     _paraModel = ParaAyatModel(onParaChanged);
+    _drawerTabController = TabController(length: 2, vsync: this);
 
     WidgetsBinding.instance.addObserver(this);
     super.initState();
