@@ -191,7 +191,16 @@ class _MainPageState extends State<MainPage>
                     HardwareKeyboard.instance.isMetaPressed;
                 bool jumpSurah = HardwareKeyboard.instance.isShiftPressed;
                 if (event is KeyDownEvent &&
-                    event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+                    event.logicalKey == LogicalKeyboardKey.home) {
+                  _pageController.jumpToPage(0);
+                }
+                if (event is KeyDownEvent &&
+                    event.logicalKey == LogicalKeyboardKey.end) {
+                  int totalPages = pageCountForPara(_paraModel.currentPara - 1);
+                  _pageController.jumpToPage(totalPages - 1);
+                } else if (event is KeyDownEvent &&
+                    (event.logicalKey == LogicalKeyboardKey.arrowLeft ||
+                        event.logicalKey == LogicalKeyboardKey.pageDown)) {
                   int? currentPageInPara = _pageController.page?.floor();
                   if (jumpSurah) {
                     int currentPage = (currentPageInPara ?? 0) +
@@ -214,7 +223,8 @@ class _MainPageState extends State<MainPage>
                     }
                   }
                 } else if (event is KeyDownEvent &&
-                    event.logicalKey == LogicalKeyboardKey.arrowRight) {
+                    (event.logicalKey == LogicalKeyboardKey.arrowRight ||
+                        event.logicalKey == LogicalKeyboardKey.pageUp)) {
                   int? currentPageInPara = _pageController.page?.floor();
                   if (jumpSurah) {
                     int currentPage = (currentPageInPara ?? 0) +
