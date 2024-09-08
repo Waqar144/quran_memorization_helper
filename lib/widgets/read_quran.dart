@@ -603,7 +603,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
         }
         return SliverToBoxAdapter(
           child: SizedBox(
-            height: 785,
+            height: 780,
             child: NotificationListener<OverscrollNotification>(
               onNotification: (noti) {
                 if (noti.depth == 0) {
