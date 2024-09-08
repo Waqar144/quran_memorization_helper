@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:convert';
 import 'dart:async';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -73,3 +74,26 @@ void showSnackBarMessage(BuildContext context, String message,
     backgroundColor: error ? Colors.red : Colors.green,
   ));
 }
+
+String toUrduNumber(int num) {
+  final Uint16List numMap = Uint16List.fromList(const [
+    0x6F0,
+    0x6F0 + 1,
+    0x6F0 + 2,
+    0x6F0 + 3,
+    0x6F0 + 4,
+    0x6F0 + 5,
+    0x6F0 + 6,
+    0x6F0 + 7,
+    0x6F0 + 8,
+    0x6F0 + 9
+  ]);
+  final numStr = num.toString();
+  String ret = "";
+  for (final c in numStr.codeUnits) {
+    ret += String.fromCharCode(numMap[c - 48]);
+  }
+  return ret;
+}
+
+final urduKhatma = String.fromCharCode(0x6D4);
