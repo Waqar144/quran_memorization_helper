@@ -10,7 +10,7 @@ import 'package:quran_memorization_helper/widgets/surah_list_view.dart';
 import 'package:quran_memorization_helper/widgets/para_list_view.dart';
 import 'package:quran_memorization_helper/utils/utils.dart';
 import 'package:flutter/services.dart'
-    show KeyDownEvent, LogicalKeyboardKey, rootBundle;
+    show HardwareKeyboard, KeyDownEvent, LogicalKeyboardKey, rootBundle;
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -186,11 +186,14 @@ class _MainPageState extends State<MainPage>
               focusNode: _focusNode,
               autofocus: true,
               onKeyEvent: (event) {
+                bool isCtrlPressed =
+                    HardwareKeyboard.instance.isControlPressed ||
+                        HardwareKeyboard.instance.isMetaPressed;
                 if (event is KeyDownEvent &&
                     event.logicalKey == LogicalKeyboardKey.arrowLeft) {
                   int totalPages = pageCountForPara(_paraModel.currentPara - 1);
                   int nextPage = (_pageController.page?.floor() ?? -1) + 1;
-                  if (nextPage >= totalPages) {
+                  if (nextPage >= totalPages || isCtrlPressed) {
                     _paraModel.setCurrentPara(_paraModel.currentPara + 1);
                   } else {
                     _pageController.nextPage(
@@ -200,9 +203,9 @@ class _MainPageState extends State<MainPage>
                 } else if (event is KeyDownEvent &&
                     event.logicalKey == LogicalKeyboardKey.arrowRight) {
                   int previousPage = (_pageController.page?.floor() ?? 1) - 1;
-                  if (previousPage <= 0) {
+                  if (previousPage <= 0 || isCtrlPressed) {
                     _paraModel.setCurrentPara(_paraModel.currentPara - 1,
-                        showLastPage: true);
+                        showLastPage: !isCtrlPressed);
                   } else {
                     _pageController.previousPage(
                         duration: const Duration(milliseconds: 200),
