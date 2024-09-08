@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:quran_memorization_helper/models/ayat.dart';
+import 'package:quran_memorization_helper/quran_data/pages.dart';
 import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
+import 'package:quran_memorization_helper/utils/utils.dart';
 
 class ParaListView extends StatelessWidget {
   final int currentParaIdx;
@@ -12,33 +14,56 @@ class ParaListView extends StatelessWidget {
       required this.onParaTapped,
       super.key});
 
-  Widget paraListItem(int index, BuildContext ctx) {
+  Widget paraListItem(int index, BuildContext context) {
     int count = model.markedAyahCountForPara(index);
-    return ListTile(
-      minVerticalPadding: 0,
-      visualDensity: VisualDensity.compact,
-      title: Text(
-        getParaNameForIndex(index),
-        style: const TextStyle(
-          letterSpacing: 0,
-          fontSize: 24,
-          fontFamily: 'Al Mushaf',
-        ),
-      ),
-      leading: Text(
-        "${index + 1}.",
-        textAlign: TextAlign.center,
-        style: const TextStyle(fontSize: 20),
-      ),
-      trailing: Text(
-        count > 0 ? "$count" : "",
-        textAlign: TextAlign.center,
-        style: const TextStyle(fontSize: 16, color: Colors.red),
-      ),
-      onTap: () => onParaTapped(index),
-      selected: currentParaIdx == index,
-      selectedTileColor: Theme.of(ctx).highlightColor,
-    );
+
+    return Directionality(
+        textDirection: TextDirection.rtl,
+        child: ListTile(
+          minVerticalPadding: 0,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 15),
+          visualDensity: VisualDensity.compact,
+          title: Text(
+            getParaNameForIndex(index),
+            style: const TextStyle(
+              letterSpacing: 0,
+              fontSize: 26,
+              fontFamily: 'Al Mushaf',
+            ),
+          ),
+          leading: Text(
+            "${toUrduNumber(index + 1)}$urduKhatma",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+                color: Theme.of(context).textTheme.bodyMedium?.color,
+                fontFamily: "Urdu",
+                fontSize: 22,
+                letterSpacing: 0.0),
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text(
+                count > 0 ? "$count" : " ",
+                style: const TextStyle(fontSize: 16, color: Colors.red),
+              ),
+              const SizedBox(width: 5),
+              SizedBox(
+                  width: 30,
+                  child: Text(
+                    "${para16LinePageOffsets[index] + 1}",
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                        fontSize: 16,
+                        color: Theme.of(context).textTheme.bodyMedium?.color),
+                  )),
+            ],
+          ),
+          onTap: () => onParaTapped(index),
+          selected: currentParaIdx == index,
+          selectedTileColor: Theme.of(context).highlightColor,
+        ));
   }
 
   @override
