@@ -5,6 +5,7 @@ import 'package:quran_memorization_helper/pages/page_constants.dart';
 import 'package:quran_memorization_helper/models/quiz.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/pages.dart';
+import 'package:quran_memorization_helper/quran_data/surahs.dart';
 import 'package:quran_memorization_helper/widgets/read_quran.dart';
 import 'package:quran_memorization_helper/widgets/surah_list_view.dart';
 import 'package:quran_memorization_helper/widgets/para_list_view.dart';
@@ -149,8 +150,8 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  void _onSurahTapped(int surahIndex) {
-    Navigator.of(context).pop();
+  void _onSurahTapped(int surahIndex, {bool pop = true}) {
+    if (pop) Navigator.of(context).pop();
     if (surahIndex < 0 || surahIndex > 113) {
       return;
     }
@@ -186,30 +187,53 @@ class _MainPageState extends State<MainPage>
               focusNode: _focusNode,
               autofocus: true,
               onKeyEvent: (event) {
-                bool isCtrlPressed =
-                    HardwareKeyboard.instance.isControlPressed ||
-                        HardwareKeyboard.instance.isMetaPressed;
+                bool jumpPara = HardwareKeyboard.instance.isControlPressed ||
+                    HardwareKeyboard.instance.isMetaPressed;
+                bool jumpSurah = HardwareKeyboard.instance.isShiftPressed;
                 if (event is KeyDownEvent &&
                     event.logicalKey == LogicalKeyboardKey.arrowLeft) {
-                  int totalPages = pageCountForPara(_paraModel.currentPara - 1);
-                  int nextPage = (_pageController.page?.floor() ?? -1) + 1;
-                  if (nextPage >= totalPages || isCtrlPressed) {
+                  int? currentPageInPara = _pageController.page?.floor();
+                  if (jumpSurah) {
+                    int currentPage = (currentPageInPara ?? 0) +
+                        para16LinePageOffsets[_paraModel.currentPara - 1];
+                    int currentSurah = surahForPage(currentPage);
+                    _onSurahTapped(currentSurah == 113 ? 0 : currentSurah + 1,
+                        pop: false);
+                  } else if (jumpPara) {
                     _paraModel.setCurrentPara(_paraModel.currentPara + 1);
                   } else {
-                    _pageController.nextPage(
-                        duration: const Duration(milliseconds: 200),
-                        curve: Curves.easeInOut);
+                    int totalPages =
+                        pageCountForPara(_paraModel.currentPara - 1);
+                    int nextPage = (currentPageInPara ?? -1) + 1;
+                    if (nextPage >= totalPages) {
+                      _paraModel.setCurrentPara(_paraModel.currentPara + 1);
+                    } else {
+                      _pageController.nextPage(
+                          duration: const Duration(milliseconds: 200),
+                          curve: Curves.easeInOut);
+                    }
                   }
                 } else if (event is KeyDownEvent &&
                     event.logicalKey == LogicalKeyboardKey.arrowRight) {
-                  int previousPage = (_pageController.page?.floor() ?? 1) - 1;
-                  if (previousPage <= 0 || isCtrlPressed) {
-                    _paraModel.setCurrentPara(_paraModel.currentPara - 1,
-                        showLastPage: !isCtrlPressed);
+                  int? currentPageInPara = _pageController.page?.floor();
+                  if (jumpSurah) {
+                    int currentPage = (currentPageInPara ?? 0) +
+                        para16LinePageOffsets[_paraModel.currentPara - 1];
+                    int currentSurah = surahForPage(currentPage);
+                    _onSurahTapped(currentSurah == 0 ? 113 : currentSurah - 1,
+                        pop: false);
+                  } else if (jumpPara) {
+                    _paraModel.setCurrentPara(_paraModel.currentPara - 1);
                   } else {
-                    _pageController.previousPage(
-                        duration: const Duration(milliseconds: 200),
-                        curve: Curves.easeInOut);
+                    int previousPage = (currentPageInPara ?? 1) - 1;
+                    if (previousPage <= 0) {
+                      _paraModel.setCurrentPara(_paraModel.currentPara - 1,
+                          showLastPage: true);
+                    } else {
+                      _pageController.previousPage(
+                          duration: const Duration(milliseconds: 200),
+                          curve: Curves.easeInOut);
+                    }
                   }
                 }
               },
