@@ -18,11 +18,12 @@ class SurahListView extends StatelessWidget {
     int surah = firstSurahInPara(currentParaIdx);
     double surahScrollTo = 48 * surah.toDouble();
     final surahListScrollController = ScrollController(
-        initialScrollOffset: surahScrollTo, keepScrollOffset: false);
+        initialScrollOffset: surahScrollTo, keepScrollOffset: true);
     int currentPage = currentPageInPara + para16LinePageOffsets[currentParaIdx];
     int currentSurah = surahForPage(currentPage);
 
     return ListView.builder(
+      key: const PageStorageKey("surah_list_view"),
       controller: surahListScrollController,
       scrollDirection: Axis.vertical,
       itemCount: 114,
