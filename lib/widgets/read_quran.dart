@@ -11,6 +11,7 @@ import 'package:quran_memorization_helper/quran_data/surahs.dart';
 import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/should_add_spaces.dart';
+import 'package:quran_memorization_helper/utils/utils.dart';
 import 'package:quran_memorization_helper/widgets/mutashabiha_ayat_list_item.dart';
 import 'package:quran_memorization_helper/widgets/tap_and_longpress_gesture_recognizer.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -704,27 +705,6 @@ class _PageWidgetState extends State<PageWidget> {
     _subscription?.cancel();
   }
 
-  static String _toUrduNumber(int num) {
-    final Uint16List numMap = Uint16List.fromList([
-      0x6F0,
-      0x6F0 + 1,
-      0x6F0 + 2,
-      0x6F0 + 3,
-      0x6F0 + 4,
-      0x6F0 + 5,
-      0x6F0 + 6,
-      0x6F0 + 7,
-      0x6F0 + 8,
-      0x6F0 + 9
-    ]);
-    final numStr = num.toString();
-    String ret = "";
-    for (final c in numStr.codeUnits) {
-      ret += String.fromCharCode(numMap[c - 48]);
-    }
-    return ret;
-  }
-
   void _tapHandler(
       int surahIdx, int ayahIdx, int wordIdx, bool longPress) async {
     widget.onAyahTapped(surahIdx, ayahIdx, wordIdx, widget.pageNum, longPress);
@@ -746,7 +726,7 @@ class _PageWidgetState extends State<PageWidget> {
           child: Row(
             children: [
               Text(
-                "\uFD3Fآیاتھا ${_toUrduNumber(surahData.ayahCount)}\uFD3E",
+                "\uFD3Fآیاتھا ${toUrduNumber(surahData.ayahCount)}\uFD3E",
                 textDirection: TextDirection.rtl,
                 textAlign: TextAlign.center,
                 style: style,
@@ -823,7 +803,7 @@ class _PageWidgetState extends State<PageWidget> {
             style: style,
           ),
           Text(
-            "\uFD3F${_toUrduNumber(surahData.ayahCount)}\uFD3E",
+            "\uFD3F${toUrduNumber(surahData.ayahCount)}\uFD3E",
             textDirection: TextDirection.rtl,
             textAlign: TextAlign.center,
             style: style,
