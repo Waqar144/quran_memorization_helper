@@ -28,21 +28,6 @@ class _MainPageState extends State<MainPage>
   @override
   void initState() {
     _paraModel = ParaAyatModel(onParaChanged);
-    _drawerTabController = TabController(
-        length: 2,
-        vsync: this,
-        initialIndex: PageStorage.of(context).readState(
-              context,
-              identifier: const ValueKey("tabIndex"),
-            ) ??
-            0);
-    _drawerTabController.addListener(() {
-      PageStorage.of(context).writeState(
-        context,
-        _drawerTabController.index,
-        identifier: const ValueKey("tabIndex"),
-      );
-    });
 
     WidgetsBinding.instance.addObserver(this);
     super.initState();
