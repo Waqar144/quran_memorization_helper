@@ -4,6 +4,9 @@ import 'package:quran_memorization_helper/quran_data/pages.dart';
 import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
 import 'package:quran_memorization_helper/utils/utils.dart';
 
+int lastPara = 0;
+double? lastScrollPosition;
+
 class ParaListView extends StatelessWidget {
   final int currentParaIdx;
   final void Function(int) onParaTapped;
@@ -13,6 +16,26 @@ class ParaListView extends StatelessWidget {
       required this.currentParaIdx,
       required this.onParaTapped,
       super.key});
+
+  double _getInitialScrollPosition(BuildContext context) {
+    if (lastScrollPosition != null && lastPara == currentParaIdx) {
+      return lastScrollPosition!;
+    }
+
+    int maxVisibleItems =
+        ((MediaQuery.of(context).size.height - (48 + 4)) / 48).floor();
+    const totalParas = 30;
+    final maxScrollablePara = totalParas -
+        maxVisibleItems; // if we scroll to the bottom, this para is visible at top
+
+    int paraScrollTo = 0;
+    if (currentParaIdx > 8 && currentParaIdx < 20) {
+      paraScrollTo = 48 * (currentParaIdx - 3);
+    } else if (currentParaIdx > maxScrollablePara) {
+      paraScrollTo = 48 * maxScrollablePara;
+    }
+    return paraScrollTo.toDouble();
+  }
 
   Widget paraListItem(int index, BuildContext context) {
     int count = model.markedAyahCountForPara(index);
@@ -68,21 +91,13 @@ class ParaListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    int maxVisibleItems =
-        ((MediaQuery.of(context).size.height - (48 + 4)) / 48).floor();
-    const totalParas = 30;
-    final maxScrollablePara = totalParas -
-        maxVisibleItems; // if we scroll to the bottom, this para is visible at top
-
-    int paraScrollTo = 0;
-    if (currentParaIdx > 8 && currentParaIdx < 20) {
-      paraScrollTo = 48 * (currentParaIdx - 3);
-    } else if (currentParaIdx > maxScrollablePara) {
-      paraScrollTo = 48 * maxScrollablePara;
-    }
-
     final paraListScrollController = ScrollController(
-        initialScrollOffset: paraScrollTo.toDouble(), keepScrollOffset: true);
+        initialScrollOffset: _getInitialScrollPosition(context),
+        keepScrollOffset: false);
+    paraListScrollController.addListener(() {
+      lastScrollPosition = paraListScrollController.offset;
+    });
+    lastPara = currentParaIdx;
 
     return ListView.builder(
       key: const PageStorageKey("para_list_view"),
