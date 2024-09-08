@@ -96,4 +96,4 @@ String toUrduNumber(int num) {
   return ret;
 }
 
-final urduKhatma = String.fromCharCode(0x6D4);
+const urduKhatma = "\u06D4";
