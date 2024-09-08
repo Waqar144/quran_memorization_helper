@@ -9,7 +9,8 @@ import 'package:quran_memorization_helper/widgets/read_quran.dart';
 import 'package:quran_memorization_helper/widgets/surah_list_view.dart';
 import 'package:quran_memorization_helper/widgets/para_list_view.dart';
 import 'package:quran_memorization_helper/utils/utils.dart';
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/services.dart'
+    show KeyDownEvent, LogicalKeyboardKey, rootBundle;
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -165,6 +166,7 @@ class _MainPageState extends State<MainPage>
     }
   }
 
+  final FocusNode _focusNode = FocusNode();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -180,29 +182,70 @@ class _MainPageState extends State<MainPage>
           if (snapshot.connectionState != ConnectionState.done) {
             return const SizedBox.shrink();
           }
-          return CustomScrollView(
-            controller: _scrollController,
-            scrollBehavior: const ScrollBehavior()..copyWith(overscroll: false),
-            slivers: [
-              SliverAppBar(
-                floating: true,
-                forceElevated: true,
-                // scrolledUnderElevation: v ? 2 : 1,
-                snap: true,
-                pinned: false,
-                actions: [
-                  IconButton(
-                    tooltip: "Next Para",
-                    icon: const Icon(Icons.arrow_back),
-                    onPressed: () {
-                      _paraModel.setCurrentPara(_paraModel.currentPara + 1);
-                    },
+          return KeyboardListener(
+              focusNode: _focusNode,
+              autofocus: true,
+              onKeyEvent: (event) {
+                if (event is KeyDownEvent &&
+                    event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+                  int totalPages = pageCountForPara(_paraModel.currentPara - 1);
+                  int nextPage = (_pageController.page?.floor() ?? -1) + 1;
+                  if (nextPage >= totalPages) {
+                    _paraModel.setCurrentPara(_paraModel.currentPara + 1);
+                  } else {
+                    _pageController.nextPage(
+                        duration: const Duration(milliseconds: 200),
+                        curve: Curves.easeInOut);
+                  }
+                } else if (event is KeyDownEvent &&
+                    event.logicalKey == LogicalKeyboardKey.arrowRight) {
+                  int previousPage = (_pageController.page?.floor() ?? 1) - 1;
+                  if (previousPage <= 0) {
+                    _paraModel.setCurrentPara(_paraModel.currentPara - 1,
+                        showLastPage: true);
+                  } else {
+                    _pageController.previousPage(
+                        duration: const Duration(milliseconds: 200),
+                        curve: Curves.easeInOut);
+                  }
+                }
+              },
+              child: CustomScrollView(
+                controller: _scrollController,
+                scrollBehavior: const ScrollBehavior()
+                  ..copyWith(overscroll: false),
+                slivers: [
+                  SliverAppBar(
+                    floating: true,
+                    forceElevated: true,
+                    // scrolledUnderElevation: v ? 2 : 1,
+                    snap: true,
+                    pinned: false,
+                    actions: [
+                      IconButton(
+                        tooltip: "Next Para",
+                        icon: const Icon(Icons.arrow_back),
+                        onPressed: () {
+                          _paraModel.setCurrentPara(_paraModel.currentPara + 1);
+                        },
+                      ),
+                      IconButton(
+                        tooltip: "Previous Para",
+                        icon: const Icon(Icons.arrow_forward),
+                        onPressed: () {
+                          _paraModel.setCurrentPara(_paraModel.currentPara - 1);
+                        },
+                      ),
+                      buildThreeDotMenu()
+                    ],
                   ),
-                  IconButton(
-                    tooltip: "Previous Para",
-                    icon: const Icon(Icons.arrow_forward),
-                    onPressed: () {
-                      _paraModel.setCurrentPara(_paraModel.currentPara - 1);
+                  ValueListenableBuilder(
+                    valueListenable: _paraModel.currentParaNotifier,
+                    builder: (context, _, __) {
+                      return ReadQuranWidget(
+                        _paraModel,
+                        pageController: _pageController,
+                      );
                     },
                   ),
                   IconButton(
@@ -221,18 +264,7 @@ class _MainPageState extends State<MainPage>
                   ),
                   buildThreeDotMenu()
                 ],
-              ),
-              ValueListenableBuilder(
-                valueListenable: _paraModel.currentParaNotifier,
-                builder: (context, _, __) {
-                  return ReadQuranWidget(
-                    _paraModel,
-                    pageController: _pageController,
-                  );
-                },
-              )
-            ],
-          );
+              ));
         },
       ),
       drawer: Builder(builder: (context) {
