@@ -205,6 +205,20 @@ class _MainPageState extends State<MainPage>
                       _paraModel.setCurrentPara(_paraModel.currentPara - 1);
                     },
                   ),
+                  IconButton(
+                    onPressed: () {
+                      Settings.instance.themeMode =
+                          Settings.instance.themeMode == ThemeMode.light
+                              ? ThemeMode.dark
+                              : ThemeMode.light;
+                    },
+                    icon: Icon(Settings.instance.themeMode == ThemeMode.light
+                        ? Icons.mode_night
+                        : Icons.sunny),
+                    tooltip: Settings.instance.themeMode == ThemeMode.light
+                        ? "Switch to night mode"
+                        : "Switch to light mode",
+                  ),
                   buildThreeDotMenu()
                 ],
               ),
