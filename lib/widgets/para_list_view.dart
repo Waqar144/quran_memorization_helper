@@ -82,9 +82,10 @@ class ParaListView extends StatelessWidget {
     }
 
     final paraListScrollController = ScrollController(
-        initialScrollOffset: paraScrollTo.toDouble(), keepScrollOffset: false);
+        initialScrollOffset: paraScrollTo.toDouble(), keepScrollOffset: true);
 
     return ListView.builder(
+      key: const PageStorageKey("para_list_view"),
       controller: paraListScrollController,
       scrollDirection: Axis.vertical,
       itemCount: 30,
