@@ -3,6 +3,9 @@ import 'package:quran_memorization_helper/quran_data/surahs.dart';
 import 'package:quran_memorization_helper/quran_data/pages.dart';
 import 'package:quran_memorization_helper/utils/utils.dart';
 
+var lastSurah = 0;
+var lastScrollPosition = 0.0;
+
 class SurahListView extends StatelessWidget {
   final int currentParaIdx;
   final int currentPageInPara;
@@ -15,15 +18,19 @@ class SurahListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    int surah = firstSurahInPara(currentParaIdx);
-    double surahScrollTo = 48 * surah.toDouble();
-    final surahListScrollController = ScrollController(
-        initialScrollOffset: surahScrollTo, keepScrollOffset: true);
     int currentPage = currentPageInPara + para16LinePageOffsets[currentParaIdx];
     int currentSurah = surahForPage(currentPage);
+    double surahScrollTo = lastScrollPosition > 0.0 && lastSurah == currentSurah
+        ? lastScrollPosition
+        : 48 * currentSurah.toDouble();
+    final surahListScrollController = ScrollController(
+        initialScrollOffset: surahScrollTo, keepScrollOffset: false);
+    surahListScrollController.addListener(() {
+      lastScrollPosition = surahListScrollController.offset;
+    });
+    lastSurah = currentSurah;
 
     return ListView.builder(
-      key: const PageStorageKey("surah_list_view"),
       controller: surahListScrollController,
       scrollDirection: Axis.vertical,
       itemCount: 114,
