@@ -1,0 +1,11 @@
+{
+  "name": "Quran16Line",
+  "files": [
+    {
+      "git": 1
+    }
+  ],
+  "exclude_patterns": [
+    ".flutter"
+  ]
+}
