@@ -167,7 +167,29 @@ class _MainPageState extends State<MainPage>
     }
   }
 
-  final FocusNode _focusNode = FocusNode();
+  void _nextPage() {
+    int? currentPageInPara = _pageController.page?.floor();
+    int totalPages = pageCountForPara(_paraModel.currentPara - 1);
+    int nextPage = (currentPageInPara ?? -1) + 1;
+    if (nextPage >= totalPages) {
+      _paraModel.setCurrentPara(_paraModel.currentPara + 1);
+    } else {
+      _pageController.nextPage(
+          duration: const Duration(milliseconds: 200), curve: Curves.easeInOut);
+    }
+  }
+
+  void _previousPage() {
+    int? currentPageInPara = _pageController.page?.floor();
+    int previousPage = (currentPageInPara ?? 1) - 1;
+    if (previousPage <= 0) {
+      _paraModel.setCurrentPara(_paraModel.currentPara - 1, showLastPage: true);
+    } else {
+      _pageController.previousPage(
+          duration: const Duration(milliseconds: 200), curve: Curves.easeInOut);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -183,125 +205,104 @@ class _MainPageState extends State<MainPage>
           if (snapshot.connectionState != ConnectionState.done) {
             return const SizedBox.shrink();
           }
-          return KeyboardListener(
-              focusNode: _focusNode,
-              autofocus: true,
-              onKeyEvent: (event) {
-                bool jumpPara = HardwareKeyboard.instance.isControlPressed ||
-                    HardwareKeyboard.instance.isMetaPressed;
-                bool jumpSurah = HardwareKeyboard.instance.isShiftPressed;
-                if (event is KeyDownEvent &&
-                    event.logicalKey == LogicalKeyboardKey.home) {
-                  _pageController.jumpToPage(0);
-                }
-                if (event is KeyDownEvent &&
-                    event.logicalKey == LogicalKeyboardKey.end) {
+          return CallbackShortcuts(
+              bindings: <ShortcutActivator, VoidCallback>{
+                const SingleActivator(LogicalKeyboardKey.arrowLeft): _nextPage,
+                const SingleActivator(LogicalKeyboardKey.arrowRight):
+                    _previousPage,
+                const SingleActivator(LogicalKeyboardKey.pageDown): _nextPage,
+                const SingleActivator(LogicalKeyboardKey.pageUp): _previousPage,
+                const SingleActivator(LogicalKeyboardKey.home): () =>
+                    _pageController.jumpToPage(0),
+                const SingleActivator(LogicalKeyboardKey.end): () {
                   int totalPages = pageCountForPara(_paraModel.currentPara - 1);
                   _pageController.jumpToPage(totalPages - 1);
-                } else if (event is KeyDownEvent &&
-                    (event.logicalKey == LogicalKeyboardKey.arrowLeft ||
-                        event.logicalKey == LogicalKeyboardKey.pageDown)) {
+                },
+                const SingleActivator(LogicalKeyboardKey.arrowLeft,
+                        control: true):
+                    () => _paraModel.setCurrentPara(_paraModel.currentPara + 1),
+                const SingleActivator(LogicalKeyboardKey.arrowRight,
+                        control: true):
+                    () => _paraModel.setCurrentPara(_paraModel.currentPara - 1),
+                const SingleActivator(LogicalKeyboardKey.arrowLeft,
+                    shift: true): () {
                   int? currentPageInPara = _pageController.page?.floor();
-                  if (jumpSurah) {
-                    int currentPage = (currentPageInPara ?? 0) +
-                        para16LinePageOffsets[_paraModel.currentPara - 1];
-                    int currentSurah = surahForPage(currentPage);
-                    _onSurahTapped(currentSurah == 113 ? 0 : currentSurah + 1,
-                        pop: false);
-                  } else if (jumpPara) {
-                    _paraModel.setCurrentPara(_paraModel.currentPara + 1);
-                  } else {
-                    int totalPages =
-                        pageCountForPara(_paraModel.currentPara - 1);
-                    int nextPage = (currentPageInPara ?? -1) + 1;
-                    if (nextPage >= totalPages) {
-                      _paraModel.setCurrentPara(_paraModel.currentPara + 1);
-                    } else {
-                      _pageController.nextPage(
-                          duration: const Duration(milliseconds: 200),
-                          curve: Curves.easeInOut);
-                    }
-                  }
-                } else if (event is KeyDownEvent &&
-                    (event.logicalKey == LogicalKeyboardKey.arrowRight ||
-                        event.logicalKey == LogicalKeyboardKey.pageUp)) {
+                  int currentPage = (currentPageInPara ?? 0) +
+                      para16LinePageOffsets[_paraModel.currentPara - 1];
+                  int currentSurah = surahForPage(currentPage);
+                  _onSurahTapped(currentSurah == 113 ? 0 : currentSurah + 1,
+                      pop: false);
+                },
+                const SingleActivator(LogicalKeyboardKey.arrowRight,
+                    shift: true): () {
                   int? currentPageInPara = _pageController.page?.floor();
-                  if (jumpSurah) {
-                    int currentPage = (currentPageInPara ?? 0) +
-                        para16LinePageOffsets[_paraModel.currentPara - 1];
-                    int currentSurah = surahForPage(currentPage);
-                    _onSurahTapped(currentSurah == 0 ? 113 : currentSurah - 1,
-                        pop: false);
-                  } else if (jumpPara) {
-                    _paraModel.setCurrentPara(_paraModel.currentPara - 1);
-                  } else {
-                    int previousPage = (currentPageInPara ?? 1) - 1;
-                    if (previousPage <= 0) {
-                      _paraModel.setCurrentPara(_paraModel.currentPara - 1,
-                          showLastPage: true);
-                    } else {
-                      _pageController.previousPage(
-                          duration: const Duration(milliseconds: 200),
-                          curve: Curves.easeInOut);
-                    }
-                  }
-                }
+                  int currentPage = (currentPageInPara ?? 0) +
+                      para16LinePageOffsets[_paraModel.currentPara - 1];
+                  int currentSurah = surahForPage(currentPage);
+                  _onSurahTapped(currentSurah == 0 ? 113 : currentSurah - 1,
+                      pop: false);
+                },
               },
-              child: CustomScrollView(
-                controller: _scrollController,
-                scrollBehavior: const ScrollBehavior()
-                  ..copyWith(overscroll: false),
-                slivers: [
-                  SliverAppBar(
-                    floating: true,
-                    forceElevated: true,
-                    // scrolledUnderElevation: v ? 2 : 1,
-                    snap: true,
-                    pinned: false,
-                    actions: [
-                      IconButton(
-                        tooltip: "Next Para",
-                        icon: const Icon(Icons.arrow_back),
-                        onPressed: () {
-                          _paraModel.setCurrentPara(_paraModel.currentPara + 1);
-                        },
+              child: Focus(
+                  autofocus: true,
+                  child: CustomScrollView(
+                    controller: _scrollController,
+                    scrollBehavior: const ScrollBehavior()
+                      ..copyWith(overscroll: false),
+                    slivers: [
+                      SliverAppBar(
+                        floating: true,
+                        forceElevated: true,
+                        // scrolledUnderElevation: v ? 2 : 1,
+                        snap: true,
+                        pinned: false,
+                        actions: [
+                          IconButton(
+                            tooltip: "Next Para",
+                            icon: const Icon(Icons.arrow_back),
+                            onPressed: () {
+                              _paraModel
+                                  .setCurrentPara(_paraModel.currentPara + 1);
+                            },
+                          ),
+                          IconButton(
+                            tooltip: "Previous Para",
+                            icon: const Icon(Icons.arrow_forward),
+                            onPressed: () {
+                              _paraModel
+                                  .setCurrentPara(_paraModel.currentPara - 1);
+                            },
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              Settings.instance.themeMode =
+                                  Settings.instance.themeMode == ThemeMode.light
+                                      ? ThemeMode.dark
+                                      : ThemeMode.light;
+                            },
+                            icon: Icon(
+                                Settings.instance.themeMode == ThemeMode.light
+                                    ? Icons.mode_night
+                                    : Icons.sunny),
+                            tooltip:
+                                Settings.instance.themeMode == ThemeMode.light
+                                    ? "Switch to night mode"
+                                    : "Switch to light mode",
+                          ),
+                          buildThreeDotMenu()
+                        ],
                       ),
-                      IconButton(
-                        tooltip: "Previous Para",
-                        icon: const Icon(Icons.arrow_forward),
-                        onPressed: () {
-                          _paraModel.setCurrentPara(_paraModel.currentPara - 1);
+                      ValueListenableBuilder(
+                        valueListenable: _paraModel.currentParaNotifier,
+                        builder: (context, _, __) {
+                          return ReadQuranWidget(
+                            _paraModel,
+                            pageController: _pageController,
+                          );
                         },
-                      ),
-                      buildThreeDotMenu()
+                      )
                     ],
-                  ),
-                  ValueListenableBuilder(
-                    valueListenable: _paraModel.currentParaNotifier,
-                    builder: (context, _, __) {
-                      return ReadQuranWidget(
-                        _paraModel,
-                        pageController: _pageController,
-                      );
-                    },
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      Settings.instance.themeMode =
-                          Settings.instance.themeMode == ThemeMode.light
-                              ? ThemeMode.dark
-                              : ThemeMode.light;
-                    },
-                    icon: Icon(Settings.instance.themeMode == ThemeMode.light
-                        ? Icons.mode_night
-                        : Icons.sunny),
-                    tooltip: Settings.instance.themeMode == ThemeMode.light
-                        ? "Switch to night mode"
-                        : "Switch to light mode",
-                  ),
-                  buildThreeDotMenu()
-                ],
-              ));
+                  )));
         },
       ),
       drawer: Builder(builder: (context) {
