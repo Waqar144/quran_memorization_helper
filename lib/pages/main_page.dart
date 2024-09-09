@@ -226,54 +226,44 @@ class _MainPageState extends State<MainPage>
         final int currentPageInPara = (_pageController.page?.floor() ?? 0);
         return Drawer(
           child: SafeArea(
-            child: DefaultTabController(
-              animationDuration: const Duration(milliseconds: 150),
-              length: 2,
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  SizedBox(
-                    height: 50,
-                    child: TabBar(
-                      controller: _drawerTabController,
-                      tabs: const [
-                        Tab(text: "Para"),
-                        Tab(text: "Surah"),
-                      ],
-                    ),
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                SizedBox(
+                  height: 50,
+                  child: TabBar(
+                    controller: _drawerTabController,
+                    tabs: const [
+                      Tab(text: "Para"),
+                      Tab(text: "Surah"),
+                    ],
                   ),
-                  Expanded(
-                    child: TabBarView(
-                      controller: _drawerTabController,
-                      children: [
-                        ParaListView(
-                          model: _paraModel,
-                          currentParaIdx: currentParaIdx,
-                          onParaTapped: (idx) {
-                            _paraModel.setCurrentPara(idx + 1);
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                        SurahListView(
-                          currentParaIdx: currentParaIdx,
-                          currentPageInPara: currentPageInPara,
-                          onSurahTapped: _onSurahTapped,
-                        ),
-                      ],
-                    ),
+                ),
+                Expanded(
+                  child: TabBarView(
+                    controller: _drawerTabController,
+                    children: [
+                      ParaListView(
+                        model: _paraModel,
+                        currentParaIdx: currentParaIdx,
+                        onParaTapped: (idx) {
+                          _paraModel.setCurrentPara(idx + 1);
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      SurahListView(
+                        currentParaIdx: currentParaIdx,
+                        currentPageInPara: currentPageInPara,
+                        onSurahTapped: _onSurahTapped,
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         );
       }),
-      onDrawerChanged: (opened) {
-        if (!opened) return;
-        if (_drawerTabController.index != 0) {
-          _drawerTabController.animateTo(0);
-        }
-      },
     );
   }
 }
