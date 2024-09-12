@@ -910,10 +910,13 @@ class _PageWidgetState extends State<PageWidget> {
           widget.getFullAyahText(a.ayahIndex, widget.pageIndex).split('\u200c');
       if (isSajdaAyat) {
         text = text.replaceFirst('\u06E9', '');
+        text = text.replaceFirst('\ue022', ''); // ruku marker (para 9)
 
         for (int i = fullAyahTextWords.length - 1; i >= 0; --i) {
           String w = fullAyahTextWords[i];
+          w = w.replaceFirst('\ue022', '');
           int found = w.indexOf('\u06E9');
+
           if (found != -1) {
             // for whatever reason, dart is unable to replace '\u06E9' from this word
             // so manually grab substrings of before and after the marker and create
