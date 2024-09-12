@@ -100,7 +100,7 @@ class Settings extends ChangeNotifier {
   void saveScrollPositionDelayed(int paraNumber, int page) {
     currentReadingPara = paraNumber;
     currentReadingPage = page;
-    persist(seconds: 4);
+    persist(seconds: 2);
   }
 
   void persist({int seconds = 1}) {
