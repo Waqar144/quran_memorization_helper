@@ -658,7 +658,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
 }
 
 class PageWidget extends StatefulWidget {
-  final int pageNum;
+  final int pageIndex;
   final int paraNum;
   final List<Line> _pageLines;
   final bool Function(int ayahIdx, int surahIdx) isMutashabihaAyat;
@@ -670,7 +670,7 @@ class PageWidget extends StatefulWidget {
   final String Function(int ayahIdx, int pageNum) getFullAyahText;
   final Stream<int> repaintStream;
 
-  const PageWidget(this.pageNum, this._pageLines,
+  const PageWidget(this.pageIndex, this._pageLines,
       {required this.paraNum,
       required this.isMutashabihaAyat,
       required this.getAyatInDB,
@@ -694,7 +694,7 @@ class _PageWidgetState extends State<PageWidget> {
   }
 
   void _triggerRepaint(int page) {
-    if (page == widget.pageNum) {
+    if (page == widget.pageIndex) {
       setState(() {});
     }
   }
@@ -707,7 +707,8 @@ class _PageWidgetState extends State<PageWidget> {
 
   void _tapHandler(
       int surahIdx, int ayahIdx, int wordIdx, bool longPress) async {
-    widget.onAyahTapped(surahIdx, ayahIdx, wordIdx, widget.pageNum, longPress);
+    widget.onAyahTapped(
+        surahIdx, ayahIdx, wordIdx, widget.pageIndex, longPress);
   }
 
   Widget getTwoLinesBismillah(int surahIdx, TextStyle style) {
@@ -771,7 +772,7 @@ class _PageWidgetState extends State<PageWidget> {
     );
 
     // 30th para ?
-    if (widget.pageNum >= 528) {
+    if (widget.pageIndex >= 528) {
       if (surahHas2LineHeadress(surahIdx)) {
         return getTwoLinesBismillah(surahIdx, style);
       }
@@ -814,22 +815,15 @@ class _PageWidgetState extends State<PageWidget> {
   }
 
   bool _shouldDrawAyahEndMarker(int ayahIdx, int lineIdx) {
-    Line l = widget._pageLines[lineIdx];
     // If we have multiple ayahs in the line, and this not the last then this is full ayah
-    if (l.lineAyahs.last.ayahIndex != ayahIdx) {
-      return true;
-    } else {
-      bool isLast = lineIdx == widget._pageLines.length - 1;
-      if (isLast) {
-        return widget.isAyahFull(ayahIdx, widget.pageNum).$1;
-      } else {
-        if (widget._pageLines[lineIdx + 1].lineAyahs.first.ayahIndex !=
-            ayahIdx) {
-          return true;
-        }
-      }
-    }
-    return false;
+    return (widget._pageLines[lineIdx].lineAyahs.last.ayahIndex != ayahIdx) ||
+        // last line in page, check if its a full ayah
+        (lineIdx == widget._pageLines.length - 1 &&
+            widget.isAyahFull(ayahIdx, widget.pageIndex).$1) ||
+        // does the next line in page start with this ayah?
+        (lineIdx + 1 < widget._pageLines.length &&
+            widget._pageLines[lineIdx + 1].lineAyahs.first.ayahIndex !=
+                ayahIdx);
   }
 
   static bool isSajdaAyat(int surahIndex, int ayahIndex) {
@@ -913,7 +907,7 @@ class _PageWidgetState extends State<PageWidget> {
           getAyahEndMarkerGlyphCode(surahIdx, surahAyahIdx);
       String text = a.text;
       List<String> fullAyahTextWords =
-          widget.getFullAyahText(a.ayahIndex, widget.pageNum).split('\u200c');
+          widget.getFullAyahText(a.ayahIndex, widget.pageIndex).split('\u200c');
       if (isSajdaAyat) {
         text = text.replaceFirst('\u06E9', '');
 
@@ -962,7 +956,7 @@ class _PageWidgetState extends State<PageWidget> {
         // separator
         spans.add(const TextSpan(text: '\u200c'));
         // space
-        if (shouldAddSpaces(widget.pageNum, lineIdx)) {
+        if (shouldAddSpaces(widget.pageIndex, lineIdx)) {
           spans.add(TextSpan(text: ' ', style: style));
         }
         i++;
@@ -1018,7 +1012,7 @@ class _PageWidgetState extends State<PageWidget> {
         ),
         const Spacer(),
         Text(
-          (widget.pageNum + 1).toString(),
+          (widget.pageIndex + 1).toString(),
           textAlign: TextAlign.center,
           style: const TextStyle(fontSize: 12),
         ),
