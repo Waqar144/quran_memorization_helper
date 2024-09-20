@@ -1004,7 +1004,6 @@ class _PageWidgetState extends State<PageWidget> {
   Widget _pageTopBorder() {
     return Row(
       children: [
-        const SizedBox(width: 8),
         Text(
           surahDataForIdx(
                   surahForAyah(widget._pageLines.last.lineAyahs.last.ayahIndex),
@@ -1025,46 +1024,43 @@ class _PageWidgetState extends State<PageWidget> {
           style: const TextStyle(
               fontSize: 16, fontFamily: "Al Mushaf", letterSpacing: 0),
         ),
-        const SizedBox(width: 8),
       ],
     );
   }
 
+  List<Widget> _pageLines() {
+    List<Widget> widgets = [];
+    const divider = Divider(
+      color: Colors.grey,
+      height: 1,
+    );
+    for (final (idx, l) in widget._pageLines.indexed) {
+      if (l.lineAyahs.first.ayahIndex < 0) {
+        widgets.add(getBismillah(l.lineAyahs.first.ayahIndex));
+        continue;
+      }
+      widgets.add(divider);
+      widgets.add(SizedBox(
+        height: 46,
+        child: FittedBox(
+          fit: BoxFit.contain,
+          child: _buildLine(l, idx),
+        ),
+      ));
+    }
+    return widgets;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _pageTopBorder(),
-        const Divider(indent: 8, endIndent: 8, color: Colors.grey, height: 1),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.only(left: 8, right: 8),
-            child: ListView.separated(
-              padding: EdgeInsets.zero,
-              separatorBuilder: (ctx, idx) => const Divider(
-                color: Colors.grey,
-                height: 1,
-              ),
-              itemCount: widget._pageLines.length,
-              physics: const NeverScrollableScrollPhysics(),
-              itemBuilder: (ctx, idx) {
-                final pageLine = widget._pageLines[idx];
-                if (pageLine.lineAyahs.first.ayahIndex < 0) {
-                  return getBismillah(pageLine.lineAyahs.first.ayahIndex);
-                }
-
-                return SizedBox(
-                  height: 46,
-                  child: FittedBox(
-                    fit: BoxFit.contain,
-                    child: _buildLine(pageLine, idx),
-                  ),
-                );
-              },
-            ),
-          ),
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.only(left: 8, right: 8),
+      child: Column(
+        children: [
+          _pageTopBorder(),
+          ..._pageLines(),
+        ],
+      ),
     );
   }
 }
