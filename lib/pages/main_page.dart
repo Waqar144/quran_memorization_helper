@@ -181,7 +181,7 @@ class _MainPageState extends State<MainPage>
   void _previousPage() {
     int? currentPageInPara = _pageController.page?.floor();
     int previousPage = (currentPageInPara ?? 1) - 1;
-    if (previousPage <= 0) {
+    if (previousPage < 0) {
       _paraModel.setCurrentPara(_paraModel.currentPara - 1, showLastPage: true);
     } else {
       _pageController.previousPage(
