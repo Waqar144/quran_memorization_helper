@@ -16,6 +16,8 @@ import 'package:quran_memorization_helper/widgets/mutashabiha_ayat_list_item.dar
 import 'package:quran_memorization_helper/widgets/tap_and_longpress_gesture_recognizer.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'line_widget.dart';
+import 'dart:math';
 
 final _markedWordStyleLight = TextStyle(
   inherit: true,
@@ -559,6 +561,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
       return;
     }
 
+    print("Tapped... $ayahIdx $wordIdx");
     int currentParaIndex = widget.model.currentPara - 1;
     int absoluteAyah = toAbsoluteAyahOffset(surahIdx, ayahIdx);
     final (isFull, isAtPageStart, isAtPageEnd) =
@@ -894,8 +897,16 @@ class _PageWidgetState extends State<PageWidget> {
     return idx;
   }
 
-  List<TextSpan> _buildLineSpans(Line line, int lineIdx) {
+  List<TextSpan> _buildLineSpans(Line line, int lineIdx, bool addSpaces) {
     List<TextSpan> spans = [];
+    // final fontStyle = TextStyle(
+    //   color: Theme.of(context).textTheme.bodyMedium?.color,
+    //   fontFamily: "Al Mushaf",
+    //   fontSize: 24,
+    //   letterSpacing: 0,
+    //   wordSpacing: 1,
+    // );
+
     for (final a in line.lineAyahs) {
       final int surahIdx = surahForAyah(a.ayahIndex);
       final int surahAyahIdx = toSurahAyahOffset(surahIdx, a.ayahIndex);
@@ -906,6 +917,9 @@ class _PageWidgetState extends State<PageWidget> {
       final (marker, isSajdaAyat) =
           getAyahEndMarkerGlyphCode(surahIdx, surahAyahIdx);
       String text = a.text;
+      if (lineIdx == 1) {
+        print(text);
+      }
       List<String> fullAyahTextWords =
           widget.getFullAyahText(a.ayahIndex, widget.pageIndex).split('\u200c');
       if (isSajdaAyat) {
@@ -954,14 +968,17 @@ class _PageWidgetState extends State<PageWidget> {
         } else if (isMutashabihaAyat) {
           style = _mutStyle(darkMode);
         }
+        // style = fontStyle.merge(style);
         // word
         spans.add(TextSpan(recognizer: tapHandler, text: w, style: style));
         // separator
         spans.add(const TextSpan(text: '\u200c'));
         // space
-        if (shouldAddSpaces(widget.pageIndex, lineIdx)) {
+        // if (shouldAddSpaces(widget.pageIndex, lineIdx)) {
+        if (addSpaces) {
           spans.add(TextSpan(text: ' ', style: style));
         }
+        // }
         i++;
       }
 
@@ -987,19 +1004,19 @@ class _PageWidgetState extends State<PageWidget> {
     return spans;
   }
 
-  Widget _buildLine(Line line, int lineIdx) {
-    return Text.rich(
-      TextSpan(children: _buildLineSpans(line, lineIdx)),
-      textDirection: TextDirection.rtl,
-      style: TextStyle(
-        color: Theme.of(context).textTheme.bodyMedium?.color,
-        fontFamily: "Al Mushaf",
-        fontSize: 24,
-        letterSpacing: 0,
-        wordSpacing: 1,
-      ),
-    );
-  }
+  // Widget _buildLine(Line line, int lineIdx) {
+  //   return Text.rich(
+  //     TextSpan(children: _buildLineSpans(line, lineIdx)),
+  //     textDirection: TextDirection.rtl,
+  //     style: TextStyle(
+  //       color: Theme.of(context).textTheme.bodyMedium?.color,
+  //       fontFamily: "Al Mushaf",
+  //       fontSize: 24,
+  //       letterSpacing: 0,
+  //       wordSpacing: 1,
+  //     ),
+  //   );
+  // }
 
   Widget _pageTopBorder() {
     return Row(
@@ -1032,13 +1049,27 @@ class _PageWidgetState extends State<PageWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final List<TextSpan> allLineSpans = [];
+    for (final (i, l) in widget._pageLines.indexed) {
+      if (l.lineAyahs.first.ayahIndex < 0) {
+        allLineSpans.add(const TextSpan());
+        continue;
+      }
+      final spans = _buildLineSpans(l, i, true);
+      allLineSpans.add(TextSpan(children: spans));
+    }
+    const padding = 8.0;
+    final (fontSize, lineSizes) = getFontSize(
+        allLineSpans, MediaQuery.of(context).size.width - (2 * padding));
+
     return Column(
       children: [
         _pageTopBorder(),
-        const Divider(indent: 8, endIndent: 8, color: Colors.grey, height: 1),
+        const Divider(
+            indent: padding, endIndent: padding, color: Colors.grey, height: 1),
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.only(left: 8, right: 8),
+            padding: const EdgeInsets.only(left: padding, right: padding),
             child: ListView.separated(
               padding: EdgeInsets.zero,
               separatorBuilder: (ctx, idx) => const Divider(
@@ -1053,13 +1084,43 @@ class _PageWidgetState extends State<PageWidget> {
                   return getBismillah(pageLine.lineAyahs.first.ayahIndex);
                 }
 
+                final lineSize = lineSizes[idx];
+                final extra = MediaQuery.of(ctx).size.width - lineSize;
+                int wc = 0;
+                for (final l in pageLine.lineAyahs) {
+                  wc += l.text.split('\u200c').length;
+                }
+                if (wc <= 0) {
+                  wc = 1;
+                }
+
+                final wordSpacing = min(19.0, max(extra / wc, 1.0));
+                // print("Wordspacing: $wordSpacing [$idx] -- wordCount: $wc");
+
+                final fontStyle = TextStyle(
+                  color: Theme.of(context).textTheme.bodyMedium?.color,
+                  fontFamily: "Al Mushaf",
+                  fontSize: 24,
+                  letterSpacing: 0,
+                  wordSpacing: wordSpacing,
+                );
+
                 return SizedBox(
                   height: 46,
-                  child: FittedBox(
-                    fit: BoxFit.contain,
-                    child: _buildLine(pageLine, idx),
+                  child: LineWidget(
+                    span: TextSpan(
+                        style: fontStyle,
+                        children: _buildLineSpans(pageLine, idx, true)),
                   ),
                 );
+
+                // return SizedBox(
+                //   height: 46,
+                //   child: FittedBox(
+                //     fit: BoxFit.contain,
+                //     child: _buildLine(pageLine, idx),
+                //   ),
+                // );
               },
             ),
           ),
