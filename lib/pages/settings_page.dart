@@ -9,7 +9,7 @@ import 'package:quran_memorization_helper/models/settings.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:quran_memorization_helper/utils/utils.dart';
 
-const String appVersion = "1.2.4";
+const String appVersion = "1.2.5";
 
 class _ChangeTranslationDialog extends StatefulWidget {
   @override
