@@ -85,6 +85,15 @@ void main() {
     expect(model.ayahs.length, 3);
     expect(model.timer!.isActive, isTrue);
 
+    model.addAyahs([
+      Ayat("", [0], ayahIdx: 4),
+      Ayat("", [0], ayahIdx: 5),
+      Ayat("", [0], ayahIdx: 6),
+    ]);
+    model.removeAyahs([4, 5, 6]);
+    expect(model.ayahs.length, 3);
+    expect(model.timer!.isActive, isTrue);
+
     // wait one and a half second for save to happen
     await Future.delayed(const Duration(seconds: 1, milliseconds: 500), () {});
 
