@@ -32,7 +32,9 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
   }
 
   void onModelChanged() {
-    _loadDataFuture = _load();
+    setState(() {
+      _loadDataFuture = _load();
+    });
   }
 
   void _onDeletePress() {
@@ -77,7 +79,8 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
 
   AppBar buildAppbar() {
     return AppBar(
-      title: Text("Marked ayahs for Para ${widget.model.currentPara}"),
+      title: Text("Marked ayahs for Para ${widget.model.currentPara}",
+          style: TextStyle(fontSize: 16)),
       actions: _multipleSelectMode
           ? [
               IconButton(
@@ -95,7 +98,22 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
                 onPressed: _onExitMultiSelectMode,
               ),
             ]
-          : null,
+          : [
+              IconButton(
+                tooltip: "Next Para",
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () {
+                  widget.model.setCurrentPara(widget.model.currentPara + 1);
+                },
+              ),
+              IconButton(
+                tooltip: "Previous Para",
+                icon: const Icon(Icons.arrow_forward),
+                onPressed: () {
+                  widget.model.setCurrentPara(widget.model.currentPara - 1);
+                },
+              ),
+            ],
     );
   }
 
