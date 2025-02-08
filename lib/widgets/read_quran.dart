@@ -570,13 +570,14 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
     // List<Mutashabiha> mutashabihat = _getMutashabihaAyat(ayahIdx, surahIdx);
     Ayat? ayatInDb = _getAyatInDB(ayahIdx, surahIdx);
     // otherwise we add/remove ayah
-    final int abs = toAbsoluteAyahOffset(surahIdx, ayahIdx);
+    final int absAyahIdx = toAbsoluteAyahOffset(surahIdx, ayahIdx);
     if (ayatInDb != null && ayatInDb.markedWords.contains(wordIdx)) {
       // remove
-      widget.model.removeAyats(currentParaIndex, abs, wordIdx);
+      widget.model
+          .removeMarkedWordInAyat(currentParaIndex, absAyahIdx, wordIdx);
     } else {
       // add
-      Ayat ayat = Ayat("", [wordIdx], ayahIdx: abs);
+      Ayat ayat = Ayat("", [wordIdx], ayahIdx: absAyahIdx);
       widget.model.addAyahs([ayat]);
     }
   }
