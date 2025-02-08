@@ -45,9 +45,9 @@ class AyahSelectionState {
 
   List<int> selectedAyahs() {
     List<int> toRemove = [];
-    for (final e in _selection) {
-      if (!toRemove.contains(e.ayahIdx)) {
-        toRemove.add(e.ayahIdx);
+    for (final item in _selection) {
+      if (item.selected && !toRemove.contains(item.ayahIdx)) {
+        toRemove.add(item.ayahIdx);
       }
     }
     return toRemove;
