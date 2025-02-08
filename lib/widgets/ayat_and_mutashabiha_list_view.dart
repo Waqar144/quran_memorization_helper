@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:quran_memorization_helper/models/ayah_selection_model.dart';
 import 'package:quran_memorization_helper/models/ayat.dart';
 import 'ayat_list_item.dart';
 import 'mutashabiha_ayat_list_item.dart';
 
 class AyatAndMutashabihaListView extends StatelessWidget {
   const AyatAndMutashabihaListView(this._ayatsList,
-      {super.key, required this.onLongPress, this.selectionMode = false});
+      {super.key,
+      required this.onLongPress,
+      required this.onTap,
+      required this.selectionState,
+      this.selectionMode = false});
 
   final List<AyatOrMutashabiha> _ayatsList;
   final VoidCallback onLongPress;
+  final Function(int) onTap;
   final bool selectionMode;
+  final AyahSelectionState selectionState;
 
   Widget _listItemForIndex(int index) {
     if (_ayatsList[index].ayat != null) {
@@ -18,7 +25,9 @@ class AyatAndMutashabihaListView extends StatelessWidget {
         key: ObjectKey(ayat),
         ayah: ayat,
         onLongPress: onLongPress,
+        onTap: () => onTap(ayat.ayahIdx),
         selectionMode: selectionMode,
+        isSelected: selectionState.isSelected(index),
       );
     } else {
       final mutashabiha = _ayatsList[index].mutashabiha!;
@@ -26,7 +35,9 @@ class AyatAndMutashabihaListView extends StatelessWidget {
         key: ObjectKey(mutashabiha),
         mutashabiha: mutashabiha,
         onLongPress: onLongPress,
+        onTap: () => onTap(mutashabiha.src.ayahIdx),
         selectionMode: selectionMode,
+        isSelected: selectionState.isSelected(index),
       );
     }
   }

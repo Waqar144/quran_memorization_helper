@@ -1,30 +1,45 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:quran_memorization_helper/models/ayah_selection_model.dart';
 import 'package:quran_memorization_helper/models/ayat.dart';
+import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'package:quran_memorization_helper/widgets/ayat_and_mutashabiha_list_view.dart';
 
 class MarkedAyahsPage extends StatefulWidget {
   final ParaAyatModel model;
-  final List<AyatOrMutashabiha> ayahAndMutashabihas;
-  MarkedAyahsPage(Map<String, dynamic> arguments, {super.key})
-      : model = arguments['model'],
-        ayahAndMutashabihas = arguments['ayahAndMutashabihas'];
-
+  const MarkedAyahsPage(this.model, {super.key});
   @override
   State<StatefulWidget> createState() => _MarkedAyahsPageState();
 }
 
 class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
   bool _multipleSelectMode = false;
+  List<AyatOrMutashabiha> ayahAndMutashabihas = [];
+  AyahSelectionState _selectionState = AyahSelectionState.fromAyahs([]);
+  late Future<void> _loadDataFuture;
+
+  @override
+  void initState() {
+    onModelChanged();
+    widget.model.addListener(onModelChanged);
+    super.initState();
+  }
 
   @override
   void dispose() {
+    widget.model.removeListener(onModelChanged);
     super.dispose();
-    widget.model.resetSelection();
+  }
+
+  void onModelChanged() {
+    _loadDataFuture = _load();
   }
 
   void _onDeletePress() {
     assert(_multipleSelectMode);
-    widget.model.removeSelectedAyahs();
+    final ayahsToRemove = _selectionState.selectedAyahs();
+    if (ayahsToRemove.isEmpty) return;
+    widget.model.removeAyahs(ayahsToRemove);
     _onExitMultiSelectMode();
   }
 
@@ -32,7 +47,7 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
     if (_multipleSelectMode) {
       setState(() {
         _multipleSelectMode = false;
-        widget.model.resetSelection();
+        _selectionState.clearSelection();
       });
     }
   }
@@ -41,6 +56,23 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
     setState(() {
       _multipleSelectMode = true;
     });
+  }
+
+  void _onTap(int ayahIndex) {
+    _selectionState.toggle(ayahIndex);
+    setState(() {});
+  }
+
+  Future<void> _load() async {
+    final data = await rootBundle.load("assets/quran.txt");
+    final List<Mutashabiha> mutashabihat =
+        await importParaMutashabihas(widget.model.currentPara - 1, data.buffer);
+
+    ayahAndMutashabihas = widget.model.ayahsAndMutashabihasList(mutashabihat);
+    for (final a in ayahAndMutashabihas) {
+      a.ensureTextIsLoaded(data.buffer);
+    }
+    _selectionState = AyahSelectionState.fromAyahs(ayahAndMutashabihas);
   }
 
   @override
@@ -63,7 +95,9 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.select_all),
-                    onPressed: () => widget.model.selectAll(),
+                    onPressed: () {
+                      setState(() => _selectionState.selectAll());
+                    },
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),
@@ -72,13 +106,18 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
                 ]
               : null,
         ),
-        body: ListenableBuilder(
-          listenable: widget.model,
-          builder: (context, _) {
+        body: FutureBuilder(
+          future: _loadDataFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              return const SizedBox.shrink();
+            }
             return AyatAndMutashabihaListView(
-              widget.ayahAndMutashabihas,
+              ayahAndMutashabihas,
+              selectionState: _selectionState,
               selectionMode: _multipleSelectMode,
               onLongPress: _enterMultiselectMode,
+              onTap: _onTap,
             );
           },
         ),

@@ -350,6 +350,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
 
   @override
   void initState() {
+    widget.model.addListener(onModelChanged);
     Settings.instance.addListener(clearCachedTranslation);
     super.initState();
     WakelockPlus.enable(); // disable auto screen turn off
@@ -357,6 +358,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
 
   @override
   void dispose() {
+    widget.model.removeListener(onModelChanged);
     Settings.instance.removeListener(clearCachedTranslation);
     super.dispose();
     WakelockPlus.disable();
@@ -364,6 +366,10 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
 
   void clearCachedTranslation() {
     _translation = null;
+  }
+
+  void onModelChanged() {
+    _repaintNotifier.add(0);
   }
 
   @override
@@ -560,22 +566,6 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
     }
 
     int currentParaIndex = widget.model.currentPara - 1;
-    int absoluteAyah = toAbsoluteAyahOffset(surahIdx, ayahIdx);
-    final (isFull, isAtPageStart, isAtPageEnd) =
-        _isAyahFull(absoluteAyah, pageNum);
-
-    int pageNumberOfTappedAyah = pageNum;
-
-    void sendRepainEvent() {
-      _repaintNotifier.add(pageNumberOfTappedAyah);
-      if (!isFull) {
-        if (isAtPageEnd) {
-          _repaintNotifier.add(pageNumberOfTappedAyah + 1);
-        } else if (isAtPageStart) {
-          _repaintNotifier.add(pageNumberOfTappedAyah - 1);
-        }
-      }
-    }
 
     // List<Mutashabiha> mutashabihat = _getMutashabihaAyat(ayahIdx, surahIdx);
     Ayat? ayatInDb = _getAyatInDB(ayahIdx, surahIdx);
@@ -589,7 +579,6 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
       Ayat ayat = Ayat("", [wordIdx], ayahIdx: abs);
       widget.model.addAyahs([ayat]);
     }
-    sendRepainEvent();
   }
 
   @override
@@ -693,10 +682,8 @@ class _PageWidgetState extends State<PageWidget> {
     _subscription = widget.repaintStream.listen(_triggerRepaint);
   }
 
-  void _triggerRepaint(int page) {
-    if (page == widget.pageIndex) {
-      setState(() {});
-    }
+  void _triggerRepaint(v) {
+    setState(() {});
   }
 
   @override

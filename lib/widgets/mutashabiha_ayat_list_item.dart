@@ -9,46 +9,29 @@ class _AyatListItemWithMetadata extends StatelessWidget {
   final Widget? leading;
   final VoidCallback? onLongPress;
   final bool selectionMode;
-  final ValueNotifier<bool> _leadingNotifier = ValueNotifier(false);
+  final bool isSelected;
 
-  _AyatListItemWithMetadata(this._ayah,
-      {this.onTap,
-      this.leading,
-      this.onLongPress,
-      this.selectionMode = false}) {
-    _leadingNotifier.value = _ayah.selected ?? false;
-  }
+  const _AyatListItemWithMetadata(
+    this._ayah, {
+    this.onTap,
+    this.leading,
+    this.onLongPress,
+    this.isSelected = false,
+    this.selectionMode = false,
+  });
 
   Widget? _getLeadingWidget() {
     if (selectionMode && leading != null) {
-      return ValueListenableBuilder(
-        valueListenable: _leadingNotifier,
-        builder: (ctx, value, _) {
-          return Icon(value ? Icons.check_box : Icons.check_box_outline_blank);
-        },
-      );
+      return Icon(isSelected ? Icons.check_box : Icons.check_box_outline_blank);
     } else {
       return leading;
     }
   }
 
-  void _toggleSelected() {
-    _ayah.selected = !(_ayah.selected ?? false);
-    _leadingNotifier.value = _ayah.selected!;
-  }
-
   void _longPress() {
     if (onLongPress != null) {
       onLongPress!();
-      _toggleSelected();
     }
-  }
-
-  VoidCallback? _getOnTapHandler() {
-    if (selectionMode) {
-      return _toggleSelected;
-    }
-    return onTap;
   }
 
   @override
@@ -68,7 +51,7 @@ class _AyatListItemWithMetadata extends StatelessWidget {
       ),
       subtitle: Text(
           "${surahNameForIdx(_ayah.surahIdx)}:${_ayah.surahAyahIndexesString()} - Para: ${_ayah.paraIdx + 1}"),
-      onTap: _getOnTapHandler(),
+      onTap: onTap,
       onLongPress: _longPress,
     );
   }
@@ -78,16 +61,22 @@ class MutashabihaAyatListItem extends StatelessWidget {
   final Mutashabiha mutashabiha;
   final ValueNotifier<bool> _showMatches = ValueNotifier(false);
   final VoidCallback? onLongPress;
+  final VoidCallback? onTap;
   final bool selectionMode;
+  final bool isSelected;
 
   MutashabihaAyatListItem(
       {super.key,
       required this.mutashabiha,
       this.onLongPress,
+      this.onTap,
+      this.isSelected = false,
       this.selectionMode = false});
 
   void _onTap() {
     if (selectionMode) {
+      assert(onTap != null);
+      onTap!();
     } else {
       _showMatches.value = !_showMatches.value;
     }
@@ -130,6 +119,7 @@ class MutashabihaAyatListItem extends StatelessWidget {
           onTap: _onTap,
           onLongPress: onLongPress,
           selectionMode: selectionMode,
+          isSelected: isSelected,
           leading: ValueListenableBuilder(
             valueListenable: _showMatches,
             builder: (ctx, value, _) {

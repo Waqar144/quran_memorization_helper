@@ -7,17 +7,18 @@ class AyatListItem extends StatefulWidget {
     super.key,
     required this.ayah,
     this.onLongPress,
+    this.onTap,
+    this.isSelected = false,
     this.selectionMode = false,
     this.showSurahAyahIndex = true,
   });
 
   final VoidCallback? onLongPress;
+  final VoidCallback? onTap;
   final bool selectionMode;
   final bool showSurahAyahIndex;
+  final bool isSelected;
   final Ayat ayah;
-
-  bool _isSelected() => ayah.selected ?? false;
-  void toggleSelected() => ayah.selected = !_isSelected();
 
   @override
   State<AyatListItem> createState() => _AyatListItemState();
@@ -27,12 +28,7 @@ class _AyatListItemState extends State<AyatListItem> {
   void _longPress() {
     assert(widget.onLongPress != null);
     widget.onLongPress!();
-    widget.toggleSelected();
   }
-
-  void _onTap() => setState(() {
-        widget.toggleSelected();
-      });
 
   VoidCallback? _getLongPressCallback() {
     if (widget.onLongPress != null && !widget.selectionMode) {
@@ -45,7 +41,7 @@ class _AyatListItemState extends State<AyatListItem> {
   Widget build(BuildContext context) {
     return ListTile(
       leading: widget.selectionMode
-          ? Icon(widget._isSelected()
+          ? Icon(widget.isSelected
               ? Icons.check_box
               : Icons.check_box_outline_blank)
           : null,
@@ -64,7 +60,7 @@ class _AyatListItemState extends State<AyatListItem> {
           ? Text(widget.ayah.surahAyahText())
           : const SizedBox.shrink(),
       onLongPress: _getLongPressCallback(),
-      onTap: widget.selectionMode ? _onTap : null,
+      onTap: widget.selectionMode ? widget.onTap : null,
     );
   }
 }

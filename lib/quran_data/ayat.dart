@@ -10,7 +10,6 @@ class Ayat {
   List<int> markedWords;
   String text = "";
   final int ayahIdx;
-  bool? selected;
 
   @override
   bool operator ==(Object other) {

@@ -36,23 +36,6 @@ class AyatOrMutashabiha {
     }
   }
 
-  bool get selected {
-    if (ayat != null) {
-      return ayat!.selected ?? false;
-    } else if (mutashabiha != null) {
-      return mutashabiha!.src.selected ?? false;
-    }
-    return false;
-  }
-
-  set selected(bool s) {
-    if (ayat != null) {
-      ayat!.selected = s;
-    } else if (mutashabiha != null) {
-      mutashabiha!.src.selected = s;
-    }
-  }
-
   String get text {
     if (ayat != null) {
       return ayat!.text;
@@ -102,6 +85,7 @@ class ParaAyatModel extends ChangeNotifier {
     for (final a in ayahs) {
       bool wasMutashabiha = false;
       for (final m in allParaMutashabihas) {
+        // can load multiple for same ayah
         if (m.src.ayahIdx == a.ayahIdx) {
           list.add(AyatOrMutashabiha(ayat: null, mutashabiha: m));
           wasMutashabiha = true;
@@ -118,7 +102,6 @@ class ParaAyatModel extends ChangeNotifier {
 
   void addAyahs(List<Ayat> newAyahs) {
     _setParaAyahs(currentPara, newAyahs);
-    resetSelection();
     notifyListeners();
     persist();
   }
@@ -178,7 +161,6 @@ class ParaAyatModel extends ChangeNotifier {
     onParaChanged(para, showLastPage, jumpToPage);
 
     currentParaNotifier.value = para;
-    resetSelection();
     notifyListeners();
 
     // trigger a save
@@ -189,10 +171,10 @@ class ParaAyatModel extends ChangeNotifier {
     return _paraAyats[paraIdx + 1]?.length ?? 0;
   }
 
-  void removeSelectedAyahs() {
+  void removeAyahs(List<int> ayahsToRemove) {
     final list = _paraAyats[currentPara];
     if (list == null) return;
-    list.removeWhere((final Ayat ayah) => ayah.selected ?? false);
+    list.removeWhere((final Ayat ayah) => ayahsToRemove.contains(ayah.ayahIdx));
     _paraAyats[currentPara] = list;
     notifyListeners();
     persist();
@@ -217,21 +199,6 @@ class ParaAyatModel extends ChangeNotifier {
     _paraAyats[paraIndex + 1] = ayahs;
     notifyListeners();
     persist();
-  }
-
-  void resetSelection() {
-    for (var i = 0; i < ayahs.length; i++) {
-      ayahs[i].selected = false;
-    }
-  }
-
-  void selectAll() {
-    if (ayahs.isEmpty) return;
-    bool value = ayahs.first.selected ?? false;
-    for (var i = 0; i < ayahs.length; i++) {
-      ayahs[i].selected = !value;
-    }
-    notifyListeners();
   }
 
   void merge(Map<int, List<Ayat>> paraAyahs) {
@@ -286,7 +253,6 @@ class ParaAyatModel extends ChangeNotifier {
 
     _paraAyats = paraAyats;
     currentParaNotifier.value = json["currentPara"] ?? 1;
-    resetSelection();
     notifyListeners();
   }
 
