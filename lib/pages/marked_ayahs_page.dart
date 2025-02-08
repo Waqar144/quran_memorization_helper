@@ -75,6 +75,30 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
     _selectionState = AyahSelectionState.fromAyahs(ayahAndMutashabihas);
   }
 
+  AppBar buildAppbar() {
+    return AppBar(
+      title: Text("Marked ayahs for Para ${widget.model.currentPara}"),
+      actions: _multipleSelectMode
+          ? [
+              IconButton(
+                icon: const Icon(Icons.delete),
+                onPressed: _onDeletePress,
+              ),
+              IconButton(
+                icon: const Icon(Icons.select_all),
+                onPressed: () {
+                  setState(() => _selectionState.selectAll());
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: _onExitMultiSelectMode,
+              ),
+            ]
+          : null,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -85,27 +109,7 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: Text("Marked ayahs for Para ${widget.model.currentPara}"),
-          actions: _multipleSelectMode
-              ? [
-                  IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: _onDeletePress,
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.select_all),
-                    onPressed: () {
-                      setState(() => _selectionState.selectAll());
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: _onExitMultiSelectMode,
-                  ),
-                ]
-              : null,
-        ),
+        appBar: buildAppbar(),
         body: FutureBuilder(
           future: _loadDataFuture,
           builder: (context, snapshot) {
