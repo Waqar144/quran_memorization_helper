@@ -81,7 +81,7 @@ void main() {
         File("$docPath${Platform.pathSeparator}ayatsdb_bck.json").existsSync(),
         isTrue);
 
-    model.removeAyats(0, 4, 0);
+    model.removeMarkedWordInAyat(0, 4, 0);
     expect(model.ayahs.length, 3);
     expect(model.timer!.isActive, isTrue);
 

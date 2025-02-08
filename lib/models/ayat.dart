@@ -181,7 +181,8 @@ class ParaAyatModel extends ChangeNotifier {
   }
 
   /// Remove ayats from given para index
-  void removeAyats(int paraIndex, int absoluteAyahIndex, int wordIndex) {
+  void removeMarkedWordInAyat(
+      int paraIndex, int absoluteAyahIndex, int wordIndex) {
     final List<Ayat>? ayahs = _paraAyats[paraIndex + 1];
     if (ayahs == null) return;
 
