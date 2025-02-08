@@ -1,17 +1,16 @@
 import 'package:quran_memorization_helper/models/ayat.dart';
 
 class AyahSelectionState {
-  List<({int ayahIdx, bool selected})> _selection = [];
+  final List<({int ayahIdx, bool selected})> _selection;
 
   AyahSelectionState.fromAyahs(
-      final List<AyatOrMutashabiha> ayahAndMutashabihas) {
-    _selection = List.generate(ayahAndMutashabihas.length, (index) {
-      final a = ayahAndMutashabihas[index];
-      return a.ayat != null
-          ? (ayahIdx: a.ayat!.ayahIdx, selected: false)
-          : (ayahIdx: a.mutashabiha!.src.ayahIdx, selected: false);
-    }, growable: false);
-  }
+      final List<AyatOrMutashabiha> ayahAndMutashabihas)
+      : _selection = List.generate(ayahAndMutashabihas.length, (index) {
+          final a = ayahAndMutashabihas[index];
+          return a.ayat != null
+              ? (ayahIdx: a.ayat!.ayahIdx, selected: false)
+              : (ayahIdx: a.mutashabiha!.src.ayahIdx, selected: false);
+        }, growable: false);
 
   void toggle(int ayahIndex) {
     int found = _selection.indexWhere((e) => e.ayahIdx == ayahIndex);
