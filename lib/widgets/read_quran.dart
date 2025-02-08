@@ -708,7 +708,7 @@ class _PageWidgetState extends State<PageWidget> {
         Container(
           height: 46,
           decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.4),
+              color: Colors.green.withValues(alpha: 0.4),
               border:
                   Border.all(color: Theme.of(context).dividerColor, width: 1)),
           child: Row(
@@ -734,7 +734,7 @@ class _PageWidgetState extends State<PageWidget> {
           height: 46,
           width: MediaQuery.of(context).size.width,
           decoration: BoxDecoration(
-            color: Colors.green.withOpacity(0.4),
+            color: Colors.green.withValues(alpha: 0.4),
             border: Border.all(color: Theme.of(context).dividerColor, width: 1),
           ),
           child: Text(
@@ -772,7 +772,7 @@ class _PageWidgetState extends State<PageWidget> {
     return Container(
       width: MediaQuery.of(context).size.width,
       decoration: BoxDecoration(
-          color: Colors.green.withOpacity(0.4),
+          color: Colors.green.withValues(alpha: 0.4),
           border: Border.all(color: Theme.of(context).dividerColor, width: 1)),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

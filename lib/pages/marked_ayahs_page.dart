@@ -121,7 +121,7 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: _multipleSelectMode == false,
-      onPopInvoked: (_) async {
+      onPopInvokedWithResult: (didPop, result) async {
         if (_multipleSelectMode) {
           _onExitMultiSelectMode();
         }

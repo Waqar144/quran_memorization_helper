@@ -10,7 +10,7 @@ import 'package:quran_memorization_helper/widgets/read_quran.dart';
 import 'package:quran_memorization_helper/widgets/surah_list_view.dart';
 import 'package:quran_memorization_helper/widgets/para_list_view.dart';
 import 'package:quran_memorization_helper/utils/utils.dart';
-import 'package:flutter/services.dart' show LogicalKeyboardKey, rootBundle;
+import 'package:flutter/services.dart' show LogicalKeyboardKey;
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
