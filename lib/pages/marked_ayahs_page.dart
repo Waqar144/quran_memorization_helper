@@ -80,7 +80,7 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
   AppBar buildAppbar() {
     return AppBar(
       title: Text("Marked ayahs for Para ${widget.model.currentPara}",
-          style: TextStyle(fontSize: 16)),
+          style: TextStyle(fontSize: 18)),
       actions: _multipleSelectMode
           ? [
               IconButton(
