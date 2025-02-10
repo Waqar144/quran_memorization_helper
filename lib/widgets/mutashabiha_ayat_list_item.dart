@@ -4,7 +4,7 @@ import 'package:quran_memorization_helper/quran_data/surahs.dart';
 import 'package:quran_memorization_helper/models/settings.dart';
 
 class _AyatListItemWithMetadata extends StatelessWidget {
-  final MutashabihaAyat _ayah;
+  final MutashabihaAyat ayah;
   final VoidCallback? onTap;
   final Widget? leading;
   final VoidCallback? onLongPress;
@@ -12,7 +12,7 @@ class _AyatListItemWithMetadata extends StatelessWidget {
   final bool isSelected;
 
   const _AyatListItemWithMetadata(
-    this._ayah, {
+    this.ayah, {
     this.onTap,
     this.leading,
     this.onLongPress,
@@ -39,7 +39,7 @@ class _AyatListItemWithMetadata extends StatelessWidget {
     return ListTile(
       leading: _getLeadingWidget(),
       title: Text(
-        _ayah.text,
+        ayah.text,
         softWrap: true,
         textAlign: TextAlign.right,
         textDirection: TextDirection.rtl,
@@ -50,7 +50,7 @@ class _AyatListItemWithMetadata extends StatelessWidget {
             wordSpacing: Settings.wordSpacing),
       ),
       subtitle: Text(
-          "${surahNameForIdx(_ayah.surahIdx)}:${_ayah.surahAyahIndexesString()} - Para: ${_ayah.paraIdx + 1}"),
+          "${surahNameForIdx(ayah.surahIdx)}:${ayah.surahAyahIndexesString()} - Para: ${ayah.paraIdx + 1}"),
       onTap: onTap,
       onLongPress: _longPress,
     );
