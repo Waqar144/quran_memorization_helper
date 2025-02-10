@@ -177,6 +177,126 @@ class _MainPageState extends State<MainPage>
     }
   }
 
+  Widget _buildDrawer() {
+    return Builder(builder: (context) {
+      final int currentParaIdx = _paraModel.currentPara - 1;
+      final int currentPageInPara = (_pageController.page?.floor() ?? 0);
+      return Drawer(
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              SizedBox(
+                height: 50,
+                child: TabBar(
+                  controller: _drawerTabController,
+                  tabs: const [
+                    Tab(text: "Para"),
+                    Tab(text: "Surah"),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: TabBarView(
+                  controller: _drawerTabController,
+                  children: [
+                    ParaListView(
+                      model: _paraModel,
+                      currentParaIdx: currentParaIdx,
+                      onParaTapped: (idx) {
+                        _paraModel.setCurrentPara(idx + 1);
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                    SurahListView(
+                      currentParaIdx: currentParaIdx,
+                      currentPageInPara: currentPageInPara,
+                      onSurahTapped: _onSurahTapped,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+
+  Map<ShortcutActivator, VoidCallback> _shortcutBindings() {
+    return <ShortcutActivator, VoidCallback>{
+      const SingleActivator(LogicalKeyboardKey.arrowLeft): _nextPage,
+      const SingleActivator(LogicalKeyboardKey.arrowRight): _previousPage,
+      const SingleActivator(LogicalKeyboardKey.pageDown): _nextPage,
+      const SingleActivator(LogicalKeyboardKey.pageUp): _previousPage,
+      const SingleActivator(LogicalKeyboardKey.home): () =>
+          _pageController.jumpToPage(0),
+      const SingleActivator(LogicalKeyboardKey.end): () {
+        int totalPages = pageCountForPara(_paraModel.currentPara - 1);
+        _pageController.jumpToPage(totalPages - 1);
+      },
+      const SingleActivator(LogicalKeyboardKey.arrowLeft, control: true): () =>
+          _paraModel.setCurrentPara(_paraModel.currentPara + 1),
+      const SingleActivator(LogicalKeyboardKey.arrowRight, control: true): () =>
+          _paraModel.setCurrentPara(_paraModel.currentPara - 1),
+      const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): () {
+        int? currentPageInPara = _pageController.page?.floor();
+        int currentPage = (currentPageInPara ?? 0) +
+            para16LinePageOffsets[_paraModel.currentPara - 1];
+        int currentSurah = surahForPage(currentPage);
+        _onSurahTapped(currentSurah == 113 ? 0 : currentSurah + 1, pop: false);
+      },
+      const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): () {
+        int? currentPageInPara = _pageController.page?.floor();
+        int currentPage = (currentPageInPara ?? 0) +
+            para16LinePageOffsets[_paraModel.currentPara - 1];
+        int currentSurah = surahForPage(currentPage);
+        _onSurahTapped(currentSurah == 0 ? 113 : currentSurah - 1, pop: false);
+      },
+    };
+  }
+
+  SliverAppBar _buildAppBar() {
+    return SliverAppBar(
+      floating: true,
+      forceElevated: true,
+      // scrolledUnderElevation: v ? 2 : 1,
+      snap: true,
+      pinned: false,
+      actions: [
+        IconButton(
+          tooltip: "Next Para",
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            _paraModel.setCurrentPara(_paraModel.currentPara + 1);
+          },
+        ),
+        IconButton(
+          tooltip: "Previous Para",
+          icon: const Icon(Icons.arrow_forward),
+          onPressed: () {
+            _paraModel.setCurrentPara(_paraModel.currentPara - 1);
+          },
+        ),
+        IconButton(
+          onPressed: () {
+            Settings.instance.themeMode =
+                Settings.instance.themeMode == ThemeMode.light
+                    ? ThemeMode.dark
+                    : ThemeMode.light;
+          },
+          icon: Icon(Settings.instance.themeMode == ThemeMode.light
+              ? Icons.mode_night
+              : Icons.sunny),
+          tooltip: Settings.instance.themeMode == ThemeMode.light
+              ? "Switch to night mode"
+              : "Switch to light mode",
+        ),
+        buildThreeDotMenu()
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -193,148 +313,32 @@ class _MainPageState extends State<MainPage>
             return const SizedBox.shrink();
           }
           return CallbackShortcuts(
-              bindings: <ShortcutActivator, VoidCallback>{
-                const SingleActivator(LogicalKeyboardKey.arrowLeft): _nextPage,
-                const SingleActivator(LogicalKeyboardKey.arrowRight):
-                    _previousPage,
-                const SingleActivator(LogicalKeyboardKey.pageDown): _nextPage,
-                const SingleActivator(LogicalKeyboardKey.pageUp): _previousPage,
-                const SingleActivator(LogicalKeyboardKey.home): () =>
-                    _pageController.jumpToPage(0),
-                const SingleActivator(LogicalKeyboardKey.end): () {
-                  int totalPages = pageCountForPara(_paraModel.currentPara - 1);
-                  _pageController.jumpToPage(totalPages - 1);
-                },
-                const SingleActivator(LogicalKeyboardKey.arrowLeft,
-                        control: true):
-                    () => _paraModel.setCurrentPara(_paraModel.currentPara + 1),
-                const SingleActivator(LogicalKeyboardKey.arrowRight,
-                        control: true):
-                    () => _paraModel.setCurrentPara(_paraModel.currentPara - 1),
-                const SingleActivator(LogicalKeyboardKey.arrowLeft,
-                    shift: true): () {
-                  int? currentPageInPara = _pageController.page?.floor();
-                  int currentPage = (currentPageInPara ?? 0) +
-                      para16LinePageOffsets[_paraModel.currentPara - 1];
-                  int currentSurah = surahForPage(currentPage);
-                  _onSurahTapped(currentSurah == 113 ? 0 : currentSurah + 1,
-                      pop: false);
-                },
-                const SingleActivator(LogicalKeyboardKey.arrowRight,
-                    shift: true): () {
-                  int? currentPageInPara = _pageController.page?.floor();
-                  int currentPage = (currentPageInPara ?? 0) +
-                      para16LinePageOffsets[_paraModel.currentPara - 1];
-                  int currentSurah = surahForPage(currentPage);
-                  _onSurahTapped(currentSurah == 0 ? 113 : currentSurah - 1,
-                      pop: false);
-                },
-              },
-              child: Focus(
-                  autofocus: true,
-                  child: CustomScrollView(
-                    controller: _scrollController,
-                    scrollBehavior: const ScrollBehavior()
-                      ..copyWith(overscroll: false),
-                    slivers: [
-                      SliverAppBar(
-                        floating: true,
-                        forceElevated: true,
-                        // scrolledUnderElevation: v ? 2 : 1,
-                        snap: true,
-                        pinned: false,
-                        actions: [
-                          IconButton(
-                            tooltip: "Next Para",
-                            icon: const Icon(Icons.arrow_back),
-                            onPressed: () {
-                              _paraModel
-                                  .setCurrentPara(_paraModel.currentPara + 1);
-                            },
-                          ),
-                          IconButton(
-                            tooltip: "Previous Para",
-                            icon: const Icon(Icons.arrow_forward),
-                            onPressed: () {
-                              _paraModel
-                                  .setCurrentPara(_paraModel.currentPara - 1);
-                            },
-                          ),
-                          IconButton(
-                            onPressed: () {
-                              Settings.instance.themeMode =
-                                  Settings.instance.themeMode == ThemeMode.light
-                                      ? ThemeMode.dark
-                                      : ThemeMode.light;
-                            },
-                            icon: Icon(
-                                Settings.instance.themeMode == ThemeMode.light
-                                    ? Icons.mode_night
-                                    : Icons.sunny),
-                            tooltip:
-                                Settings.instance.themeMode == ThemeMode.light
-                                    ? "Switch to night mode"
-                                    : "Switch to light mode",
-                          ),
-                          buildThreeDotMenu()
-                        ],
-                      ),
-                      ValueListenableBuilder(
-                        valueListenable: _paraModel.currentParaNotifier,
-                        builder: (context, _, __) {
-                          return ReadQuranWidget(
-                            _paraModel,
-                            pageController: _pageController,
-                          );
-                        },
-                      )
-                    ],
-                  )));
+            bindings: _shortcutBindings(),
+            child: Focus(
+              autofocus: true,
+              child: CustomScrollView(
+                controller: _scrollController,
+                scrollBehavior: const ScrollBehavior()
+                  ..copyWith(overscroll: false),
+                slivers: [
+                  _buildAppBar(),
+                  // The actual quran reading widget
+                  ValueListenableBuilder(
+                    valueListenable: _paraModel.currentParaNotifier,
+                    builder: (context, _, __) {
+                      return ReadQuranWidget(
+                        _paraModel,
+                        pageController: _pageController,
+                      );
+                    },
+                  )
+                ],
+              ),
+            ),
+          );
         },
       ),
-      drawer: Builder(builder: (context) {
-        final int currentParaIdx = _paraModel.currentPara - 1;
-        final int currentPageInPara = (_pageController.page?.floor() ?? 0);
-        return Drawer(
-          child: SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                SizedBox(
-                  height: 50,
-                  child: TabBar(
-                    controller: _drawerTabController,
-                    tabs: const [
-                      Tab(text: "Para"),
-                      Tab(text: "Surah"),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: TabBarView(
-                    controller: _drawerTabController,
-                    children: [
-                      ParaListView(
-                        model: _paraModel,
-                        currentParaIdx: currentParaIdx,
-                        onParaTapped: (idx) {
-                          _paraModel.setCurrentPara(idx + 1);
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                      SurahListView(
-                        currentParaIdx: currentParaIdx,
-                        currentPageInPara: currentPageInPara,
-                        onSurahTapped: _onSurahTapped,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      }),
+      drawer: _buildDrawer(),
     );
   }
 }
