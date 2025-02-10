@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-final Uint16List para16LinePageOffsets = Uint16List.fromList([
+final Uint16List para16LinePageOffsets = Uint16List.fromList(<int>[
   1, // 1
   20, // 2
   38, // 3
@@ -56,7 +56,7 @@ int paraForPage(int page) {
   return 30 - 1;
 }
 
-final Uint16List surah16LinePageOffset = Uint16List.fromList([
+final Uint16List surah16LinePageOffset = Uint16List.fromList(<int>[
   1,
   2,
   45,

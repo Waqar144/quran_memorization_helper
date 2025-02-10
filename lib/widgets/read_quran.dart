@@ -119,7 +119,7 @@ class _TranslationTileState extends State<TranslationTile> {
   }
 
   @override
-  dispose() {
+  void dispose() {
     expanded.dispose();
     super.dispose();
   }

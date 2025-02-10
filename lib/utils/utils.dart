@@ -76,7 +76,7 @@ void showSnackBarMessage(BuildContext context, String message,
 }
 
 String toUrduNumber(int num) {
-  final Uint16List numMap = Uint16List.fromList(const [
+  final Uint16List numMap = Uint16List.fromList(const <int>[
     0x6F0,
     0x6F0 + 1,
     0x6F0 + 2,
@@ -96,4 +96,4 @@ String toUrduNumber(int num) {
   return ret;
 }
 
-const urduKhatma = "\u06D4";
+const String urduKhatma = "\u06D4";

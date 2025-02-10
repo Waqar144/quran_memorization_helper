@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:quran_memorization_helper/models/ayah_selection_model.dart';
 import 'package:quran_memorization_helper/models/ayat.dart';
+import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'ayat_list_item.dart';
 import 'mutashabiha_ayat_list_item.dart';
 
@@ -20,7 +21,7 @@ class AyatAndMutashabihaListView extends StatelessWidget {
 
   Widget _listItemForIndex(int index) {
     if (_ayatsList[index].ayat != null) {
-      final ayat = _ayatsList[index].ayat!;
+      final Ayat ayat = _ayatsList[index].ayat!;
       return AyatListItem(
         key: ObjectKey(ayat),
         ayah: ayat,
@@ -30,7 +31,7 @@ class AyatAndMutashabihaListView extends StatelessWidget {
         isSelected: selectionState.isSelected(index),
       );
     } else {
-      final mutashabiha = _ayatsList[index].mutashabiha!;
+      final Mutashabiha mutashabiha = _ayatsList[index].mutashabiha!;
       return MutashabihaAyatListItem(
         key: ObjectKey(mutashabiha),
         mutashabiha: mutashabiha,

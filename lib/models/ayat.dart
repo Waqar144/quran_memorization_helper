@@ -30,7 +30,7 @@ class AyatOrMutashabiha {
     } else if (mutashabiha != null) {
       mutashabiha!.src.text =
           getAyahForIdx(mutashabiha!.src.ayahIdx, quranTextUtf8).text;
-      for (final m in mutashabiha!.matches) {
+      for (final MutashabihaAyat m in mutashabiha!.matches) {
         m.text = getAyahForIdx(m.ayahIdx, quranTextUtf8).text;
       }
     }
@@ -82,9 +82,9 @@ class ParaAyatModel extends ChangeNotifier {
   List<AyatOrMutashabiha> ayahsAndMutashabihasList(
       List<Mutashabiha> allParaMutashabihas) {
     List<AyatOrMutashabiha> list = [];
-    for (final a in ayahs) {
+    for (final Ayat a in ayahs) {
       bool wasMutashabiha = false;
-      for (final m in allParaMutashabihas) {
+      for (final Mutashabiha m in allParaMutashabihas) {
         // can load multiple for same ayah
         if (m.src.ayahIdx == a.ayahIdx) {
           list.add(AyatOrMutashabiha(ayat: null, mutashabiha: m));
@@ -116,7 +116,7 @@ class ParaAyatModel extends ChangeNotifier {
     Ayat first = newAyahs.first;
     for (final a in existingAyahs) {
       if (a.ayahIdx == first.ayahIdx) {
-        for (final w in first.markedWords) {
+        for (final int w in first.markedWords) {
           if (!a.markedWords.contains(w)) {
             a.markedWords.add(w);
           }
@@ -130,7 +130,7 @@ class ParaAyatModel extends ChangeNotifier {
     }
 
     // validate and add
-    for (final a in newAyahs) {
+    for (final Ayat a in newAyahs) {
       if (ayahBelongsToPara(a.ayahIdx, currentPara - 1)) {
         existingAyahs.add(Ayat(a.text, [...a.markedWords], ayahIdx: a.ayahIdx));
       } else {
@@ -140,7 +140,7 @@ class ParaAyatModel extends ChangeNotifier {
       }
     }
 
-    existingAyahs.sort((a, b) {
+    existingAyahs.sort((Ayat a, Ayat b) {
       return a.ayahIdx - b.ayahIdx;
     });
 
@@ -172,7 +172,7 @@ class ParaAyatModel extends ChangeNotifier {
   }
 
   void removeAyahs(List<int> ayahsToRemove) {
-    final list = _paraAyats[currentPara];
+    final List<Ayat>? list = _paraAyats[currentPara];
     if (list == null) return;
     list.removeWhere((final Ayat ayah) => ayahsToRemove.contains(ayah.ayahIdx));
     _paraAyats[currentPara] = list;
@@ -186,7 +186,7 @@ class ParaAyatModel extends ChangeNotifier {
     final List<Ayat>? ayahs = _paraAyats[paraIndex + 1];
     if (ayahs == null) return;
 
-    for (final (i, a) in ayahs.indexed) {
+    for (final (int i, Ayat a) in ayahs.indexed) {
       if (a.ayahIdx == absoluteAyahIndex) {
         if (a.markedWords.remove(wordIndex)) {
           if (a.markedWords.isEmpty) {
@@ -203,7 +203,7 @@ class ParaAyatModel extends ChangeNotifier {
   }
 
   void merge(Map<int, List<Ayat>> paraAyahs) {
-    for (final e in paraAyahs.entries) {
+    for (final MapEntry<int, List<Ayat>> e in paraAyahs.entries) {
       _setParaAyahs(e.key, e.value);
     }
     // if current para change, notify
@@ -224,16 +224,14 @@ class ParaAyatModel extends ChangeNotifier {
 
         var ayahJsons = paraJson["ayats"] as List<dynamic>?;
         if (ayahJsons != null) {
-          for (final dynamic a in ayahJsons) {
+          for (final a in ayahJsons) {
             try {
               final int idx = a['idx'];
               if (!ayahBelongsToPara(idx, para - 1)) {
                 continue;
               }
 
-              final List<int> wordIdxes = [
-                for (final w in a['words']) w as int
-              ];
+              final wordIdxes = <int>[for (final w in a['words']) w as int];
               paraData.add(Ayat("", wordIdxes, ayahIdx: idx));
             } catch (_) {
               continue;
@@ -242,7 +240,7 @@ class ParaAyatModel extends ChangeNotifier {
         }
 
         if (paraData.isEmpty) continue;
-        paraData.sort((a, b) {
+        paraData.sort((Ayat a, Ayat b) {
           return a.ayahIdx - b.ayahIdx;
         });
 
@@ -280,9 +278,9 @@ class ParaAyatModel extends ChangeNotifier {
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> json = {};
-    for (final kv in _paraAyats.entries) {
-      List<Ayat> ayats = [for (final a in kv.value) a];
-      json[kv.key.toString()] = {'ayats': ayats};
+    for (final MapEntry<int, List<Ayat>> kv in _paraAyats.entries) {
+      final ayats = <Ayat>[for (final Ayat a in kv.value) a];
+      json[kv.key.toString()] = <String, List<Ayat>>{'ayats': ayats};
     }
     json["currentPara"] = currentParaNotifier.value;
     return json;

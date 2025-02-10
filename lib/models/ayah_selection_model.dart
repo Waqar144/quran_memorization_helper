@@ -5,8 +5,8 @@ class AyahSelectionState {
 
   AyahSelectionState.fromAyahs(
       final List<AyatOrMutashabiha> ayahAndMutashabihas)
-      : _selection = List.generate(ayahAndMutashabihas.length, (index) {
-          final a = ayahAndMutashabihas[index];
+      : _selection = List.generate(ayahAndMutashabihas.length, (int index) {
+          final AyatOrMutashabiha a = ayahAndMutashabihas[index];
           return a.ayat != null
               ? (ayahIdx: a.ayat!.ayahIdx, selected: false)
               : (ayahIdx: a.mutashabiha!.src.ayahIdx, selected: false);
@@ -25,7 +25,7 @@ class AyahSelectionState {
 
   void selectAll() {
     if (_selection.isEmpty) return;
-    final firstSelected = _selection[0].selected;
+    final bool firstSelected = _selection[0].selected;
 
     for (int i = 0; i < _selection.length; ++i) {
       _selection[i] =

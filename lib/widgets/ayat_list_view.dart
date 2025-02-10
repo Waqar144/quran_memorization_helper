@@ -17,7 +17,7 @@ class AyatListView extends StatelessWidget {
           const Divider(indent: 8, endIndent: 8, color: Colors.grey, height: 2),
       itemCount: _ayatsList.length,
       itemBuilder: (context, index) {
-        final ayat = _ayatsList[index];
+        final Ayat ayat = _ayatsList[index];
         return AyatListItem(
             key: ObjectKey(ayat),
             ayah: _ayatsList[index],

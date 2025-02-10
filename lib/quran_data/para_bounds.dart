@@ -66,7 +66,7 @@ String getParaNameForIndex(int paraIdx) {
   };
 }
 
-const List<ParaBounds> paraByteBounds = [
+const List<ParaBounds> paraByteBounds = <ParaBounds>[
   ParaBounds(0, 24080),
   ParaBounds(24081, 48937),
   ParaBounds(48938, 73433),
@@ -99,7 +99,7 @@ const List<ParaBounds> paraByteBounds = [
   ParaBounds(717703, 740472),
 ];
 
-final Uint32List paraAyahCount = Uint32List.fromList([
+final Uint32List paraAyahCount = Uint32List.fromList(<int>[
   148, // 0
   111, // 1
   125, // 2
@@ -132,7 +132,7 @@ final Uint32List paraAyahCount = Uint32List.fromList([
   564, // 29
 ]);
 
-final Uint32List _paraAyahOffset = Uint32List.fromList([
+final Uint32List _paraAyahOffset = Uint32List.fromList(<int>[
   0, // 1
   148, // 2
   259, // 3

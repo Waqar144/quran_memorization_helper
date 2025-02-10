@@ -32,11 +32,11 @@ class SurahData {
   const SurahData(this.name, this.ayahCount);
 }
 
-String surahNameForIdx(idx) {
+String surahNameForIdx(int idx) {
   return surahDataForIdx(idx, arabic: false).name;
 }
 
-SurahData surahDataForIdx(idx, {bool arabic = false}) {
+SurahData surahDataForIdx(int idx, {bool arabic = false}) {
   return switch (idx) {
     0 => SurahData(arabic ? "ٱلْفَاتِحَةُ" : "Al-Fatihah", 7),
     1 => SurahData(arabic ? "ٱلْبَقَرَةُ" : "Al-Baqarah", 286),
@@ -200,7 +200,7 @@ int firstSurahInPara(int paraIdx) {
   if (paraIdx == 29) {
     return 77;
   } else {
-    final surahs = _surahsStartsInPara(paraIdx);
+    final List<int> surahs = _surahsStartsInPara(paraIdx);
     if (surahs.isNotEmpty) {
       return surahs.first;
     }
@@ -232,10 +232,10 @@ int surahForPage(int page) {
 /// should occupy two lines
 /// NOTE: This function should only be used for last para
 bool surahHas2LineHeadress(int surah) {
-  return [77, 78, 79, 103, 109, 110, 112, 113].contains(surah);
+  return <int>[77, 78, 79, 103, 109, 110, 112, 113].contains(surah);
 }
 
-final Uint32List _surahAyahOffsets = Uint32List.fromList([
+final Uint32List _surahAyahOffsets = Uint32List.fromList(<int>[
   0,
   7,
   293,

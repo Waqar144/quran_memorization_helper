@@ -94,7 +94,7 @@ class Mutashabiha {
     if (src.text.isEmpty) {
       src.loadText(quranTextUtf8);
       for (int j = 0; j < matches.length; ++j) {
-        final match = matches[j];
+        final MutashabihaAyat match = matches[j];
         match.loadText(quranTextUtf8);
         matches[j] = match;
       }
@@ -106,11 +106,11 @@ class Mutashabiha {
 }
 
 String _getContext(int ayahIdx, String text, final ByteBuffer quranTextUtf8) {
-  final range = getAyahRange(ayahIdx + 1);
+  final AyahOffset range = getAyahRange(ayahIdx + 1);
   String nextAyahText =
       utf8.decode(quranTextUtf8.asUint8List(range.start, range.len)).trim();
-  final words = nextAyahText.split(' ');
-  List<String> toshow = [];
+  final List<String> words = nextAyahText.split(' ');
+  final List<String> toshow = [];
   for (final word in words) {
     toshow.add(word);
     if (toshow.length > 5) {
@@ -126,18 +126,18 @@ MutashabihaAyat ayatFromJsonObj(
   try {
     List<int> ayahIdxes;
     if (m["ayah"] is List) {
-      ayahIdxes = [for (final a in m["ayah"]) a as int];
+      ayahIdxes = <int>[for (final a in m["ayah"]) a as int];
     } else {
-      ayahIdxes = [m["ayah"] as int];
+      ayahIdxes = <int>[m["ayah"] as int];
     }
     String text = "";
-    List<int> surahAyahIdxes = [];
+    final List<int> surahAyahIdxes = [];
     int surahIdx = -1;
     int paraIdx = -1;
-    for (final ayahIdx in ayahIdxes) {
+    for (final int ayahIdx in ayahIdxes) {
       if (quranTextUtf8 != null) {
-        final ayahRange = getAyahRange(ayahIdx);
-        final textUtf8 =
+        final AyahOffset ayahRange = getAyahRange(ayahIdx);
+        final Uint8List textUtf8 =
             quranTextUtf8.asUint8List(ayahRange.start, ayahRange.len);
         text += utf8.decode(textUtf8).trim();
         if (ayahIdx != ayahIdxes.last) {

@@ -25,7 +25,7 @@ Ayat getAyahForIdx(int ayahIdx, final ByteBuffer quranText,
   return Ayat(text.trim(), markedWords, ayahIdx: ayahIdx);
 }
 
-final Uint32List _ayahOffsets = Uint32List.fromList([
+final Uint32List _ayahOffsets = Uint32List.fromList(<int>[
   0,
   69,
   148,

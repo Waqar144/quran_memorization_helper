@@ -121,7 +121,7 @@ class _MainPageState extends State<MainPage>
     };
     return PopupMenuButton<String>(
       onSelected: (String value) {
-        final actionCallback = actions[value];
+        final VoidCallback? actionCallback = actions[value];
         if (actionCallback == null) throw "Unknown action: $value";
         actionCallback();
       },
@@ -203,7 +203,7 @@ class _MainPageState extends State<MainPage>
                     ParaListView(
                       model: _paraModel,
                       currentParaIdx: currentParaIdx,
-                      onParaTapped: (idx) {
+                      onParaTapped: (int idx) {
                         _paraModel.setCurrentPara(idx + 1);
                         Navigator.of(context).pop();
                       },
@@ -306,7 +306,7 @@ class _MainPageState extends State<MainPage>
         preferredSize: const Size(double.infinity, 0),
         child: AppBar(bottom: null, shadowColor: Colors.transparent),
       ),
-      body: FutureBuilder(
+      body: FutureBuilder<void>(
         future: _load(),
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
@@ -323,7 +323,7 @@ class _MainPageState extends State<MainPage>
                 slivers: [
                   _buildAppBar(),
                   // The actual quran reading widget
-                  ValueListenableBuilder(
+                  ValueListenableBuilder<int>(
                     valueListenable: _paraModel.currentParaNotifier,
                     builder: (context, _, __) {
                       return ReadQuranWidget(

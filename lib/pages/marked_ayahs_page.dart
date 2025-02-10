@@ -39,7 +39,7 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
 
   void _onDeletePress() {
     assert(_multipleSelectMode);
-    final ayahsToRemove = _selectionState.selectedAyahs();
+    final List<int> ayahsToRemove = _selectionState.selectedAyahs();
     if (ayahsToRemove.isEmpty) return;
     widget.model.removeAyahs(ayahsToRemove);
     _onExitMultiSelectMode();
@@ -66,7 +66,7 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
   }
 
   Future<void> _load() async {
-    final data = await rootBundle.load("assets/quran.txt");
+    final ByteData data = await rootBundle.load("assets/quran.txt");
     final List<Mutashabiha> mutashabihat =
         await importParaMutashabihas(widget.model.currentPara - 1, data.buffer);
 
@@ -128,7 +128,7 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
       },
       child: Scaffold(
         appBar: buildAppbar(),
-        body: FutureBuilder(
+        body: FutureBuilder<void>(
           future: _loadDataFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState != ConnectionState.done) {
