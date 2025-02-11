@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/surahs.dart';
-import 'package:quran_memorization_helper/models/settings.dart';
+import 'package:quran_memorization_helper/utils/colors.dart';
 
 class _AyatListItemWithMetadata extends StatelessWidget {
   final MutashabihaAyat ayah;
@@ -38,16 +38,11 @@ class _AyatListItemWithMetadata extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: _getLeadingWidget(),
-      title: Text(
-        ayah.text,
+      title: RichText(
+        text: TextSpan(children: textSpansForAyah(ayah)),
         softWrap: true,
         textAlign: TextAlign.right,
         textDirection: TextDirection.rtl,
-        style: const TextStyle(
-            fontFamily: "Al Mushaf",
-            fontSize: Settings.fontSize,
-            letterSpacing: 0.0,
-            wordSpacing: Settings.wordSpacing),
       ),
       subtitle: Text(
           "${surahNameForIdx(ayah.surahIdx)}:${ayah.surahAyahIndexesString()} - Para: ${ayah.paraIdx + 1}"),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
-import 'package:quran_memorization_helper/models/settings.dart';
+import 'package:quran_memorization_helper/utils/colors.dart';
 
 class AyatListItem extends StatefulWidget {
   const AyatListItem({
@@ -45,16 +45,11 @@ class _AyatListItemState extends State<AyatListItem> {
               ? Icons.check_box
               : Icons.check_box_outline_blank)
           : null,
-      title: Text(
-        widget.ayah.text,
+      title: RichText(
+        text: TextSpan(children: textSpansForAyah(widget.ayah)),
         softWrap: true,
         textAlign: TextAlign.right,
         textDirection: TextDirection.rtl,
-        style: const TextStyle(
-            fontFamily: "Al Mushaf",
-            fontSize: Settings.fontSize,
-            letterSpacing: 0.0,
-            wordSpacing: Settings.wordSpacing),
       ),
       subtitle: widget.showSurahAyahIndex
           ? Text(widget.ayah.surahAyahText())

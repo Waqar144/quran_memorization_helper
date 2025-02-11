@@ -1,11 +1,5 @@
 import 'dart:typed_data';
 
-class ParaBounds {
-  final int start;
-  final int end;
-  const ParaBounds(this.start, this.end);
-}
-
 const String ayahSeparator = " ۞ ";
 
 /// Returns the para idx for given ayah idx
@@ -65,39 +59,6 @@ String getParaNameForIndex(int paraIdx) {
     _ => throw "Invalid para index: $paraIdx",
   };
 }
-
-const List<ParaBounds> paraByteBounds = <ParaBounds>[
-  ParaBounds(0, 24080),
-  ParaBounds(24081, 48937),
-  ParaBounds(48938, 73433),
-  ParaBounds(73434, 97802),
-  ParaBounds(97803, 122666),
-  ParaBounds(122667, 147323),
-  ParaBounds(147324, 173147),
-  ParaBounds(173148, 197637),
-  ParaBounds(197638, 222064),
-  ParaBounds(222065, 245871),
-  ParaBounds(245872, 270646),
-  ParaBounds(270647, 295598),
-  ParaBounds(295599, 320083),
-  ParaBounds(320084, 343998),
-  ParaBounds(343999, 369288),
-  ParaBounds(369289, 394503),
-  ParaBounds(394504, 417750),
-  ParaBounds(417751, 443310),
-  ParaBounds(443311, 469035),
-  ParaBounds(469036, 492361),
-  ParaBounds(492362, 517038),
-  ParaBounds(517039, 541513),
-  ParaBounds(541514, 567188),
-  ParaBounds(567189, 590887),
-  ParaBounds(590888, 616139),
-  ParaBounds(616140, 641435),
-  ParaBounds(641436, 666396),
-  ParaBounds(666397, 691925),
-  ParaBounds(691926, 717702),
-  ParaBounds(717703, 740472),
-];
 
 final Uint32List paraAyahCount = Uint32List.fromList(<int>[
   148, // 0

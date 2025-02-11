@@ -5,6 +5,7 @@ import 'package:quran_memorization_helper/pages/page_constants.dart';
 import 'package:quran_memorization_helper/models/quiz.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/pages.dart';
+import 'package:quran_memorization_helper/quran_data/quran_text.dart';
 import 'package:quran_memorization_helper/quran_data/surahs.dart';
 import 'package:quran_memorization_helper/widgets/read_quran.dart';
 import 'package:quran_memorization_helper/widgets/surah_list_view.dart';
@@ -30,6 +31,8 @@ class _MainPageState extends State<MainPage>
   void initState() {
     _paraModel = ParaAyatModel(onParaChanged);
     _drawerTabController = TabController(length: 2, vsync: this);
+
+    QuranText.instance.loadData();
 
     WidgetsBinding.instance.addObserver(this);
     super.initState();

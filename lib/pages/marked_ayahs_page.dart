@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:quran_memorization_helper/models/ayah_selection_model.dart';
 import 'package:quran_memorization_helper/models/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
@@ -66,13 +65,12 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
   }
 
   Future<void> _load() async {
-    final ByteData data = await rootBundle.load("assets/quran.txt");
     final List<Mutashabiha> mutashabihat =
-        await importParaMutashabihas(widget.model.currentPara - 1, data.buffer);
+        await importParaMutashabihas(widget.model.currentPara - 1);
 
     ayahAndMutashabihas = widget.model.ayahsAndMutashabihasList(mutashabihat);
     for (final a in ayahAndMutashabihas) {
-      a.ensureTextIsLoaded(data.buffer);
+      a.ensureTextIsLoaded();
     }
     _selectionState = AyahSelectionState.fromAyahs(ayahAndMutashabihas);
   }

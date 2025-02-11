@@ -1,7 +1,7 @@
+import 'package:quran_memorization_helper/quran_data/quran_text.dart';
+
 import 'surahs.dart';
 import 'dart:convert';
-import 'dart:typed_data';
-import 'ayah_offsets.dart';
 import 'para_bounds.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
@@ -49,17 +49,6 @@ class MutashabihaAyat extends Ayat {
     });
   }
 
-  void loadText(final ByteBuffer quranTextUtf8) {
-    if (text.isNotEmpty) return;
-    for (final a in surahAyahIndexes) {
-      final absIdx = toAbsoluteAyahOffset(surahIdx, a);
-      text += getAyahForIdx(absIdx, quranTextUtf8).text;
-      if (a != surahAyahIndexes.last) {
-        text += ayahSeparator;
-      }
-    }
-  }
-
   @override
   Map<String, dynamic> toJson() {
     return surahAyahIndexes.length == 1
@@ -90,13 +79,13 @@ class Mutashabiha {
     };
   }
 
-  void loadText(final ByteBuffer quranTextUtf8) {
+  void loadText() {
     if (src.text.isEmpty) {
-      src.loadText(quranTextUtf8);
-      for (int j = 0; j < matches.length; ++j) {
-        final MutashabihaAyat match = matches[j];
-        match.loadText(quranTextUtf8);
-        matches[j] = match;
+      src.text = QuranText.instance.ayahText(src.ayahIdx);
+    }
+    for (final MutashabihaAyat m in matches) {
+      if (m.text.isEmpty) {
+        m.text = QuranText.instance.ayahText(m.ayahIdx);
       }
     }
   }
@@ -105,11 +94,9 @@ class Mutashabiha {
   int get hashCode => src.ayahIdx.hashCode;
 }
 
-String _getContext(int ayahIdx, String text, final ByteBuffer quranTextUtf8) {
-  final AyahOffset range = getAyahRange(ayahIdx + 1);
-  String nextAyahText =
-      utf8.decode(quranTextUtf8.asUint8List(range.start, range.len)).trim();
-  final List<String> words = nextAyahText.split(' ');
+String _getContext(int ayahIdx, String text) {
+  String nextAyahText = QuranText.instance.ayahText(ayahIdx + 1);
+  final List<String> words = nextAyahText.split('\u200c');
   final List<String> toshow = [];
   for (final word in words) {
     toshow.add(word);
@@ -121,8 +108,7 @@ String _getContext(int ayahIdx, String text, final ByteBuffer quranTextUtf8) {
   return "$text$ayahSeparator${toshow.join(' ')}$threeDot";
 }
 
-MutashabihaAyat ayatFromJsonObj(
-    dynamic m, final ByteBuffer? quranTextUtf8, int ctx) {
+MutashabihaAyat ayatFromJsonObj(dynamic m, int ctx) {
   try {
     List<int> ayahIdxes;
     if (m["ayah"] is List) {
@@ -134,16 +120,15 @@ MutashabihaAyat ayatFromJsonObj(
     final List<int> surahAyahIdxes = [];
     int surahIdx = -1;
     int paraIdx = -1;
+    final bool quranTextIsReady = QuranText.instance.isReady;
     for (final int ayahIdx in ayahIdxes) {
-      if (quranTextUtf8 != null) {
-        final AyahOffset ayahRange = getAyahRange(ayahIdx);
-        final Uint8List textUtf8 =
-            quranTextUtf8.asUint8List(ayahRange.start, ayahRange.len);
-        text += utf8.decode(textUtf8).trim();
+      if (quranTextIsReady) {
+        text += QuranText.instance.ayahText(ayahIdx);
         if (ayahIdx != ayahIdxes.last) {
           text += ayahSeparator;
         }
       }
+
       if (surahIdx == -1) {
         surahIdx = surahForAyah(ayahIdx);
         paraIdx = paraForAyah(ayahIdx);
@@ -152,8 +137,8 @@ MutashabihaAyat ayatFromJsonObj(
     }
 
     final bool showContext = ctx != 0;
-    if (showContext && quranTextUtf8 != null) {
-      text = _getContext(ayahIdxes.last, text, quranTextUtf8);
+    if (showContext && quranTextIsReady) {
+      text = _getContext(ayahIdxes.last, text);
     }
     return MutashabihaAyat(paraIdx, surahIdx, surahAyahIdxes, text, [],
         ayahIdx: ayahIdxes.first);
@@ -163,8 +148,7 @@ MutashabihaAyat ayatFromJsonObj(
   }
 }
 
-Future<List<Mutashabiha>> importParaMutashabihas(
-    int paraIdx, final ByteBuffer? quranTextUtf8) async {
+Future<List<Mutashabiha>> importParaMutashabihas(int paraIdx) async {
   final mutashabihasJsonBytes =
       await rootBundle.load("assets/mutashabiha_data.json");
   final mutashabihasJson =
@@ -178,10 +162,10 @@ Future<List<Mutashabiha>> importParaMutashabihas(
     if (m == null) continue;
     try {
       int ctx = (m["ctx"] as int?) ?? 0;
-      MutashabihaAyat src = ayatFromJsonObj(m["src"], quranTextUtf8, ctx);
+      MutashabihaAyat src = ayatFromJsonObj(m["src"], ctx);
       List<MutashabihaAyat> matches = [];
       for (final match in m["muts"]) {
-        matches.add(ayatFromJsonObj(match, quranTextUtf8, ctx));
+        matches.add(ayatFromJsonObj(match, ctx));
       }
       mutashabihas.add(Mutashabiha(src, matches));
     } catch (e) {

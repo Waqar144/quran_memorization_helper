@@ -344,7 +344,6 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
   List<Line> lines = [];
   List<Page> _pages = [];
   List<Mutashabiha> _mutashabihat = [];
-  ByteBuffer? _quranUtf8;
   Translation? _translation;
   final _repaintNotifier = StreamController<int>.broadcast();
 
@@ -391,7 +390,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
     _pages = pages;
 
     // we lazy load the mutashabiha ayat text
-    _mutashabihat = await importParaMutashabihas(para - 1, null);
+    _mutashabihat = await importParaMutashabihas(para - 1);
     return _pages;
   }
 
@@ -482,11 +481,6 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
       int surahIdx, int ayahIdx, int wordIdx, int pageNum) async {
     List<Mutashabiha> mutashabihat = _getMutashabihaAyat(ayahIdx, surahIdx);
 
-    if (_quranUtf8 == null) {
-      final data = await rootBundle.load("assets/quran.txt");
-      _quranUtf8 = data.buffer;
-    }
-
     if (_translation == null) {
       ByteBuffer transUtf8;
       final isBundledTranslation = Settings.instance.translationFile.isEmpty;
@@ -517,7 +511,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
     }
 
     for (int i = 0; i < mutashabihat.length; ++i) {
-      mutashabihat[i].loadText(_quranUtf8!);
+      mutashabihat[i].loadText();
     }
 
     int tappedAyah = toAbsoluteAyahOffset(surahIdx, ayahIdx);

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'page_constants.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'package:quran_memorization_helper/widgets/mutashabiha_ayat_list_item.dart';
-import 'package:flutter/services.dart' show rootBundle;
 
 /// The page where you select the para for which the mutashabihas will be displayed
 class MutashabihasPage extends StatelessWidget {
@@ -41,8 +40,7 @@ class ParaMutashabihas extends StatelessWidget {
   /// Import the mutashabihas from assets
   Future<List<Mutashabiha>> _importParaMutashabihas() async {
     _mutashabihas.clear();
-    final data = await rootBundle.load("assets/quran.txt");
-    _mutashabihas.addAll(await importParaMutashabihas(_para, data.buffer));
+    _mutashabihas.addAll(await importParaMutashabihas(_para));
     return _mutashabihas;
   }
 

@@ -1,10 +1,9 @@
 import 'package:flutter/foundation.dart';
+import 'package:quran_memorization_helper/quran_data/quran_text.dart';
 import 'dart:convert';
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:quran_memorization_helper/utils/utils.dart' as utils;
-import 'package:quran_memorization_helper/quran_data/ayah_offsets.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
 
@@ -14,35 +13,12 @@ class AyatOrMutashabiha {
   final Mutashabiha? mutashabiha;
   const AyatOrMutashabiha({this.ayat, this.mutashabiha});
 
-  int getAyahIdx() {
+  void ensureTextIsLoaded() {
     if (ayat != null) {
-      return ayat!.ayahIdx;
+      ayat!.text = QuranText.instance.ayahText(ayat!.ayahIdx);
     } else if (mutashabiha != null) {
-      return mutashabiha!.src.ayahIdx;
+      mutashabiha!.loadText();
     }
-    throw "Invalid AyatOrMutashabiha item..";
-  }
-
-  void ensureTextIsLoaded(final ByteBuffer quranTextUtf8) {
-    if (text.isNotEmpty) return;
-    if (ayat != null) {
-      ayat!.text = getAyahForIdx(ayat!.ayahIdx, quranTextUtf8).text;
-    } else if (mutashabiha != null) {
-      mutashabiha!.src.text =
-          getAyahForIdx(mutashabiha!.src.ayahIdx, quranTextUtf8).text;
-      for (final MutashabihaAyat m in mutashabiha!.matches) {
-        m.text = getAyahForIdx(m.ayahIdx, quranTextUtf8).text;
-      }
-    }
-  }
-
-  String get text {
-    if (ayat != null) {
-      return ayat!.text;
-    } else if (mutashabiha != null) {
-      return mutashabiha!.src.text;
-    }
-    throw "Invalid AyatOrMutashabiha item..";
   }
 }
 
@@ -87,6 +63,7 @@ class ParaAyatModel extends ChangeNotifier {
       for (final Mutashabiha m in allParaMutashabihas) {
         // can load multiple for same ayah
         if (m.src.ayahIdx == a.ayahIdx) {
+          m.src.markedWords = [...a.markedWords];
           list.add(AyatOrMutashabiha(ayat: null, mutashabiha: m));
           wasMutashabiha = true;
         }

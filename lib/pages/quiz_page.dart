@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
+import 'package:quran_memorization_helper/quran_data/quran_text.dart';
 import 'package:quran_memorization_helper/widgets/ayat_list_item.dart';
 import 'package:quran_memorization_helper/models/quiz.dart';
 
@@ -75,7 +76,7 @@ class _QuizPageState extends State<QuizPage> {
     }
 
     _QuizAyahQuestion endAyahQuestion() {
-      List<String> words = ayah.split(' ');
+      List<String> words = ayah.split('\u200c');
       int replaceStart = min((words.length / 2).ceil(), 6);
       final question =
           "${words.sublist(0, words.length - replaceStart).join(' ')}...";
@@ -113,8 +114,6 @@ class _QuizPageState extends State<QuizPage> {
     final selectedParas = widget._creationArgs.selectedParas;
     selectedParas.shuffle(random);
 
-    final data = await rootBundle.load("assets/quran.txt");
-    final quranText = utf8.decode(data.buffer.asUint8List());
     final Map<int, List<int>> seenAyahsByPara = {};
 
     while (_quizAyahs.length < _total) {
@@ -133,24 +132,9 @@ class _QuizPageState extends State<QuizPage> {
         seenAyahsByPara[para]!.add(r);
 
         // find ayah and next ayah
-        ParaBounds bounds = paraByteBounds[para];
-        int startNl = bounds.start;
-        int nextNl = quranText.indexOf('\n', startNl);
-        int count = 0;
-        String ayah = "";
-        String nextAyah = "";
-        while (nextNl < bounds.end) {
-          if (r == count) {
-            ayah = quranText.substring(startNl, nextNl);
-            startNl = nextNl + 1;
-            nextNl = quranText.indexOf('\n', startNl);
-            nextAyah = quranText.substring(startNl, nextNl);
-            break;
-          }
-          count++;
-          startNl = nextNl + 1;
-          nextNl = quranText.indexOf('\n', startNl);
-        }
+        int first = getFirstAyahOfPara(para);
+        String ayah = QuranText.instance.ayahText(first + r);
+        String nextAyah = QuranText.instance.ayahText(first + r + 1);
 
         yield _addQuestion(ayah, nextAyah, para, r);
 
