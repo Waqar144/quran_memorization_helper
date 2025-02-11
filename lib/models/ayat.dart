@@ -22,12 +22,6 @@ class AyatOrMutashabiha {
   }
 }
 
-extension ValueNotifierToggle on ValueNotifier<bool> {
-  void toggle() {
-    value = !value;
-  }
-}
-
 class ParaAyatModel extends ChangeNotifier {
   Map<int, List<Ayat>> _paraAyats = {};
   ValueNotifier<int> currentParaNotifier = ValueNotifier<int>(1);
