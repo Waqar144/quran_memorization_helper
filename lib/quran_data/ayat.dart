@@ -95,17 +95,10 @@ class Mutashabiha {
 }
 
 String _getContext(int ayahIdx, String text) {
-  String nextAyahText = QuranText.instance.ayahText(ayahIdx + 1);
-  final List<String> words = nextAyahText.split('\u200c');
-  final List<String> toshow = [];
-  for (final word in words) {
-    toshow.add(word);
-    if (toshow.length > 5) {
-      break;
-    }
-  }
-  final String threeDot = toshow.length == words.length ? "" : "...";
-  return "$text$ayahSeparator${toshow.join(' ')}$threeDot";
+  final words = QuranText.instance.ayahText(ayahIdx + 1).split('\u200c');
+  final firstFive = words.take(5);
+  final String threeDot = firstFive.length == words.length ? "" : "...";
+  return "$text$ayahSeparator${firstFive.join(' ')}$threeDot";
 }
 
 MutashabihaAyat ayatFromJsonObj(dynamic m, int ctx) {
