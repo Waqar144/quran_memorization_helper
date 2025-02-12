@@ -12,6 +12,7 @@ class MarkedAyahsPage extends StatefulWidget {
 }
 
 class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
+  int _currentPara = 1;
   bool _multipleSelectMode = false;
   List<AyatOrMutashabiha> ayahAndMutashabihas = [];
   AyahSelectionState _selectionState = AyahSelectionState.fromAyahs([]);
@@ -19,6 +20,7 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
 
   @override
   void initState() {
+    _currentPara = widget.model.currentPara;
     onModelChanged();
     widget.model.addListener(onModelChanged);
     super.initState();
@@ -40,7 +42,7 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
     assert(_multipleSelectMode);
     final List<int> ayahsToRemove = _selectionState.selectedAyahs();
     if (ayahsToRemove.isEmpty) return;
-    widget.model.removeAyahs(ayahsToRemove);
+    widget.model.removeAyahsFromPara(_currentPara, ayahsToRemove);
     _onExitMultiSelectMode();
   }
 
@@ -66,9 +68,10 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
 
   Future<void> _load() async {
     final List<Mutashabiha> mutashabihat =
-        await importParaMutashabihas(widget.model.currentPara - 1);
+        await importParaMutashabihas(_currentPara - 1);
 
-    ayahAndMutashabihas = widget.model.ayahsAndMutashabihasList(mutashabihat);
+    ayahAndMutashabihas =
+        widget.model.ayahsAndMutashabihasList(_currentPara, mutashabihat);
     for (final a in ayahAndMutashabihas) {
       a.ensureTextIsLoaded();
     }
@@ -77,7 +80,7 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
 
   AppBar buildAppbar() {
     return AppBar(
-      title: Text("Marked ayahs for Para ${widget.model.currentPara}",
+      title: Text("Marked ayahs for Para $_currentPara",
           style: TextStyle(fontSize: 18)),
       actions: _multipleSelectMode
           ? [
@@ -101,14 +104,16 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
                 tooltip: "Next Para",
                 icon: const Icon(Icons.arrow_back),
                 onPressed: () {
-                  widget.model.setCurrentPara(widget.model.currentPara + 1);
+                  _currentPara = _currentPara >= 30 ? 1 : _currentPara + 1;
+                  onModelChanged();
                 },
               ),
               IconButton(
                 tooltip: "Previous Para",
                 icon: const Icon(Icons.arrow_forward),
                 onPressed: () {
-                  widget.model.setCurrentPara(widget.model.currentPara - 1);
+                  _currentPara = _currentPara <= 1 ? 30 : _currentPara - 1;
+                  onModelChanged();
                 },
               ),
             ],

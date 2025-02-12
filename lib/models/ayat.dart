@@ -50,9 +50,14 @@ class ParaAyatModel extends ChangeNotifier {
   List<Ayat> get ayahs => _paraAyats[currentPara] ?? [];
 
   List<AyatOrMutashabiha> ayahsAndMutashabihasList(
-      List<Mutashabiha> allParaMutashabihas) {
+      int paraNumber, List<Mutashabiha> allParaMutashabihas) {
+    if (paraNumber < 1 || paraNumber > 30) {
+      return [];
+    }
+
     List<AyatOrMutashabiha> list = [];
-    for (final Ayat a in ayahs) {
+    final markedAyahs = _paraAyats[paraNumber] ?? [];
+    for (final Ayat a in markedAyahs) {
       bool wasMutashabiha = false;
       for (final Mutashabiha m in allParaMutashabihas) {
         // can load multiple for same ayah
@@ -142,14 +147,18 @@ class ParaAyatModel extends ChangeNotifier {
     return _paraAyats[paraIdx + 1]?.length ?? 0;
   }
 
-  void removeAyahs(List<int> ayahsToRemove) {
-    final List<Ayat>? list = _paraAyats[currentPara];
+  void removeAyahsFromPara(int paraNumber, List<int> ayahsToRemove) {
+    if (paraNumber < 1 || paraNumber > 30) return;
+    final List<Ayat>? list = _paraAyats[paraNumber];
     if (list == null) return;
     list.removeWhere((final Ayat ayah) => ayahsToRemove.contains(ayah.ayahIdx));
-    _paraAyats[currentPara] = list;
+    _paraAyats[paraNumber] = list;
     notifyListeners();
     persist();
   }
+
+  void removeAyahs(List<int> ayahsToRemove) =>
+      removeAyahsFromPara(currentPara, ayahsToRemove);
 
   /// Remove ayats from given para index
   void removeMarkedWordInAyat(
