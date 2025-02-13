@@ -11,7 +11,7 @@ class QuranText {
   void loadData() async {
     _ayahs = List.filled(6236, "", growable: false);
 
-    final sw = Stopwatch()..start();
+    // final sw = Stopwatch()..start();
 
     for (int i = 1; i <= 30; ++i) {
       final data =
@@ -40,7 +40,6 @@ class QuranText {
     }
 
     _isReady = true;
-    print("Time taken: ${sw.elapsedMilliseconds}");
   }
 
   bool get isReady => _isReady;
