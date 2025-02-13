@@ -78,33 +78,44 @@ class _MainPageState extends State<MainPage>
     // multiply by 500 to make the offset bigger so it can be saved, otherwise it gets ignored
     // as the difference between last save value and this one might be too small
     Settings.instance.saveScrollPositionDelayed(
-        _paraModel.currentPara, _pageController.page?.floor() ?? 0);
+      _paraModel.currentPara,
+      _pageController.page?.floor() ?? 0,
+    );
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.paused) {
       await Settings.instance.saveScrollPosition(
-          _paraModel.currentPara, _pageController.page?.floor() ?? 0);
+        _paraModel.currentPara,
+        _pageController.page?.floor() ?? 0,
+      );
     }
   }
 
   void _openQuizParaSelectionPage() async {
-    final quizCreationArgs = await Navigator.of(context)
-        .pushNamed(quizSelectionPage) as QuizCreationArgs?;
+    final quizCreationArgs =
+        await Navigator.of(context).pushNamed(quizSelectionPage)
+            as QuizCreationArgs?;
     if (!mounted) return;
     if (quizCreationArgs == null) return;
     if (quizCreationArgs.selectedParas.isEmpty) return;
-    final ayahsToAdd = await Navigator.of(context).pushNamed(quizPage,
-        arguments: quizCreationArgs) as Map<int, List<Ayat>>?;
+    final ayahsToAdd =
+        await Navigator.of(
+              context,
+            ).pushNamed(quizPage, arguments: quizCreationArgs)
+            as Map<int, List<Ayat>>?;
     if (!mounted) return;
     if (ayahsToAdd == null || ayahsToAdd.isEmpty) return;
     _paraModel.merge(ayahsToAdd);
   }
 
   void _openSettings() async {
-    await Navigator.pushNamed(context, settingsPageRoute,
-        arguments: _paraModel);
+    await Navigator.pushNamed(
+      context,
+      settingsPageRoute,
+      arguments: _paraModel,
+    );
   }
 
   void _openMutashabihas() {
@@ -131,10 +142,7 @@ class _MainPageState extends State<MainPage>
       icon: const Icon(Icons.more_vert),
       itemBuilder: (BuildContext context) {
         return actions.keys.map((String choice) {
-          return PopupMenuItem<String>(
-            value: choice,
-            child: Text(choice),
-          );
+          return PopupMenuItem<String>(value: choice, child: Text(choice));
         }).toList();
       },
     );
@@ -165,7 +173,9 @@ class _MainPageState extends State<MainPage>
       _paraModel.setCurrentPara(_paraModel.currentPara + 1);
     } else {
       _pageController.nextPage(
-          duration: const Duration(milliseconds: 200), curve: Curves.easeInOut);
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+      );
     }
   }
 
@@ -176,54 +186,55 @@ class _MainPageState extends State<MainPage>
       _paraModel.setCurrentPara(_paraModel.currentPara - 1, showLastPage: true);
     } else {
       _pageController.previousPage(
-          duration: const Duration(milliseconds: 200), curve: Curves.easeInOut);
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+      );
     }
   }
 
   Widget _buildDrawer() {
-    return Builder(builder: (context) {
-      final int currentParaIdx = _paraModel.currentPara - 1;
-      final int currentPageInPara = (_pageController.page?.floor() ?? 0);
-      return Drawer(
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              SizedBox(
-                height: 50,
-                child: TabBar(
-                  controller: _drawerTabController,
-                  tabs: const [
-                    Tab(text: "Para"),
-                    Tab(text: "Surah"),
-                  ],
+    return Builder(
+      builder: (context) {
+        final int currentParaIdx = _paraModel.currentPara - 1;
+        final int currentPageInPara = (_pageController.page?.floor() ?? 0);
+        return Drawer(
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                SizedBox(
+                  height: 50,
+                  child: TabBar(
+                    controller: _drawerTabController,
+                    tabs: const [Tab(text: "Para"), Tab(text: "Surah")],
+                  ),
                 ),
-              ),
-              Expanded(
-                child: TabBarView(
-                  controller: _drawerTabController,
-                  children: [
-                    ParaListView(
-                      model: _paraModel,
-                      currentParaIdx: currentParaIdx,
-                      onParaTapped: (int idx) {
-                        _paraModel.setCurrentPara(idx + 1);
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                    SurahListView(
-                      currentParaIdx: currentParaIdx,
-                      currentPageInPara: currentPageInPara,
-                      onSurahTapped: _onSurahTapped,
-                    ),
-                  ],
+                Expanded(
+                  child: TabBarView(
+                    controller: _drawerTabController,
+                    children: [
+                      ParaListView(
+                        model: _paraModel,
+                        currentParaIdx: currentParaIdx,
+                        onParaTapped: (int idx) {
+                          _paraModel.setCurrentPara(idx + 1);
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      SurahListView(
+                        currentParaIdx: currentParaIdx,
+                        currentPageInPara: currentPageInPara,
+                        onSurahTapped: _onSurahTapped,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      );
-    });
+        );
+      },
+    );
   }
 
   Map<ShortcutActivator, VoidCallback> _shortcutBindings() {
@@ -232,26 +243,28 @@ class _MainPageState extends State<MainPage>
       const SingleActivator(LogicalKeyboardKey.arrowRight): _previousPage,
       const SingleActivator(LogicalKeyboardKey.pageDown): _nextPage,
       const SingleActivator(LogicalKeyboardKey.pageUp): _previousPage,
-      const SingleActivator(LogicalKeyboardKey.home): () =>
-          _pageController.jumpToPage(0),
+      const SingleActivator(LogicalKeyboardKey.home):
+          () => _pageController.jumpToPage(0),
       const SingleActivator(LogicalKeyboardKey.end): () {
         int totalPages = pageCountForPara(_paraModel.currentPara - 1);
         _pageController.jumpToPage(totalPages - 1);
       },
-      const SingleActivator(LogicalKeyboardKey.arrowLeft, control: true): () =>
-          _paraModel.setCurrentPara(_paraModel.currentPara + 1),
-      const SingleActivator(LogicalKeyboardKey.arrowRight, control: true): () =>
-          _paraModel.setCurrentPara(_paraModel.currentPara - 1),
+      const SingleActivator(LogicalKeyboardKey.arrowLeft, control: true):
+          () => _paraModel.setCurrentPara(_paraModel.currentPara + 1),
+      const SingleActivator(LogicalKeyboardKey.arrowRight, control: true):
+          () => _paraModel.setCurrentPara(_paraModel.currentPara - 1),
       const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): () {
         int? currentPageInPara = _pageController.page?.floor();
-        int currentPage = (currentPageInPara ?? 0) +
+        int currentPage =
+            (currentPageInPara ?? 0) +
             para16LinePageOffsets[_paraModel.currentPara - 1];
         int currentSurah = surahForPage(currentPage);
         _onSurahTapped(currentSurah == 113 ? 0 : currentSurah + 1, pop: false);
       },
       const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): () {
         int? currentPageInPara = _pageController.page?.floor();
-        int currentPage = (currentPageInPara ?? 0) +
+        int currentPage =
+            (currentPageInPara ?? 0) +
             para16LinePageOffsets[_paraModel.currentPara - 1];
         int currentSurah = surahForPage(currentPage);
         _onSurahTapped(currentSurah == 0 ? 113 : currentSurah - 1, pop: false);
@@ -288,14 +301,17 @@ class _MainPageState extends State<MainPage>
                     ? ThemeMode.dark
                     : ThemeMode.light;
           },
-          icon: Icon(Settings.instance.themeMode == ThemeMode.light
-              ? Icons.mode_night
-              : Icons.sunny),
-          tooltip: Settings.instance.themeMode == ThemeMode.light
-              ? "Switch to night mode"
-              : "Switch to light mode",
+          icon: Icon(
+            Settings.instance.themeMode == ThemeMode.light
+                ? Icons.mode_night
+                : Icons.sunny,
+          ),
+          tooltip:
+              Settings.instance.themeMode == ThemeMode.light
+                  ? "Switch to night mode"
+                  : "Switch to light mode",
         ),
-        buildThreeDotMenu()
+        buildThreeDotMenu(),
       ],
     );
   }
@@ -321,8 +337,8 @@ class _MainPageState extends State<MainPage>
               autofocus: true,
               child: CustomScrollView(
                 controller: _scrollController,
-                scrollBehavior: const ScrollBehavior()
-                  ..copyWith(overscroll: false),
+                scrollBehavior:
+                    const ScrollBehavior()..copyWith(overscroll: false),
                 slivers: [
                   _buildAppBar(),
                   // The actual quran reading widget
@@ -334,7 +350,7 @@ class _MainPageState extends State<MainPage>
                         pageController: _pageController,
                       );
                     },
-                  )
+                  ),
                 ],
               ),
             ),

@@ -67,7 +67,7 @@ class Settings extends ChangeNotifier {
       'currentReadingScrollOffset': _currentReadingPage,
       'themeMode': _themeMode.index,
       'translationFile': _translationFile,
-      'tapToShowTranslation': _tapToShowTranslation
+      'tapToShowTranslation': _tapToShowTranslation,
     };
     String json = const JsonEncoder.withIndent("  ").convert(map);
     await utils.saveJsonToDisk(json, "settings");

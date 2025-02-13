@@ -152,7 +152,7 @@ SurahData surahDataForIdx(int idx, {bool arabic = false}) {
     111 => SurahData(arabic ? "ٱلْإِخْلَاصُ" : "Al-Ikhlas", 4),
     112 => SurahData(arabic ? "ٱلْفَلَقُ" : "Al-Falaq", 5),
     113 => SurahData(arabic ? "ٱلنَّاسُ" : "An-Nas", 6),
-    _ => throw "Invalid surah idx: $idx"
+    _ => throw "Invalid surah idx: $idx",
   };
 }
 
@@ -192,7 +192,7 @@ List<int> _surahsStartsInPara(int paraIdx) {
     27 => const [57, 58, 59, 60, 61, 62, 63, 64, 65],
     28 => const [66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76],
     29 => const [/* 77 - 113 */],
-    _ => throw "Invalid para idx: $paraIdx"
+    _ => throw "Invalid para idx: $paraIdx",
   };
 }
 
@@ -209,9 +209,10 @@ int firstSurahInPara(int paraIdx) {
 }
 
 List<int> surahAyahOffsetsForPara(int paraIdx) {
-  final List<int> surahs = paraIdx < 29
-      ? _surahsStartsInPara(paraIdx)
-      : [for (int s = 77; s < 114; ++s) s];
+  final List<int> surahs =
+      paraIdx < 29
+          ? _surahsStartsInPara(paraIdx)
+          : [for (int s = 77; s < 114; ++s) s];
   return [for (final s in surahs) _surahAyahOffsets[s]];
 }
 
@@ -349,5 +350,5 @@ final Uint32List _surahAyahOffsets = Uint32List.fromList(<int>[
   6216,
   6221,
   6225,
-  6230
+  6230,
 ]);

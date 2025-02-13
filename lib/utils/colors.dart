@@ -19,9 +19,12 @@ List<TextSpan> textSpansForAyah(Ayat ayah) {
         currentString = "";
       }
       // now add the span for mistake
-      ret.add(TextSpan(
+      ret.add(
+        TextSpan(
           text: "${words[i]} ",
-          style: TextStyle(inherit: true, color: markedWordFgColor)));
+          style: TextStyle(inherit: true, color: markedWordFgColor),
+        ),
+      );
     } else {
       currentString += "${words[i]} ";
     }

@@ -11,11 +11,12 @@ class ParaListView extends StatelessWidget {
   final int currentParaIdx;
   final void Function(int) onParaTapped;
   final ParaAyatModel model;
-  const ParaListView(
-      {required this.model,
-      required this.currentParaIdx,
-      required this.onParaTapped,
-      super.key});
+  const ParaListView({
+    required this.model,
+    required this.currentParaIdx,
+    required this.onParaTapped,
+    super.key,
+  });
 
   double _getInitialScrollPosition(BuildContext context) {
     if (lastScrollPosition != null && lastPara == currentParaIdx) {
@@ -25,7 +26,8 @@ class ParaListView extends StatelessWidget {
     int maxVisibleItems =
         ((MediaQuery.of(context).size.height - (48 + 4)) / 48).floor();
     const totalParas = 30;
-    final maxScrollablePara = totalParas -
+    final maxScrollablePara =
+        totalParas -
         maxVisibleItems; // if we scroll to the bottom, this para is visible at top
 
     int paraScrollTo = 0;
@@ -41,59 +43,64 @@ class ParaListView extends StatelessWidget {
     int count = model.markedAyahCountForPara(index);
 
     return Directionality(
-        textDirection: TextDirection.rtl,
-        child: ListTile(
-          minVerticalPadding: 0,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 15),
-          visualDensity: VisualDensity.compact,
-          title: Text(
-            getParaNameForIndex(index),
-            style: const TextStyle(
-              letterSpacing: 0,
-              fontSize: 26,
-              fontFamily: 'Al Mushaf',
+      textDirection: TextDirection.rtl,
+      child: ListTile(
+        minVerticalPadding: 0,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 15),
+        visualDensity: VisualDensity.compact,
+        title: Text(
+          getParaNameForIndex(index),
+          style: const TextStyle(
+            letterSpacing: 0,
+            fontSize: 26,
+            fontFamily: 'Al Mushaf',
+          ),
+        ),
+        leading: Text(
+          "${toUrduNumber(index + 1)}$urduKhatma",
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Theme.of(context).textTheme.bodyMedium?.color,
+            fontFamily: "Urdu",
+            fontSize: 22,
+            letterSpacing: 0.0,
+          ),
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Text(
+              count > 0 ? "$count" : " ",
+              style: const TextStyle(fontSize: 16, color: Colors.red),
             ),
-          ),
-          leading: Text(
-            "${toUrduNumber(index + 1)}$urduKhatma",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-                color: Theme.of(context).textTheme.bodyMedium?.color,
-                fontFamily: "Urdu",
-                fontSize: 22,
-                letterSpacing: 0.0),
-          ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Text(
-                count > 0 ? "$count" : " ",
-                style: const TextStyle(fontSize: 16, color: Colors.red),
+            const SizedBox(width: 5),
+            SizedBox(
+              width: 30,
+              child: Text(
+                "${para16LinePageOffsets[index] + 1}",
+                textAlign: TextAlign.left,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Theme.of(context).textTheme.bodyMedium?.color,
+                ),
               ),
-              const SizedBox(width: 5),
-              SizedBox(
-                  width: 30,
-                  child: Text(
-                    "${para16LinePageOffsets[index] + 1}",
-                    textAlign: TextAlign.left,
-                    style: TextStyle(
-                        fontSize: 16,
-                        color: Theme.of(context).textTheme.bodyMedium?.color),
-                  )),
-            ],
-          ),
-          onTap: () => onParaTapped(index),
-          selected: currentParaIdx == index,
-          selectedTileColor: Theme.of(context).highlightColor,
-        ));
+            ),
+          ],
+        ),
+        onTap: () => onParaTapped(index),
+        selected: currentParaIdx == index,
+        selectedTileColor: Theme.of(context).highlightColor,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final paraListScrollController = ScrollController(
-        initialScrollOffset: _getInitialScrollPosition(context),
-        keepScrollOffset: false);
+      initialScrollOffset: _getInitialScrollPosition(context),
+      keepScrollOffset: false,
+    );
     paraListScrollController.addListener(() {
       lastScrollPosition = paraListScrollController.offset;
     });

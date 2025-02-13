@@ -50,7 +50,9 @@ class ParaAyatModel extends ChangeNotifier {
   List<Ayat> get ayahs => _paraAyats[currentPara] ?? [];
 
   List<AyatOrMutashabiha> ayahsAndMutashabihasList(
-      int paraNumber, List<Mutashabiha> allParaMutashabihas) {
+    int paraNumber,
+    List<Mutashabiha> allParaMutashabihas,
+  ) {
     if (paraNumber < 1 || paraNumber > 30) {
       return [];
     }
@@ -124,8 +126,11 @@ class ParaAyatModel extends ChangeNotifier {
     persist();
   }
 
-  void setCurrentPara(int para,
-      {bool showLastPage = false, int jumpToPage = -1}) {
+  void setCurrentPara(
+    int para, {
+    bool showLastPage = false,
+    int jumpToPage = -1,
+  }) {
     if (para == currentPara) return;
     // wrap around
     if (para <= 0) {
@@ -162,7 +167,10 @@ class ParaAyatModel extends ChangeNotifier {
 
   /// Remove ayats from given para index
   void removeMarkedWordInAyat(
-      int paraIndex, int absoluteAyahIndex, int wordIndex) {
+    int paraIndex,
+    int absoluteAyahIndex,
+    int wordIndex,
+  ) {
     final List<Ayat>? ayahs = _paraAyats[paraIndex + 1];
     if (ayahs == null) return;
 
@@ -237,9 +245,10 @@ class ParaAyatModel extends ChangeNotifier {
 
   Future<(bool, Object?)> readJsonDB({String? path}) async {
     try {
-      final Map<String, dynamic> json = path == null
-          ? await utils.readJsonFile("ayatsdb")
-          : await utils.readJsonFromFilePath(path);
+      final Map<String, dynamic> json =
+          path == null
+              ? await utils.readJsonFile("ayatsdb")
+              : await utils.readJsonFromFilePath(path);
       await _resetfromJson(json);
       return (true, null);
     } catch (e) {
@@ -248,8 +257,10 @@ class ParaAyatModel extends ChangeNotifier {
   }
 
   Future<String> saveToDisk({String? fileName}) async {
-    String path =
-        await utils.saveJsonToDisk(jsonStringify(), fileName ?? "ayatsdb");
+    String path = await utils.saveJsonToDisk(
+      jsonStringify(),
+      fileName ?? "ayatsdb",
+    );
     return path;
   }
 

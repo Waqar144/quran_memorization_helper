@@ -12,7 +12,11 @@ class _QuizAyahQuestion {
   final QuizMode mode;
   final int _paraIndex;
   const _QuizAyahQuestion(
-      this.questionAyah, this.nextAyah, this.mode, this._paraIndex);
+    this.questionAyah,
+    this.nextAyah,
+    this.mode,
+    this._paraIndex,
+  );
 
   int get paraNumber => _paraIndex + 1;
 }
@@ -48,9 +52,10 @@ class _QuizPageState extends State<QuizPage> {
   @override
   void initState() {
     super.initState();
-    _total = widget._creationArgs.selectedParas.length > 20
-        ? widget._creationArgs.selectedParas.length
-        : 20;
+    _total =
+        widget._creationArgs.selectedParas.length > 20
+            ? widget._creationArgs.selectedParas.length
+            : 20;
     _startReadingAyahsForQuiz();
   }
 
@@ -64,13 +69,18 @@ class _QuizPageState extends State<QuizPage> {
   }
 
   _QuizAyahQuestion _addQuestion(
-      String ayah, String nextAyah, int paraIndex, int ayahIdx) {
+    String ayah,
+    String nextAyah,
+    int paraIndex,
+    int ayahIdx,
+  ) {
     _QuizAyahQuestion nextAyahQuestion() {
       return _QuizAyahQuestion(
-          Ayat(ayah, [], ayahIdx: ayahIdx),
-          Ayat(nextAyah, [], ayahIdx: ayahIdx + 1),
-          QuizMode.nextAyah,
-          paraIndex);
+        Ayat(ayah, [], ayahIdx: ayahIdx),
+        Ayat(nextAyah, [], ayahIdx: ayahIdx + 1),
+        QuizMode.nextAyah,
+        paraIndex,
+      );
     }
 
     _QuizAyahQuestion endAyahQuestion() {
@@ -78,8 +88,12 @@ class _QuizPageState extends State<QuizPage> {
       int replaceStart = min((words.length / 2).ceil(), 6);
       final question =
           "${words.sublist(0, words.length - replaceStart).join(' ')}...";
-      return _QuizAyahQuestion(Ayat(question, [], ayahIdx: ayahIdx),
-          Ayat(ayah, [], ayahIdx: ayahIdx), QuizMode.endAyah, paraIndex);
+      return _QuizAyahQuestion(
+        Ayat(question, [], ayahIdx: ayahIdx),
+        Ayat(ayah, [], ayahIdx: ayahIdx),
+        QuizMode.endAyah,
+        paraIndex,
+      );
     }
 
     if (widget._creationArgs.mode == QuizMode.nextAyah) {
@@ -188,18 +202,22 @@ class _QuizPageState extends State<QuizPage> {
               children: [
                 ElevatedButton(
                   style: ButtonStyle(
-                      backgroundColor: WidgetStatePropertyAll(
-                          Theme.of(context).colorScheme.errorContainer)),
+                    backgroundColor: WidgetStatePropertyAll(
+                      Theme.of(context).colorScheme.errorContainer,
+                    ),
+                  ),
                   child: Text(
                     "No",
                     style: TextStyle(
-                        color: Theme.of(context).colorScheme.onErrorContainer),
+                      color: Theme.of(context).colorScheme.onErrorContainer,
+                    ),
                   ),
                   onPressed: () => _gotoNextQuestion(0),
                 ),
                 ElevatedButton(
                   style: const ButtonStyle(
-                      backgroundColor: WidgetStatePropertyAll(Colors.green)),
+                    backgroundColor: WidgetStatePropertyAll(Colors.green),
+                  ),
                   child: const Text(
                     "Yes",
                     style: TextStyle(color: Colors.white),
@@ -229,12 +247,12 @@ class _QuizPageState extends State<QuizPage> {
       _ayahsToAddToDB[a.paraNumber] = [
         ...(_ayahsToAddToDB[a.paraNumber] ?? <Ayat>[]),
         a.questionAyah,
-        a.nextAyah
+        a.nextAyah,
       ];
     } else {
       _ayahsToAddToDB[a.paraNumber] = [
         ...(_ayahsToAddToDB[a.paraNumber] ?? <Ayat>[]),
-        a.nextAyah
+        a.nextAyah,
       ];
     }
   }
@@ -256,9 +274,11 @@ class _QuizPageState extends State<QuizPage> {
         const Divider(),
         const Padding(
           padding: EdgeInsets.only(left: 8, right: 8),
-          child: Text("Below is the list of Ayahs that you got wrong. "
-              "You can slide an ayah to add it to the respective para "
-              "for revising later or you can click the button below to add all the ayahs at once"),
+          child: Text(
+            "Below is the list of Ayahs that you got wrong. "
+            "You can slide an ayah to add it to the respective para "
+            "for revising later or you can click the button below to add all the ayahs at once",
+          ),
         ),
         const SizedBox(height: 8),
         ElevatedButton(
@@ -289,7 +309,7 @@ class _QuizPageState extends State<QuizPage> {
                   AyatListItem(
                     ayah: _wrongAnswers[index].nextAyah,
                     showSurahAyahIndex: false,
-                  )
+                  ),
                 ],
               ),
             );
@@ -302,7 +322,7 @@ class _QuizPageState extends State<QuizPage> {
       appBar: AppBar(
         title: const Text("Results"),
         actions: [
-          IconButton(icon: const Icon(Icons.check), onPressed: () => _onDone())
+          IconButton(icon: const Icon(Icons.check), onPressed: () => _onDone()),
         ],
       ),
       body: SingleChildScrollView(
@@ -345,14 +365,16 @@ class _QuizPageState extends State<QuizPage> {
               children: [
                 Column(
                   children: [
-                    Text(_questionTextForQuizMode(_quizAyahs[current].mode),
-                        style: Theme.of(context).textTheme.headlineSmall),
+                    Text(
+                      _questionTextForQuizMode(_quizAyahs[current].mode),
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
                     AyatListItem(
                       ayah: _quizAyahs[current].questionAyah,
                       showSurahAyahIndex: false,
                     ),
                     const Divider(height: 8),
-                    _buildAnswerWidget(current)
+                    _buildAnswerWidget(current),
                   ],
                 ),
               ],

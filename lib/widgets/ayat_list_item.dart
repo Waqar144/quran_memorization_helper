@@ -41,11 +41,14 @@ class _AyatListItemState extends State<AyatListItem> {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: widget.selectionMode
-          ? Icon(widget.isSelected
-              ? Icons.check_box
-              : Icons.check_box_outline_blank)
-          : null,
+      leading:
+          widget.selectionMode
+              ? Icon(
+                widget.isSelected
+                    ? Icons.check_box
+                    : Icons.check_box_outline_blank,
+              )
+              : null,
       title: RichText(
         text: TextSpan(
           children: textSpansForAyah(widget.ayah),
@@ -61,9 +64,10 @@ class _AyatListItemState extends State<AyatListItem> {
         textAlign: TextAlign.right,
         textDirection: TextDirection.rtl,
       ),
-      subtitle: widget.showSurahAyahIndex
-          ? Text(widget.ayah.surahAyahText())
-          : const SizedBox.shrink(),
+      subtitle:
+          widget.showSurahAyahIndex
+              ? Text(widget.ayah.surahAyahText())
+              : const SizedBox.shrink(),
       onLongPress: _getLongPressCallback(),
       onTap: widget.selectionMode ? widget.onTap : null,
     );

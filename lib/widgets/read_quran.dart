@@ -90,11 +90,12 @@ class Translation {
 
   bool get isUrdu => isBundledTranslation || fileName.startsWith("ur.");
 
-  Translation(
-      {required this.fileName,
-      required this.transUtf8,
-      required this.transLineOffsets,
-      required this.isBundledTranslation});
+  Translation({
+    required this.fileName,
+    required this.transUtf8,
+    required this.transLineOffsets,
+    required this.isBundledTranslation,
+  });
 }
 
 class TranslationTile extends StatefulWidget {
@@ -102,8 +103,13 @@ class TranslationTile extends StatefulWidget {
   final bool isUrduTranslation;
   final String metadata;
   final bool expanded;
-  const TranslationTile(this.translation, this.isUrduTranslation,
-      {required this.metadata, required this.expanded, super.key});
+  const TranslationTile(
+    this.translation,
+    this.isUrduTranslation, {
+    required this.metadata,
+    required this.expanded,
+    super.key,
+  });
 
   @override
   State<StatefulWidget> createState() => _TranslationTileState();
@@ -130,34 +136,38 @@ class _TranslationTileState extends State<TranslationTile> {
       valueListenable: expanded,
       builder: (context, value, _) {
         return ListTile(
-          leading: widget.expanded
-              ? null
-              : Icon(!value ? Icons.chevron_right : Icons.expand_more),
-          title: !value
-              ? const Text("Show Translation")
-              : Column(
-                  children: [
-                    Text(
-                      widget.metadata,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        decoration: TextDecoration.underline,
+          leading:
+              widget.expanded
+                  ? null
+                  : Icon(!value ? Icons.chevron_right : Icons.expand_more),
+          title:
+              !value
+                  ? const Text("Show Translation")
+                  : Column(
+                    children: [
+                      Text(
+                        widget.metadata,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          decoration: TextDecoration.underline,
+                        ),
                       ),
-                    ),
-                    Text(
-                      widget.translation.trim(),
-                      textDirection:
-                          widget.isUrduTranslation ? TextDirection.rtl : null,
-                      style: widget.isUrduTranslation
-                          ? const TextStyle(
-                              fontFamily: "Urdu",
-                              fontSize: 22,
-                              letterSpacing: 0.0,
-                              height: 1.8)
-                          : null,
-                    ),
-                  ],
-                ),
+                      Text(
+                        widget.translation.trim(),
+                        textDirection:
+                            widget.isUrduTranslation ? TextDirection.rtl : null,
+                        style:
+                            widget.isUrduTranslation
+                                ? const TextStyle(
+                                  fontFamily: "Urdu",
+                                  fontSize: 22,
+                                  letterSpacing: 0.0,
+                                  height: 1.8,
+                                )
+                                : null,
+                      ),
+                    ],
+                  ),
           onTap: () {
             if (widget.expanded) return;
             expanded.value = !expanded.value;
@@ -225,24 +235,32 @@ class _LongPressActionSheetState extends State<LongPressActionSheet> {
         final int ayah = _paraFirstAyah + index;
         final int s = widget.translation.transLineOffsets[ayah];
         final int e = widget.translation.transLineOffsets[ayah + 1];
-        String translation =
-            utf8.decode(widget.translation.transUtf8.asUint8List(s, e - s));
+        String translation = utf8.decode(
+          widget.translation.transUtf8.asUint8List(s, e - s),
+        );
         String metadata = surahAyahText(ayah);
         final int surahIdx = surahForAyah(ayah);
         final int surahAyahIdx = toSurahAyahOffset(surahIdx, ayah);
 
         // if mutashabiha is null, we always expand
-        bool expanded = widget.mutashabihaList == null ||
+        bool expanded =
+            widget.mutashabihaList == null ||
             // else if user has swiped, then we expand
             (widget.mutashabihaList != null && widget.tappedAyahIdx != ayah);
         final translationWidget = TranslationTile(
-            translation, widget.translation.isUrdu,
-            metadata: metadata, expanded: expanded);
+          translation,
+          widget.translation.isUrdu,
+          metadata: metadata,
+          expanded: expanded,
+        );
 
         final openOnQuranCom = TextButton.icon(
           onPressed: () {
-            launchUrl(Uri.parse(
-                "https://quran.com/${surahIdx + 1}:${surahAyahIdx + 1}"));
+            launchUrl(
+              Uri.parse(
+                "https://quran.com/${surahIdx + 1}:${surahAyahIdx + 1}",
+              ),
+            );
           },
           icon: const Icon(Icons.open_in_new),
           label: const Text("Open on Quran.com"),
@@ -254,17 +272,12 @@ class _LongPressActionSheetState extends State<LongPressActionSheet> {
               openOnQuranCom,
               translationWidget,
               const Divider(),
-              widget.mutashabihaList!
+              widget.mutashabihaList!,
             ],
           );
         }
 
-        return ListView(
-          children: [
-            openOnQuranCom,
-            translationWidget,
-          ],
-        );
+        return ListView(children: [openOnQuranCom, translationWidget]);
       },
     );
   }
@@ -279,11 +292,8 @@ class CustomPageViewScrollPhysics extends ScrollPhysics {
   }
 
   @override
-  SpringDescription get spring => const SpringDescription(
-        mass: 100,
-        stiffness: 100,
-        damping: 1.2,
-      );
+  SpringDescription get spring =>
+      const SpringDescription(mass: 100, stiffness: 100, damping: 1.2);
 }
 
 class LineAyah {
@@ -453,7 +463,9 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
   }
 
   (bool isFull, bool atPageStart, bool atPageEnd) _isAyahFull(
-      int ayahIdx, int pageNum) {
+    int ayahIdx,
+    int pageNum,
+  ) {
     bool isFull = true;
     bool isAtPageEnd = false;
     bool isAtPageStart = false;
@@ -466,7 +478,8 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
 
     if (isAtPageEnd && (pageIndex + 1) < _pages.length) {
       // next page first ayah != this ayah => we have a full ayah
-      isFull = _pages[pageIndex + 1].lines.first.lineAyahs.first.ayahIndex !=
+      isFull =
+          _pages[pageIndex + 1].lines.first.lineAyahs.first.ayahIndex !=
           ayahIdx;
     }
     if (isAtPageStart && pageIndex > 0) {
@@ -478,7 +491,11 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
   }
 
   void _onAyahLongPressed(
-      int surahIdx, int ayahIdx, int wordIdx, int pageNum) async {
+    int surahIdx,
+    int ayahIdx,
+    int wordIdx,
+    int pageNum,
+  ) async {
     List<Mutashabiha> mutashabihat = _getMutashabihaAyat(ayahIdx, surahIdx);
 
     if (_translation == null) {
@@ -504,10 +521,11 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
       }
 
       _translation = Translation(
-          fileName: Settings.instance.translationFile,
-          transUtf8: transUtf8,
-          transLineOffsets: transLineOffsets,
-          isBundledTranslation: isBundledTranslation);
+        fileName: Settings.instance.translationFile,
+        transUtf8: transUtf8,
+        transLineOffsets: transLineOffsets,
+        isBundledTranslation: isBundledTranslation,
+      );
     }
 
     for (int i = 0; i < mutashabihat.length; ++i) {
@@ -550,8 +568,13 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
     );
   }
 
-  void _onAyahTapped(int surahIdx, int ayahIdx, int wordIdx, int pageNum,
-      bool longPress) async {
+  void _onAyahTapped(
+    int surahIdx,
+    int ayahIdx,
+    int wordIdx,
+    int pageNum,
+    bool longPress,
+  ) async {
     bool tapToShowBottomSheet = Settings.instance.tapToShowTranslation;
     if ((longPress && !tapToShowBottomSheet) ||
         (!longPress && tapToShowBottomSheet)) {
@@ -567,8 +590,11 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
     final int absAyahIdx = toAbsoluteAyahOffset(surahIdx, ayahIdx);
     if (ayatInDb != null && ayatInDb.markedWords.contains(wordIdx)) {
       // remove
-      widget.model
-          .removeMarkedWordInAyat(currentParaIndex, absAyahIdx, wordIdx);
+      widget.model.removeMarkedWordInAyat(
+        currentParaIndex,
+        absAyahIdx,
+        wordIdx,
+      );
     } else {
       // add
       Ayat ayat = Ayat("", [wordIdx], ayahIdx: absAyahIdx);
@@ -616,8 +642,8 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
                 controller: widget.pageController,
                 reverse: true,
                 itemCount: _pages.length,
-                scrollBehavior: const ScrollBehavior()
-                  ..copyWith(overscroll: false),
+                scrollBehavior:
+                    const ScrollBehavior()..copyWith(overscroll: false),
                 physics: const CustomPageViewScrollPhysics(),
                 itemBuilder: (ctx, index) {
                   return PageWidget(
@@ -648,21 +674,29 @@ class PageWidget extends StatefulWidget {
   final bool Function(int ayahIdx, int surahIdx) isMutashabihaAyat;
   final Ayat? Function(int ayahIdx, int surahIdx) getAyatInDB;
   final void Function(
-          int surahIdx, int ayahIdx, int wordIdx, int pageIdx, bool longPress)
-      onAyahTapped;
+    int surahIdx,
+    int ayahIdx,
+    int wordIdx,
+    int pageIdx,
+    bool longPress,
+  )
+  onAyahTapped;
   final (bool, bool, bool) Function(int ayahIdx, int pageIdx) isAyahFull;
   final String Function(int ayahIdx, int pageNum) getFullAyahText;
   final Stream<int> repaintStream;
 
-  const PageWidget(this.pageIndex, this._pageLines,
-      {required this.paraNum,
-      required this.isMutashabihaAyat,
-      required this.getAyatInDB,
-      required this.onAyahTapped,
-      required this.repaintStream,
-      required this.isAyahFull,
-      required this.getFullAyahText,
-      super.key});
+  const PageWidget(
+    this.pageIndex,
+    this._pageLines, {
+    required this.paraNum,
+    required this.isMutashabihaAyat,
+    required this.getAyatInDB,
+    required this.onAyahTapped,
+    required this.repaintStream,
+    required this.isAyahFull,
+    required this.getFullAyahText,
+    super.key,
+  });
 
   @override
   State<StatefulWidget> createState() => _PageWidgetState();
@@ -688,9 +722,18 @@ class _PageWidgetState extends State<PageWidget> {
   }
 
   void _tapHandler(
-      int surahIdx, int ayahIdx, int wordIdx, bool longPress) async {
+    int surahIdx,
+    int ayahIdx,
+    int wordIdx,
+    bool longPress,
+  ) async {
     widget.onAyahTapped(
-        surahIdx, ayahIdx, wordIdx, widget.pageIndex, longPress);
+      surahIdx,
+      ayahIdx,
+      wordIdx,
+      widget.pageIndex,
+      longPress,
+    );
   }
 
   Widget getTwoLinesBismillah(int surahIdx, TextStyle style) {
@@ -703,9 +746,9 @@ class _PageWidgetState extends State<PageWidget> {
         Container(
           height: 46,
           decoration: BoxDecoration(
-              color: Colors.green.withValues(alpha: 0.4),
-              border:
-                  Border.all(color: Theme.of(context).dividerColor, width: 1)),
+            color: Colors.green.withValues(alpha: 0.4),
+            border: Border.all(color: Theme.of(context).dividerColor, width: 1),
+          ),
           child: Row(
             children: [
               Text(
@@ -738,7 +781,7 @@ class _PageWidgetState extends State<PageWidget> {
             textAlign: TextAlign.center,
             style: style,
           ),
-        )
+        ),
       ],
     );
   }
@@ -767,8 +810,9 @@ class _PageWidgetState extends State<PageWidget> {
     return Container(
       width: MediaQuery.of(context).size.width,
       decoration: BoxDecoration(
-          color: Colors.green.withValues(alpha: 0.4),
-          border: Border.all(color: Theme.of(context).dividerColor, width: 1)),
+        color: Colors.green.withValues(alpha: 0.4),
+        border: Border.all(color: Theme.of(context).dividerColor, width: 1),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         textDirection: TextDirection.rtl,
@@ -824,12 +868,14 @@ class _PageWidgetState extends State<PageWidget> {
       52 => ayahIndex == 61,
       83 => ayahIndex == 20,
       95 => ayahIndex == 18,
-      _ => false
+      _ => false,
     };
   }
 
   static (String marker, bool isSajda) getAyahEndMarkerGlyphCode(
-      int surahIndex, int ayahIndex) {
+    int surahIndex,
+    int ayahIndex,
+  ) {
     if (isSajdaAyat(surahIndex, ayahIndex)) {
       return (
         switch (surahIndex) {
@@ -847,9 +893,9 @@ class _PageWidgetState extends State<PageWidget> {
           52 => '\uf68c',
           83 => '\uf684',
           95 => '\uf683',
-          _ => throw "Invalid sajda ayah"
+          _ => throw "Invalid sajda ayah",
         },
-        true
+        true,
       );
     }
     return (String.fromCharCode(0xF500 + ayahIndex), false);
@@ -858,15 +904,19 @@ class _PageWidgetState extends State<PageWidget> {
   // Finds the correct position of the first word of the line
   // in the full ayah text
   static int getFirstWordIndex(
-      List<String> fullAyahWords, List<String> currentLineWords,
-      {int start = -1}) {
+    List<String> fullAyahWords,
+    List<String> currentLineWords, {
+    int start = -1,
+  }) {
     String first = currentLineWords.first;
     int idx = fullAyahWords.indexOf(first, start);
     int c = 0;
     const int maxMatch = 4;
-    for (int i = idx;
-        i < fullAyahWords.length && c < currentLineWords.length;
-        ++i, ++c) {
+    for (
+      int i = idx;
+      i < fullAyahWords.length && c < currentLineWords.length;
+      ++i, ++c
+    ) {
       String next = currentLineWords[c];
       if (fullAyahWords[i] != next) {
         return getFirstWordIndex(fullAyahWords, currentLineWords, start: i + 1);
@@ -882,14 +932,19 @@ class _PageWidgetState extends State<PageWidget> {
       final int surahIdx = surahForAyah(a.ayahIndex);
       final int surahAyahIdx = toSurahAyahOffset(surahIdx, a.ayahIndex);
       final Ayat? ayahInDb = widget.getAyatInDB(surahAyahIdx, surahIdx);
-      final bool isMutashabihaAyat =
-          widget.isMutashabihaAyat(surahAyahIdx, surahIdx);
+      final bool isMutashabihaAyat = widget.isMutashabihaAyat(
+        surahAyahIdx,
+        surahIdx,
+      );
 
-      final (marker, isSajdaAyat) =
-          getAyahEndMarkerGlyphCode(surahIdx, surahAyahIdx);
+      final (marker, isSajdaAyat) = getAyahEndMarkerGlyphCode(
+        surahIdx,
+        surahAyahIdx,
+      );
       String text = a.text;
-      List<String> fullAyahTextWords =
-          widget.getFullAyahText(a.ayahIndex, widget.pageIndex).split('\u200c');
+      List<String> fullAyahTextWords = widget
+          .getFullAyahText(a.ayahIndex, widget.pageIndex)
+          .split('\u200c');
       if (isSajdaAyat) {
         text = text.replaceFirst('\u06E9', '');
         text = text.replaceFirst('\ue022', ''); // ruku marker (para 9)
@@ -919,9 +974,9 @@ class _PageWidgetState extends State<PageWidget> {
       for (final w in words) {
         int wordIdx = i;
         final tapHandler = TapAndLongPressGestureRecognizer(
-            onTap: () => _tapHandler(surahIdx, surahAyahIdx, wordIdx, false),
-            onLongPress: () =>
-                _tapHandler(surahIdx, surahAyahIdx, wordIdx, true));
+          onTap: () => _tapHandler(surahIdx, surahAyahIdx, wordIdx, false),
+          onLongPress: () => _tapHandler(surahIdx, surahAyahIdx, wordIdx, true),
+        );
 
         TextStyle? style;
 
@@ -954,11 +1009,12 @@ class _PageWidgetState extends State<PageWidget> {
             text: marker,
             style: TextStyle(
               color: Theme.of(context).textTheme.bodyMedium?.color,
-              backgroundColor: hasRukuMarker
-                  ? (darkMode
-                      ? Colors.amber.shade700.withAlpha(125)
-                      : Colors.amber.shade100)
-                  : null,
+              backgroundColor:
+                  hasRukuMarker
+                      ? (darkMode
+                          ? Colors.amber.shade700.withAlpha(125)
+                          : Colors.amber.shade100)
+                      : null,
               fontFamily: "AyahNumber",
               fontSize: a.ayahIndex > 100 ? 24 : 18,
             ),
@@ -988,11 +1044,14 @@ class _PageWidgetState extends State<PageWidget> {
       children: [
         Text(
           surahDataForIdx(
-                  surahForAyah(widget._pageLines.last.lineAyahs.last.ayahIndex),
-                  arabic: true)
-              .name,
+            surahForAyah(widget._pageLines.last.lineAyahs.last.ayahIndex),
+            arabic: true,
+          ).name,
           style: const TextStyle(
-              fontSize: 16, fontFamily: "Al Mushaf", letterSpacing: 0),
+            fontSize: 16,
+            fontFamily: "Al Mushaf",
+            letterSpacing: 0,
+          ),
         ),
         const Spacer(),
         Text(
@@ -1004,7 +1063,10 @@ class _PageWidgetState extends State<PageWidget> {
         Text(
           getParaNameForIndex(widget.paraNum - 1),
           style: const TextStyle(
-              fontSize: 16, fontFamily: "Al Mushaf", letterSpacing: 0),
+            fontSize: 16,
+            fontFamily: "Al Mushaf",
+            letterSpacing: 0,
+          ),
         ),
       ],
     );
@@ -1012,23 +1074,19 @@ class _PageWidgetState extends State<PageWidget> {
 
   List<Widget> _pageLines() {
     List<Widget> widgets = [];
-    const divider = Divider(
-      color: Colors.grey,
-      height: 1,
-    );
+    const divider = Divider(color: Colors.grey, height: 1);
     for (final (idx, l) in widget._pageLines.indexed) {
       if (l.lineAyahs.first.ayahIndex < 0) {
         widgets.add(getBismillah(l.lineAyahs.first.ayahIndex));
         continue;
       }
       widgets.add(divider);
-      widgets.add(SizedBox(
-        height: 46,
-        child: FittedBox(
-          fit: BoxFit.contain,
-          child: _buildLine(l, idx),
+      widgets.add(
+        SizedBox(
+          height: 46,
+          child: FittedBox(fit: BoxFit.contain, child: _buildLine(l, idx)),
         ),
-      ));
+      );
     }
     return widgets;
   }
@@ -1037,12 +1095,7 @@ class _PageWidgetState extends State<PageWidget> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(left: 8, right: 8),
-      child: Column(
-        children: [
-          _pageTopBorder(),
-          ..._pageLines(),
-        ],
-      ),
+      child: Column(children: [_pageTopBorder(), ..._pageLines()]),
     );
   }
 }

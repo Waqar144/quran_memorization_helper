@@ -67,11 +67,14 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
   }
 
   Future<void> _load() async {
-    final List<Mutashabiha> mutashabihat =
-        await importParaMutashabihas(_currentPara - 1);
+    final List<Mutashabiha> mutashabihat = await importParaMutashabihas(
+      _currentPara - 1,
+    );
 
-    ayahAndMutashabihas =
-        widget.model.ayahsAndMutashabihasList(_currentPara, mutashabihat);
+    ayahAndMutashabihas = widget.model.ayahsAndMutashabihasList(
+      _currentPara,
+      mutashabihat,
+    );
     for (final a in ayahAndMutashabihas) {
       a.ensureTextIsLoaded();
     }
@@ -80,43 +83,46 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
 
   AppBar buildAppbar() {
     return AppBar(
-      title: Text("Marked ayahs for Para $_currentPara",
-          style: TextStyle(fontSize: 18)),
-      actions: _multipleSelectMode
-          ? [
-              IconButton(
-                icon: const Icon(Icons.delete),
-                onPressed: _onDeletePress,
-              ),
-              IconButton(
-                icon: const Icon(Icons.select_all),
-                onPressed: () {
-                  setState(() => _selectionState.selectAll());
-                },
-              ),
-              IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: _onExitMultiSelectMode,
-              ),
-            ]
-          : [
-              IconButton(
-                tooltip: "Next Para",
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () {
-                  _currentPara = _currentPara >= 30 ? 1 : _currentPara + 1;
-                  onModelChanged();
-                },
-              ),
-              IconButton(
-                tooltip: "Previous Para",
-                icon: const Icon(Icons.arrow_forward),
-                onPressed: () {
-                  _currentPara = _currentPara <= 1 ? 30 : _currentPara - 1;
-                  onModelChanged();
-                },
-              ),
-            ],
+      title: Text(
+        "Marked ayahs for Para $_currentPara",
+        style: TextStyle(fontSize: 18),
+      ),
+      actions:
+          _multipleSelectMode
+              ? [
+                IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: _onDeletePress,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.select_all),
+                  onPressed: () {
+                    setState(() => _selectionState.selectAll());
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: _onExitMultiSelectMode,
+                ),
+              ]
+              : [
+                IconButton(
+                  tooltip: "Next Para",
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () {
+                    _currentPara = _currentPara >= 30 ? 1 : _currentPara + 1;
+                    onModelChanged();
+                  },
+                ),
+                IconButton(
+                  tooltip: "Previous Para",
+                  icon: const Icon(Icons.arrow_forward),
+                  onPressed: () {
+                    _currentPara = _currentPara <= 1 ? 30 : _currentPara - 1;
+                    onModelChanged();
+                  },
+                ),
+              ],
     );
   }
 

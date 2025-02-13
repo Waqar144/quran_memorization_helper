@@ -14,8 +14,10 @@ class QuranText {
     // final sw = Stopwatch()..start();
 
     for (int i = 1; i <= 30; ++i) {
-      final data =
-          await rootBundle.loadString("assets/16line/$i.json", cache: false);
+      final data = await rootBundle.loadString(
+        "assets/16line/$i.json",
+        cache: false,
+      );
       final json = jsonDecode(data);
 
       int lastIndex = -1;

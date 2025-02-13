@@ -13,8 +13,9 @@ class QuizParaSelectionPage extends StatelessWidget {
       Navigator.of(context).pop();
       return;
     }
-    Navigator.of(context)
-        .pop(QuizCreationArgs(_selectedParas.value, _quizMode.value));
+    Navigator.of(
+      context,
+    ).pop(QuizCreationArgs(_selectedParas.value, _quizMode.value));
   }
 
   @override
@@ -26,7 +27,7 @@ class QuizParaSelectionPage extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.check),
             onPressed: () => _onDone(context),
-          )
+          ),
         ],
       ),
       body: Column(
@@ -42,7 +43,7 @@ class QuizParaSelectionPage extends StatelessWidget {
                       DropdownMenuItem(
                         value: s,
                         child: Text(_quizModes[s.index]),
-                      )
+                      ),
                   ],
                   value: mode,
                   onChanged: (QuizMode? s) {
@@ -54,21 +55,20 @@ class QuizParaSelectionPage extends StatelessWidget {
               },
             ),
           ),
-          const Divider(
-            thickness: 2,
-          ),
+          const Divider(thickness: 2),
           // Para List
           Expanded(
             child: ValueListenableBuilder(
               valueListenable: _selectedParas,
               builder: (context, List<int> selection, _) {
                 return ListView.separated(
-                  separatorBuilder: (BuildContext context, int index) =>
-                      const Divider(
-                          indent: 8,
-                          endIndent: 8,
-                          color: Colors.grey,
-                          height: 2),
+                  separatorBuilder:
+                      (BuildContext context, int index) => const Divider(
+                        indent: 8,
+                        endIndent: 8,
+                        color: Colors.grey,
+                        height: 2,
+                      ),
                   itemCount: 30,
                   itemBuilder: (context, index) {
                     return CheckboxListTile(

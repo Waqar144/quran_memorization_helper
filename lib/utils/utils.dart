@@ -66,13 +66,18 @@ Future<Map<String, dynamic>> readJsonFromFilePath(String path) async {
   }
 }
 
-void showSnackBarMessage(BuildContext context, String message,
-    {bool error = false}) {
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-    content: Text(message),
-    duration: Duration(seconds: error ? 5 : 2),
-    backgroundColor: error ? Colors.red : Colors.green,
-  ));
+void showSnackBarMessage(
+  BuildContext context,
+  String message, {
+  bool error = false,
+}) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(message),
+      duration: Duration(seconds: error ? 5 : 2),
+      backgroundColor: error ? Colors.red : Colors.green,
+    ),
+  );
 }
 
 String toUrduNumber(int num) {
@@ -86,7 +91,7 @@ String toUrduNumber(int num) {
     0x6F0 + 6,
     0x6F0 + 7,
     0x6F0 + 8,
-    0x6F0 + 9
+    0x6F0 + 9,
   ]);
   final numStr = num.toString();
   String ret = "";

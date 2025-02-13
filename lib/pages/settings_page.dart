@@ -25,29 +25,37 @@ class _ChangeTranslationDialogState extends State<_ChangeTranslationDialog> {
       title: const Text("Change Translation"),
       contentPadding: const EdgeInsets.all(16),
       children: [
-        const Text.rich(TextSpan(children: [
-          TextSpan(text: "You can download translations from "),
+        const Text.rich(
           TextSpan(
-              text: "https://tanzil.net/trans/",
-              style: TextStyle(decoration: TextDecoration.underline)),
-          TextSpan(
-              text:
-                  " and then load them using the 'Load' button below. Please select "),
-          TextSpan(
-              text: "Text",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                decoration: TextDecoration.underline,
-              )),
-          TextSpan(text: " as the "),
-          TextSpan(
-              text: "File Format",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                decoration: TextDecoration.underline,
-              )),
-          TextSpan(text: " before downloading."),
-        ])),
+            children: [
+              TextSpan(text: "You can download translations from "),
+              TextSpan(
+                text: "https://tanzil.net/trans/",
+                style: TextStyle(decoration: TextDecoration.underline),
+              ),
+              TextSpan(
+                text:
+                    " and then load them using the 'Load' button below. Please select ",
+              ),
+              TextSpan(
+                text: "Text",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+              TextSpan(text: " as the "),
+              TextSpan(
+                text: "File Format",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+              TextSpan(text: " before downloading."),
+            ],
+          ),
+        ),
         if (error.isNotEmpty)
           Text("Error: $error", style: const TextStyle(color: Colors.red)),
         Wrap(
@@ -78,9 +86,10 @@ class _ChangeTranslationDialogState extends State<_ChangeTranslationDialog> {
               label: const Text("Load..."),
               onPressed: () async {
                 FilePickerResult? result = await FilePicker.platform.pickFiles(
-                    dialogTitle: "Select translation File",
-                    type: FileType.custom,
-                    allowedExtensions: ["txt"]);
+                  dialogTitle: "Select translation File",
+                  type: FileType.custom,
+                  allowedExtensions: ["txt"],
+                );
                 if (result == null || !result.isSinglePick) return;
                 String? path = result.paths.first;
                 if (path == null) return;
@@ -97,9 +106,9 @@ class _ChangeTranslationDialogState extends State<_ChangeTranslationDialog> {
                   }
                 }
               },
-            )
+            ),
           ],
-        )
+        ),
       ],
     );
   }
@@ -139,7 +148,8 @@ class _SettingsPageState extends State<SettingsPage> {
               children: <Widget>[
                 Text(message),
                 const Text(
-                    "Please try again. If the error persists please report a bug."),
+                  "Please try again. If the error persists please report a bug.",
+                ),
               ],
             ),
           ),
@@ -163,8 +173,9 @@ class _SettingsPageState extends State<SettingsPage> {
       trailing: ElevatedButton(
         onPressed: () async {
           try {
-            final res = await platform.invokeMethod(
-                'backupDB', {'data': widget.paraModel.jsonStringify()});
+            final res = await platform.invokeMethod('backupDB', {
+              'data': widget.paraModel.jsonStringify(),
+            });
             if (res == "CANCELED") {
               return;
             }
@@ -189,9 +200,10 @@ class _SettingsPageState extends State<SettingsPage> {
           // get the file
           await FilePicker.platform.clearTemporaryFiles();
           FilePickerResult? result = await FilePicker.platform.pickFiles(
-              dialogTitle: "Select JSON File",
-              type: FileType.custom,
-              allowedExtensions: ["json"]);
+            dialogTitle: "Select JSON File",
+            type: FileType.custom,
+            allowedExtensions: ["json"],
+          );
           if (result == null) return;
           if (result.paths.isEmpty) return;
 
@@ -203,7 +215,9 @@ class _SettingsPageState extends State<SettingsPage> {
             if (mounted) {
               // success message
               showSnackBarMessage(
-                  context, "${result.names.first} imported successfully");
+                context,
+                "${result.names.first} imported successfully",
+              );
             }
             // persist
             widget.paraModel.saveToDisk();
@@ -238,7 +252,7 @@ class _SettingsPageState extends State<SettingsPage> {
               DropdownMenuItem(
                 value: themeMode,
                 child: Text(_themeModeToString(themeMode)),
-              )
+              ),
           ],
         ),
       ),
@@ -291,9 +305,11 @@ class _SettingsPageState extends State<SettingsPage> {
       subtitle: const Text(appVersion),
       onTap: () async {
         await launchUrl(
-            Uri.parse(
-                "https://github.com/Waqar144/quran_memorization_helper/releases"),
-            mode: LaunchMode.externalApplication);
+          Uri.parse(
+            "https://github.com/Waqar144/quran_memorization_helper/releases",
+          ),
+          mode: LaunchMode.externalApplication,
+        );
       },
     );
   }
@@ -302,13 +318,16 @@ class _SettingsPageState extends State<SettingsPage> {
     return ListTile(
       leading: const Icon(Icons.bug_report),
       title: const Text("Report a bug/issue"),
-      subtitle:
-          const Text("Faced an issue or have a suggestion? Tap to report"),
+      subtitle: const Text(
+        "Faced an issue or have a suggestion? Tap to report",
+      ),
       onTap: () async {
         await launchUrl(
-            Uri.parse(
-                "https://github.com/Waqar144/quran_memorization_helper/issues"),
-            mode: LaunchMode.externalApplication);
+          Uri.parse(
+            "https://github.com/Waqar144/quran_memorization_helper/issues",
+          ),
+          mode: LaunchMode.externalApplication,
+        );
       },
     );
   }
@@ -319,8 +338,10 @@ class _SettingsPageState extends State<SettingsPage> {
       title: const Text("Email support"),
       subtitle: const Text("Reach out to us via email directly"),
       onTap: () async {
-        await launchUrl(Uri.parse("support@streetwriters.co"),
-            mode: LaunchMode.externalApplication);
+        await launchUrl(
+          Uri.parse("support@streetwriters.co"),
+          mode: LaunchMode.externalApplication,
+        );
       },
     );
   }
@@ -329,8 +350,9 @@ class _SettingsPageState extends State<SettingsPage> {
     return ListTile(
       leading: const Icon(Icons.policy),
       title: const Text("View licenses"),
-      subtitle:
-          const Text("View licenses of open source libraries used in this app"),
+      subtitle: const Text(
+        "View licenses of open source libraries used in this app",
+      ),
       onTap: () async {
         showLicensePage(
           context: context,
@@ -344,9 +366,7 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Settings"),
-      ),
+      appBar: AppBar(title: const Text("Settings")),
       body: ListView(
         children: [
           _createThemeModeTile(),

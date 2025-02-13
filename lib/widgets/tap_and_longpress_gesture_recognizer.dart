@@ -4,10 +4,11 @@ import 'package:flutter/services.dart' show HapticFeedback;
 /// A TapGestureRecognizer that adds [LongPressGestureRecognizer] support to it
 class TapAndLongPressGestureRecognizer extends TapGestureRecognizer {
   /// Creates a gesture recognizer.
-  TapAndLongPressGestureRecognizer(
-      {required this.onLongPress,
-      required this.onTap,
-      this.enableFeedback = true});
+  TapAndLongPressGestureRecognizer({
+    required this.onLongPress,
+    required this.onTap,
+    this.enableFeedback = true,
+  });
 
   bool _longPressAccepted = false;
   // The buttons sent by `PointerDownEvent`. If a `PointerMoveEvent` comes with a

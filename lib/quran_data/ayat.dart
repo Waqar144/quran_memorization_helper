@@ -17,10 +17,7 @@ class Ayat {
   }
 
   dynamic toJson() {
-    return {
-      'idx': ayahIdx,
-      'words': markedWords,
-    };
+    return {'idx': ayahIdx, 'words': markedWords};
   }
 
   /// returns "SurahName":AyahNumInSurah
@@ -39,9 +36,14 @@ class MutashabihaAyat extends Ayat {
   final List<int> surahAyahIndexes;
   final int paraIdx;
   final int surahIdx;
-  MutashabihaAyat(this.paraIdx, this.surahIdx, this.surahAyahIndexes,
-      super.text, super.markedWords,
-      {required super.ayahIdx});
+  MutashabihaAyat(
+    this.paraIdx,
+    this.surahIdx,
+    this.surahAyahIndexes,
+    super.text,
+    super.markedWords, {
+    required super.ayahIdx,
+  });
 
   String surahAyahIndexesString() {
     return surahAyahIndexes.fold("", (String s, int v) {
@@ -54,10 +56,11 @@ class MutashabihaAyat extends Ayat {
     return surahAyahIndexes.length == 1
         ? {'ayah': ayahIdx}
         : {
-            'ayah': surahAyahIndexes
-                .map((ayahIdx) => toSurahAyahOffset(surahIdx, ayahIdx))
-                .toList()
-          };
+          'ayah':
+              surahAyahIndexes
+                  .map((ayahIdx) => toSurahAyahOffset(surahIdx, ayahIdx))
+                  .toList(),
+        };
   }
 }
 
@@ -75,7 +78,7 @@ class Mutashabiha {
   dynamic toJson() {
     return {
       'src': src.toJson(),
-      'muts': matches.map((m) => m.toJson()).toList()
+      'muts': matches.map((m) => m.toJson()).toList(),
     };
   }
 
@@ -133,8 +136,14 @@ MutashabihaAyat ayatFromJsonObj(dynamic m, int ctx) {
     if (showContext && quranTextIsReady) {
       text = _getContext(ayahIdxes.last, text);
     }
-    return MutashabihaAyat(paraIdx, surahIdx, surahAyahIdxes, text, [],
-        ayahIdx: ayahIdxes.first);
+    return MutashabihaAyat(
+      paraIdx,
+      surahIdx,
+      surahAyahIdxes,
+      text,
+      [],
+      ayahIdx: ayahIdxes.first,
+    );
   } catch (e) {
     // print(e);
     rethrow;
@@ -142,10 +151,12 @@ MutashabihaAyat ayatFromJsonObj(dynamic m, int ctx) {
 }
 
 Future<List<Mutashabiha>> importParaMutashabihas(int paraIdx) async {
-  final mutashabihasJsonBytes =
-      await rootBundle.load("assets/mutashabiha_data.json");
-  final mutashabihasJson =
-      utf8.decode(mutashabihasJsonBytes.buffer.asUint8List());
+  final mutashabihasJsonBytes = await rootBundle.load(
+    "assets/mutashabiha_data.json",
+  );
+  final mutashabihasJson = utf8.decode(
+    mutashabihasJsonBytes.buffer.asUint8List(),
+  );
   final map = jsonDecode(mutashabihasJson) as Map<String, dynamic>;
   int paraNum = paraIdx + 1;
   final list = map[paraNum.toString()] as List<dynamic>;

@@ -11,13 +11,19 @@ void main() {
       AyatOrMutashabiha(ayat: Ayat("", [], ayahIdx: 1), mutashabiha: null),
       AyatOrMutashabiha(ayat: Ayat("", [], ayahIdx: 2), mutashabiha: null),
       AyatOrMutashabiha(
-          ayat: Ayat("", [], ayahIdx: 2),
-          mutashabiha: Mutashabiha(
-              MutashabihaAyat(0, 0, <int>[], "", [], ayahIdx: 3), [])),
+        ayat: Ayat("", [], ayahIdx: 2),
+        mutashabiha: Mutashabiha(
+          MutashabihaAyat(0, 0, <int>[], "", [], ayahIdx: 3),
+          [],
+        ),
+      ),
       AyatOrMutashabiha(
-          ayat: Ayat("", [], ayahIdx: 2),
-          mutashabiha: Mutashabiha(
-              MutashabihaAyat(0, 0, <int>[], "", [], ayahIdx: 3), [])),
+        ayat: Ayat("", [], ayahIdx: 2),
+        mutashabiha: Mutashabiha(
+          MutashabihaAyat(0, 0, <int>[], "", [], ayahIdx: 3),
+          [],
+        ),
+      ),
     ]);
 
     sel.toggle(0);

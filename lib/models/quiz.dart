@@ -1,8 +1,4 @@
-enum QuizMode {
-  nextAyah,
-  endAyah,
-  mix,
-}
+enum QuizMode { nextAyah, endAyah, mix }
 
 class QuizCreationArgs {
   final List<int> selectedParas;

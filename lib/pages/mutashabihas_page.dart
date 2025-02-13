@@ -10,9 +10,7 @@ class MutashabihasPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Mutashabihas By Para"),
-      ),
+      appBar: AppBar(title: const Text("Mutashabihas By Para")),
       body: ListView.separated(
         separatorBuilder: (context, index) => const Divider(height: 1),
         itemCount: 30,
@@ -21,8 +19,9 @@ class MutashabihasPage extends StatelessWidget {
             visualDensity: VisualDensity.compact,
             title: Text("Para ${index + 1}"),
             onTap: () {
-              Navigator.of(context)
-                  .pushNamed(paraMutashabihasPage, arguments: index);
+              Navigator.of(
+                context,
+              ).pushNamed(paraMutashabihasPage, arguments: index);
             },
           );
         },
@@ -47,9 +46,7 @@ class ParaMutashabihas extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Mutashabihas for Para ${_para + 1}"),
-      ),
+      appBar: AppBar(title: Text("Mutashabihas for Para ${_para + 1}")),
       body: FutureBuilder(
         future: _importParaMutashabihas(),
         builder: (context, snapshot) {

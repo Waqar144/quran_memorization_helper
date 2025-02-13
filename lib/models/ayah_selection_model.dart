@@ -4,20 +4,20 @@ class AyahSelectionState {
   final List<({int ayahIdx, bool selected})> _selection;
 
   AyahSelectionState.fromAyahs(
-      final List<AyatOrMutashabiha> ayahAndMutashabihas)
-      : _selection = List.generate(ayahAndMutashabihas.length, (int index) {
-          final AyatOrMutashabiha a = ayahAndMutashabihas[index];
-          return a.ayat != null
-              ? (ayahIdx: a.ayat!.ayahIdx, selected: false)
-              : (ayahIdx: a.mutashabiha!.src.ayahIdx, selected: false);
-        }, growable: false);
+    final List<AyatOrMutashabiha> ayahAndMutashabihas,
+  ) : _selection = List.generate(ayahAndMutashabihas.length, (int index) {
+        final AyatOrMutashabiha a = ayahAndMutashabihas[index];
+        return a.ayat != null
+            ? (ayahIdx: a.ayat!.ayahIdx, selected: false)
+            : (ayahIdx: a.mutashabiha!.src.ayahIdx, selected: false);
+      }, growable: false);
 
   void toggle(int ayahIndex) {
     int found = _selection.indexWhere((e) => e.ayahIdx == ayahIndex);
     while (found != -1) {
       _selection[found] = (
         ayahIdx: _selection[found].ayahIdx,
-        selected: !_selection[found].selected
+        selected: !_selection[found].selected,
       );
       found = _selection.indexWhere((e) => e.ayahIdx == ayahIndex, found + 1);
     }
@@ -28,8 +28,10 @@ class AyahSelectionState {
     final bool firstSelected = _selection[0].selected;
 
     for (int i = 0; i < _selection.length; ++i) {
-      _selection[i] =
-          (ayahIdx: _selection[i].ayahIdx, selected: !firstSelected);
+      _selection[i] = (
+        ayahIdx: _selection[i].ayahIdx,
+        selected: !firstSelected,
+      );
     }
   }
 

@@ -6,12 +6,14 @@ import 'ayat_list_item.dart';
 import 'mutashabiha_ayat_list_item.dart';
 
 class AyatAndMutashabihaListView extends StatelessWidget {
-  const AyatAndMutashabihaListView(this._ayatsList,
-      {super.key,
-      required this.onLongPress,
-      required this.onTap,
-      required this.selectionState,
-      this.selectionMode = false});
+  const AyatAndMutashabihaListView(
+    this._ayatsList, {
+    super.key,
+    required this.onLongPress,
+    required this.onTap,
+    required this.selectionState,
+    this.selectionMode = false,
+  });
 
   final List<AyatOrMutashabiha> _ayatsList;
   final VoidCallback onLongPress;
@@ -46,8 +48,13 @@ class AyatAndMutashabihaListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
-      separatorBuilder: (BuildContext context, int index) =>
-          const Divider(indent: 8, endIndent: 8, color: Colors.grey, height: 2),
+      separatorBuilder:
+          (BuildContext context, int index) => const Divider(
+            indent: 8,
+            endIndent: 8,
+            color: Colors.grey,
+            height: 2,
+          ),
       itemCount: _ayatsList.length,
       itemBuilder: (context, index) {
         return _listItemForIndex(index);

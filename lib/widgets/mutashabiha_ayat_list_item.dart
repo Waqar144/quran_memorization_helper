@@ -55,7 +55,8 @@ class _AyatListItemWithMetadata extends StatelessWidget {
         textDirection: TextDirection.rtl,
       ),
       subtitle: Text(
-          "${surahNameForIdx(ayah.surahIdx)}:${ayah.surahAyahIndexesString()} - Para: ${ayah.paraIdx + 1}"),
+        "${surahNameForIdx(ayah.surahIdx)}:${ayah.surahAyahIndexesString()} - Para: ${ayah.paraIdx + 1}",
+      ),
       onTap: onTap,
       onLongPress: _longPress,
     );
@@ -70,13 +71,14 @@ class MutashabihaAyatListItem extends StatelessWidget {
   final bool selectionMode;
   final bool isSelected;
 
-  MutashabihaAyatListItem(
-      {super.key,
-      required this.mutashabiha,
-      this.onLongPress,
-      this.onTap,
-      this.isSelected = false,
-      this.selectionMode = false});
+  MutashabihaAyatListItem({
+    super.key,
+    required this.mutashabiha,
+    this.onLongPress,
+    this.onTap,
+    this.isSelected = false,
+    this.selectionMode = false,
+  });
 
   void _onTap() {
     if (selectionMode) {
@@ -96,9 +98,10 @@ class MutashabihaAyatListItem extends StatelessWidget {
           border: Border.all(color: theme.colorScheme.inversePrimary, width: 1),
           boxShadow: [
             BoxShadow(
-                color: theme.shadowColor,
-                blurRadius: 4,
-                offset: const Offset(4, 2)),
+              color: theme.shadowColor,
+              blurRadius: 4,
+              offset: const Offset(4, 2),
+            ),
           ],
         ),
         child: ListView.separated(
@@ -140,7 +143,7 @@ class MutashabihaAyatListItem extends StatelessWidget {
             }
             return _buildMatches(Theme.of(context));
           },
-        )
+        ),
       ],
     );
   }

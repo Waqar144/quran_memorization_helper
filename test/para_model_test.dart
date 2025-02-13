@@ -62,7 +62,7 @@ void main() {
     expect(model.ayahs.length, 3);
 
     model.addAyahs([
-      Ayat("", [0], ayahIdx: 4)
+      Ayat("", [0], ayahIdx: 4),
     ]);
     expect(model.ayahs.length, 4);
     expect(model.timer!.isActive, isTrue);
@@ -78,8 +78,9 @@ void main() {
     // our backup file should be there
     final docPath = await getDocPath();
     expect(
-        File("$docPath${Platform.pathSeparator}ayatsdb_bck.json").existsSync(),
-        isTrue);
+      File("$docPath${Platform.pathSeparator}ayatsdb_bck.json").existsSync(),
+      isTrue,
+    );
 
     model.removeMarkedWordInAyat(0, 4, 0);
     expect(model.ayahs.length, 3);
@@ -110,12 +111,12 @@ void main() {
     expect(model.ayahs.length, 3);
 
     model.addAyahs([
-      Ayat("", [0], ayahIdx: 1041)
+      Ayat("", [0], ayahIdx: 1041),
     ]);
     expect(model.ayahs.length, 3);
 
     model.addAyahs([
-      Ayat("", [0], ayahIdx: 9999)
+      Ayat("", [0], ayahIdx: 9999),
     ]);
     expect(model.ayahs.length, 3);
 
@@ -125,8 +126,9 @@ void main() {
   tearDownAll(() async {
     Directory docs = await getApplicationDocumentsDirectory();
     File jsonFile = File("${docs.path}${Platform.pathSeparator}ayatsdb.json");
-    File jsonBckFile =
-        File("${docs.path}${Platform.pathSeparator}ayatsdb_bck.json");
+    File jsonBckFile = File(
+      "${docs.path}${Platform.pathSeparator}ayatsdb_bck.json",
+    );
     await jsonFile.delete();
     print("deleted test db file");
     if (jsonBckFile.existsSync()) {
