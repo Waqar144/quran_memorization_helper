@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quran_memorization_helper/models/settings.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'package:quran_memorization_helper/utils/colors.dart';
 
@@ -46,7 +47,16 @@ class _AyatListItemState extends State<AyatListItem> {
               : Icons.check_box_outline_blank)
           : null,
       title: RichText(
-        text: TextSpan(children: textSpansForAyah(widget.ayah)),
+        text: TextSpan(
+          children: textSpansForAyah(widget.ayah),
+          style: TextStyle(
+            color: Theme.of(context).textTheme.bodyMedium?.color,
+            fontFamily: "Al Mushaf",
+            fontSize: Settings.fontSize,
+            letterSpacing: 0,
+            wordSpacing: Settings.wordSpacing,
+          ),
+        ),
         softWrap: true,
         textAlign: TextAlign.right,
         textDirection: TextDirection.rtl,

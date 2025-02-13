@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:quran_memorization_helper/models/settings.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
 
 final markedWordBgColorLight = Colors.red.shade100;
@@ -12,30 +11,24 @@ List<TextSpan> textSpansForAyah(Ayat ayah) {
   List<TextSpan> ret = [];
   String currentString = "";
 
-  const textStyle = TextStyle(
-      fontFamily: "Al Mushaf",
-      fontSize: Settings.fontSize,
-      letterSpacing: 0.0,
-      wordSpacing: Settings.wordSpacing);
-
   for (int i = 0; i < words.length; ++i) {
     if (ayah.markedWords.contains(i)) {
       // first add existing string
       if (currentString.isNotEmpty) {
-        ret.add(TextSpan(text: currentString, style: textStyle));
+        ret.add(TextSpan(text: currentString));
         currentString = "";
       }
       // now add the span for mistake
       ret.add(TextSpan(
           text: "${words[i]} ",
-          style: textStyle.copyWith(color: markedWordFgColor)));
+          style: TextStyle(inherit: true, color: markedWordFgColor)));
     } else {
       currentString += "${words[i]} ";
     }
   }
 
   if (currentString.isNotEmpty) {
-    ret.add(TextSpan(text: currentString, style: textStyle));
+    ret.add(TextSpan(text: currentString));
   }
 
   return ret;
