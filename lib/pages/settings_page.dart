@@ -146,7 +146,7 @@ class _SettingsPageState extends State<SettingsPage> {
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                Text(message),
+                Text(message, softWrap: true),
                 const Text(
                   "Please try again. If the error persists please report a bug.",
                 ),
@@ -197,32 +197,36 @@ class _SettingsPageState extends State<SettingsPage> {
       subtitle: const Text("Restore previously backed up data"),
       trailing: ElevatedButton(
         onPressed: () async {
-          // get the file
-          await FilePicker.platform.clearTemporaryFiles();
-          FilePickerResult? result = await FilePicker.platform.pickFiles(
-            dialogTitle: "Select JSON File",
-            type: FileType.custom,
-            allowedExtensions: ["json"],
-          );
-          if (result == null) return;
-          if (result.paths.isEmpty) return;
+          try {
+            // get the file
+            await FilePicker.platform.clearTemporaryFiles();
+            FilePickerResult? result = await FilePicker.platform.pickFiles(
+              dialogTitle: "Select JSON File",
+              type: FileType.custom,
+              allowedExtensions: ["json"],
+            );
+            if (result == null) return;
+            if (result.paths.isEmpty) return;
 
-          String? path = result.paths.first;
-          if (path == null) return;
-          // ask the para model to load this db
-          final (ok, error) = await widget.paraModel.readJsonDB(path: path);
-          if (ok) {
-            if (mounted) {
-              // success message
-              showSnackBarMessage(
-                context,
-                "${result.names.first} imported successfully",
-              );
+            String? path = result.paths.first;
+            if (path == null) return;
+            // ask the para model to load this db
+            final (ok, error) = await widget.paraModel.readJsonDB(path: path);
+            if (ok) {
+              if (mounted) {
+                // success message
+                showSnackBarMessage(
+                  context,
+                  "${result.names.first} imported successfully",
+                );
+              }
+              // persist
+              widget.paraModel.saveToDisk();
+            } else {
+              _showError("Error while restoring: $error");
             }
-            // persist
-            widget.paraModel.saveToDisk();
-          } else {
-            _showError("Error while restoring: $error");
+          } catch (e) {
+            _showError("Exception occurred, please report a bug: $e");
           }
         },
         child: const Text("Restore"),
