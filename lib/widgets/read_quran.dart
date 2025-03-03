@@ -1016,7 +1016,7 @@ class _PageWidgetState extends State<PageWidget> {
                           : Colors.amber.shade100)
                       : null,
               fontFamily: "AyahNumber",
-              fontSize: a.ayahIndex > 100 ? 24 : 18,
+              fontSize: surahAyahIdx > 100 ? 24 : 20,
             ),
           ),
         );
