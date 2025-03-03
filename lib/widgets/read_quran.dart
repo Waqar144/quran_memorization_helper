@@ -462,10 +462,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
     return text;
   }
 
-  (bool isFull, bool atPageStart, bool atPageEnd) _isAyahFull(
-    int ayahIdx,
-    int pageNum,
-  ) {
+  bool _isAyahFull(int ayahIdx, int pageNum) {
     bool isFull = true;
     bool isAtPageEnd = false;
     bool isAtPageStart = false;
@@ -487,7 +484,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
       isFull =
           _pages[pageIndex - 1].lines.last.lineAyahs.last.ayahIndex != ayahIdx;
     }
-    return (isFull, isAtPageStart, isAtPageEnd);
+    return isFull;
   }
 
   void _onAyahLongPressed(
@@ -681,7 +678,7 @@ class PageWidget extends StatefulWidget {
     bool longPress,
   )
   onAyahTapped;
-  final (bool, bool, bool) Function(int ayahIdx, int pageIdx) isAyahFull;
+  final bool Function(int ayahIdx, int pageIdx) isAyahFull;
   final String Function(int ayahIdx, int pageNum) getFullAyahText;
   final Stream<int> repaintStream;
 
@@ -845,7 +842,7 @@ class _PageWidgetState extends State<PageWidget> {
     return (widget._pageLines[lineIdx].lineAyahs.last.ayahIndex != ayahIdx) ||
         // last line in page, check if its a full ayah
         (lineIdx == widget._pageLines.length - 1 &&
-            widget.isAyahFull(ayahIdx, widget.pageIndex).$1) ||
+            widget.isAyahFull(ayahIdx, widget.pageIndex)) ||
         // does the next line in page start with this ayah?
         (lineIdx + 1 < widget._pageLines.length &&
             widget._pageLines[lineIdx + 1].lineAyahs.first.ayahIndex !=
