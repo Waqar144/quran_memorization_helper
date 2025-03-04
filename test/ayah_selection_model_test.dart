@@ -14,14 +14,14 @@ void main() {
       AyatOrMutashabiha(
         ayat: Ayat("", [], ayahIdx: 2),
         mutashabiha: Mutashabiha(
-          MutashabihaAyat(0, 0, Uint16List(0), "", [], ayahIdx: 3),
+          MutashabihaAyat(0, Uint16List(0), "", [], ayahIdx: 3),
           [],
         ),
       ),
       AyatOrMutashabiha(
         ayat: Ayat("", [], ayahIdx: 2),
         mutashabiha: Mutashabiha(
-          MutashabihaAyat(0, 0, Uint16List(0), "", [], ayahIdx: 3),
+          MutashabihaAyat(0, Uint16List(0), "", [], ayahIdx: 3),
           [],
         ),
       ),

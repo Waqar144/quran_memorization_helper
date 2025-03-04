@@ -55,7 +55,7 @@ class _AyatListItemWithMetadata extends StatelessWidget {
         textDirection: TextDirection.rtl,
       ),
       subtitle: Text(
-        "${surahNameForIdx(ayah.surahIdx)}:${ayah.surahAyahIndexesString()} - Para: ${ayah.paraIdx + 1}",
+        "${surahNameForIdx(ayah.surahIdx)}:${ayah.surahAyahIndexesString()} - Para: ${ayah.paraNumber()}",
       ),
       onTap: onTap,
       onLongPress: _longPress,

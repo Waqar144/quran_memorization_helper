@@ -34,11 +34,9 @@ class Ayat {
 
 /// Represent an ayat in a "Mutashabiha"
 class MutashabihaAyat extends Ayat {
-  final Uint16List surahAyahIndexes;
-  final int paraIdx;
   final int surahIdx;
+  final Uint16List surahAyahIndexes;
   MutashabihaAyat(
-    this.paraIdx,
     this.surahIdx,
     this.surahAyahIndexes,
     super.text,
@@ -50,6 +48,11 @@ class MutashabihaAyat extends Ayat {
     return surahAyahIndexes.fold("", (String s, int v) {
       return s.isEmpty ? "${v + 1}" : "$s, ${v + 1}";
     });
+  }
+
+  int paraNumber() {
+    int ayah = toAbsoluteAyahOffset(surahIdx, surahAyahIndexes.first);
+    return paraForAyah(ayah) + 1;
   }
 
   @override
@@ -116,7 +119,6 @@ MutashabihaAyat ayatFromJsonObj(dynamic m, int ctx) {
     String text = "";
     final List<int> surahAyahIdxes = [];
     int surahIdx = -1;
-    int paraIdx = -1;
     final bool quranTextIsReady = QuranText.instance.isReady;
     for (final int ayahIdx in ayahIdxes) {
       if (quranTextIsReady) {
@@ -128,7 +130,6 @@ MutashabihaAyat ayatFromJsonObj(dynamic m, int ctx) {
 
       if (surahIdx == -1) {
         surahIdx = surahForAyah(ayahIdx);
-        paraIdx = paraForAyah(ayahIdx);
       }
       surahAyahIdxes.add(toSurahAyahOffset(surahIdx, ayahIdx));
     }
@@ -138,7 +139,6 @@ MutashabihaAyat ayatFromJsonObj(dynamic m, int ctx) {
       text = _getContext(ayahIdxes.last, text);
     }
     return MutashabihaAyat(
-      paraIdx,
       surahIdx,
       Uint16List.fromList(surahAyahIdxes),
       text,
