@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:quran_memorization_helper/models/ayah_selection_model.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'package:quran_memorization_helper/models/ayat.dart';
+import 'dart:typed_data';
 
 void main() {
   // rhs is para idx so actual is +1
@@ -13,14 +14,14 @@ void main() {
       AyatOrMutashabiha(
         ayat: Ayat("", [], ayahIdx: 2),
         mutashabiha: Mutashabiha(
-          MutashabihaAyat(0, 0, <int>[], "", [], ayahIdx: 3),
+          MutashabihaAyat(0, 0, Uint16List(0), "", [], ayahIdx: 3),
           [],
         ),
       ),
       AyatOrMutashabiha(
         ayat: Ayat("", [], ayahIdx: 2),
         mutashabiha: Mutashabiha(
-          MutashabihaAyat(0, 0, <int>[], "", [], ayahIdx: 3),
+          MutashabihaAyat(0, 0, Uint16List(0), "", [], ayahIdx: 3),
           [],
         ),
       ),

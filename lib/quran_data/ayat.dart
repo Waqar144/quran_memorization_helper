@@ -2,6 +2,7 @@ import 'package:quran_memorization_helper/quran_data/quran_text.dart';
 
 import 'surahs.dart';
 import 'dart:convert';
+import 'dart:typed_data';
 import 'para_bounds.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
@@ -33,7 +34,7 @@ class Ayat {
 
 /// Represent an ayat in a "Mutashabiha"
 class MutashabihaAyat extends Ayat {
-  final List<int> surahAyahIndexes;
+  final Uint16List surahAyahIndexes;
   final int paraIdx;
   final int surahIdx;
   MutashabihaAyat(
@@ -139,7 +140,7 @@ MutashabihaAyat ayatFromJsonObj(dynamic m, int ctx) {
     return MutashabihaAyat(
       paraIdx,
       surahIdx,
-      surahAyahIdxes,
+      Uint16List.fromList(surahAyahIdxes),
       text,
       [],
       ayahIdx: ayahIdxes.first,
