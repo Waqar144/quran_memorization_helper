@@ -177,5 +177,13 @@ Future<List<Mutashabiha>> importParaMutashabihas(int paraIdx) async {
       rethrow;
     }
   }
+
+  mutashabihas.sort((a, b) {
+    if (a.src.surahIdx != b.src.surahIdx) {
+      return (a.src.surahIdx - b.src.surahIdx);
+    }
+    return (a.src.ayahIdx - b.src.ayahIdx);
+  });
+
   return mutashabihas;
 }

@@ -405,9 +405,16 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
   }
 
   bool _isMutashabihaAyat(int surahAyahIdx, int surahIdx) {
-    for (final m in _mutashabihat) {
-      if (m.src.surahIdx == surahIdx &&
-          m.src.surahAyahIndexes.contains(surahAyahIdx)) {
+    // _mutashabihat is sorted
+    final it = _mutashabihat
+        .skipWhile((m) => m.src.surahIdx < surahIdx)
+        .takeWhile(
+          (m) =>
+              m.src.surahIdx == surahIdx &&
+              m.src.surahAyahIndexes.first <= surahAyahIdx,
+        );
+    for (final m in it) {
+      if (m.src.surahAyahIndexes.contains(surahAyahIdx)) {
         return true;
       }
     }
