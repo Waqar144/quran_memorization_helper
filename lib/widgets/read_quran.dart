@@ -493,13 +493,10 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
     return isFull;
   }
 
-  void _onAyahLongPressed(
-    int surahIdx,
-    int ayahIdx,
-    int wordIdx,
-    int pageNum,
-  ) async {
-    List<Mutashabiha> mutashabihat = _getMutashabihaAyat(ayahIdx, surahIdx);
+  void _onAyahLongPressed(int ayahIdx) async {
+    int surahIdx = surahForAyah(ayahIdx);
+    int surahAyah = toSurahAyahOffset(surahIdx, ayahIdx);
+    List<Mutashabiha> mutashabihat = _getMutashabihaAyat(surahAyah, surahIdx);
 
     if (_translation == null) {
       ByteBuffer transUtf8;
@@ -535,8 +532,6 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
       mutashabihat[i].loadText();
     }
 
-    int tappedAyah = toAbsoluteAyahOffset(surahIdx, ayahIdx);
-
     Widget? mutashabihaWidget;
     if (mutashabihat.isNotEmpty) {
       mutashabihaWidget = ListView.separated(
@@ -563,7 +558,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
               mutashabihaList: mutashabihaWidget,
               translation: _translation!,
               currentParaIdx: widget.model.currentPara - 1,
-              tappedAyahIdx: tappedAyah,
+              tappedAyahIdx: ayahIdx,
             ),
           ),
         );
@@ -571,35 +566,24 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
     );
   }
 
-  void _onAyahTapped(
-    int surahIdx,
-    int ayahIdx,
-    int wordIdx,
-    int pageNum,
-    bool longPress,
-  ) async {
+  void _onAyahTapped(int ayahIdx, int wordIdx, bool longPress) async {
     bool tapToShowBottomSheet = Settings.instance.tapToShowTranslation;
     if ((longPress && !tapToShowBottomSheet) ||
         (!longPress && tapToShowBottomSheet)) {
-      _onAyahLongPressed(surahIdx, ayahIdx, wordIdx, pageNum);
+      _onAyahLongPressed(ayahIdx);
       return;
     }
 
     int currentParaIndex = widget.model.currentPara - 1;
 
-    final int absAyahIdx = toAbsoluteAyahOffset(surahIdx, ayahIdx);
-    Ayat? ayatInDb = _getAyatInDB(absAyahIdx);
+    Ayat? ayatInDb = _getAyatInDB(ayahIdx);
     // otherwise we add/remove ayah
     if (ayatInDb != null && ayatInDb.markedWords.contains(wordIdx)) {
       // remove
-      widget.model.removeMarkedWordInAyat(
-        currentParaIndex,
-        absAyahIdx,
-        wordIdx,
-      );
+      widget.model.removeMarkedWordInAyat(currentParaIndex, ayahIdx, wordIdx);
     } else {
       // add
-      Ayat ayat = Ayat("", [wordIdx], ayahIdx: absAyahIdx);
+      Ayat ayat = Ayat("", [wordIdx], ayahIdx: ayahIdx);
       widget.model.addAyahs([ayat]);
     }
   }
@@ -675,14 +659,7 @@ class PageWidget extends StatefulWidget {
   final List<Line> _pageLines;
   final bool Function(int ayahIdx, int surahIdx) isMutashabihaAyat;
   final Ayat? Function(int ayahIdx) getAyatInDB;
-  final void Function(
-    int surahIdx,
-    int ayahIdx,
-    int wordIdx,
-    int pageIdx,
-    bool longPress,
-  )
-  onAyahTapped;
+  final void Function(int ayahIdx, int wordIdx, bool longPress) onAyahTapped;
   final bool Function(int ayahIdx, int pageIdx) isAyahFull;
   final String Function(int ayahIdx, int pageNum) getFullAyahText;
   final Stream<int> repaintStream;
@@ -723,22 +700,7 @@ class _PageWidgetState extends State<PageWidget> {
     _subscription?.cancel();
   }
 
-  void _tapHandler(
-    int surahIdx,
-    int ayahIdx,
-    int wordIdx,
-    bool longPress,
-  ) async {
-    widget.onAyahTapped(
-      surahIdx,
-      ayahIdx,
-      wordIdx,
-      widget.pageIndex,
-      longPress,
-    );
-  }
-
-  Widget getTwoLinesBismillah(int surahIdx, TextStyle style) {
+  Widget getTwoLinesBismillah(int surahIdx, TextStyle style, double rowHeight) {
     SurahData surahData = surahDataForIdx(surahIdx, arabic: true);
 
     return Column(
@@ -977,8 +939,8 @@ class _PageWidgetState extends State<PageWidget> {
       for (final w in words) {
         int wordIdx = i;
         final tapHandler = TapAndLongPressGestureRecognizer(
-          onTap: () => _tapHandler(surahIdx, surahAyahIdx, wordIdx, false),
-          onLongPress: () => _tapHandler(surahIdx, surahAyahIdx, wordIdx, true),
+          onTap: () => widget.onAyahTapped(a.ayahIndex, wordIdx, false),
+          onLongPress: () => widget.onAyahTapped(a.ayahIndex, wordIdx, true),
         );
 
         TextStyle? style;
