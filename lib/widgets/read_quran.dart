@@ -867,33 +867,27 @@ class _PageWidgetState extends State<PageWidget> {
     };
   }
 
-  static (String marker, bool isSajda) getAyahEndMarkerGlyphCode(
-    int surahIndex,
-    int ayahIndex,
-  ) {
+  static String getAyahEndMarkerGlyphCode(int surahIndex, int ayahIndex) {
     if (isSajdaAyat(surahIndex, ayahIndex)) {
-      return (
-        switch (surahIndex) {
-          6 => '\uf68e',
-          12 => '\uf681',
-          15 => '\uf688',
-          16 => '\uf68d',
-          18 => '\uf689',
-          21 => '\uf682',
-          24 => '\uf68a',
-          26 => '\uf686',
-          31 => '\uf68b',
-          37 => '\uf685',
-          40 => '\uf687',
-          52 => '\uf68c',
-          83 => '\uf684',
-          95 => '\uf683',
-          _ => throw "Invalid sajda ayah",
-        },
-        true,
-      );
+      return switch (surahIndex) {
+        6 => '\uf68e',
+        12 => '\uf681',
+        15 => '\uf688',
+        16 => '\uf68d',
+        18 => '\uf689',
+        21 => '\uf682',
+        24 => '\uf68a',
+        26 => '\uf686',
+        31 => '\uf68b',
+        37 => '\uf685',
+        40 => '\uf687',
+        52 => '\uf68c',
+        83 => '\uf684',
+        95 => '\uf683',
+        _ => throw "Invalid sajda ayah",
+      };
     }
-    return (String.fromCharCode(0xF500 + ayahIndex), false);
+    return String.fromCharCode(0xF500 + ayahIndex);
   }
 
   // Finds the correct position of the first word of the line
@@ -932,15 +926,11 @@ class _PageWidgetState extends State<PageWidget> {
         surahIdx,
       );
 
-      final (marker, isSajdaAyat) = getAyahEndMarkerGlyphCode(
-        surahIdx,
-        surahAyahIdx,
-      );
       String text = a.text;
       List<String> fullAyahTextWords = widget
           .getFullAyahText(a.ayahIndex, widget.pageIndex)
           .split('\u200c');
-      if (isSajdaAyat) {
+      if (isSajdaAyat(surahIdx, surahAyahIdx)) {
         text = text.replaceFirst('\u06E9', '');
         text = text.replaceFirst('\ue022', ''); // ruku marker (para 9)
 
@@ -998,6 +988,7 @@ class _PageWidgetState extends State<PageWidget> {
       }
 
       if (_shouldDrawAyahEndMarker(a.ayahIndex, lineIdx)) {
+        final marker = getAyahEndMarkerGlyphCode(surahIdx, surahAyahIdx);
         bool hasRukuMarker = a.text.lastIndexOf("\uE022") != -1;
         spans.add(
           TextSpan(
