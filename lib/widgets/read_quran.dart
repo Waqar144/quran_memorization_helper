@@ -425,10 +425,9 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
     return ret;
   }
 
-  Ayat? _getAyatInDB(int surahAyahIdx, int surahIdx) {
-    int abs = toAbsoluteAyahOffset(surahIdx, surahAyahIdx);
+  Ayat? _getAyatInDB(int ayahIdx) {
     for (final a in widget.model.ayahs) {
-      if (a.ayahIdx == abs) return a;
+      if (a.ayahIdx == ayahIdx) return a;
     }
     return null;
   }
@@ -581,10 +580,9 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
 
     int currentParaIndex = widget.model.currentPara - 1;
 
-    // List<Mutashabiha> mutashabihat = _getMutashabihaAyat(ayahIdx, surahIdx);
-    Ayat? ayatInDb = _getAyatInDB(ayahIdx, surahIdx);
-    // otherwise we add/remove ayah
     final int absAyahIdx = toAbsoluteAyahOffset(surahIdx, ayahIdx);
+    Ayat? ayatInDb = _getAyatInDB(absAyahIdx);
+    // otherwise we add/remove ayah
     if (ayatInDb != null && ayatInDb.markedWords.contains(wordIdx)) {
       // remove
       widget.model.removeMarkedWordInAyat(
@@ -669,7 +667,7 @@ class PageWidget extends StatefulWidget {
   final int paraNum;
   final List<Line> _pageLines;
   final bool Function(int ayahIdx, int surahIdx) isMutashabihaAyat;
-  final Ayat? Function(int ayahIdx, int surahIdx) getAyatInDB;
+  final Ayat? Function(int ayahIdx) getAyatInDB;
   final void Function(
     int surahIdx,
     int ayahIdx,
@@ -928,7 +926,7 @@ class _PageWidgetState extends State<PageWidget> {
     for (final a in line.lineAyahs) {
       final int surahIdx = surahForAyah(a.ayahIndex);
       final int surahAyahIdx = toSurahAyahOffset(surahIdx, a.ayahIndex);
-      final Ayat? ayahInDb = widget.getAyatInDB(surahAyahIdx, surahIdx);
+      final Ayat? ayahInDb = widget.getAyatInDB(a.ayahIndex);
       final bool isMutashabihaAyat = widget.isMutashabihaAyat(
         surahAyahIdx,
         surahIdx,
