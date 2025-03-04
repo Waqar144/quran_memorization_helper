@@ -915,15 +915,26 @@ class _PageWidgetState extends State<PageWidget> {
     return idx;
   }
 
-  List<TextSpan> _buildLineSpans(Line line, int lineIdx) {
+  List<TextSpan> _buildLineSpans(
+    Line line,
+    int lineIdx,
+    List<(int ayahIndex, int, int, Ayat?, bool)> ayahData,
+  ) {
     List<TextSpan> spans = [];
     for (final a in line.lineAyahs) {
-      final int surahIdx = surahForAyah(a.ayahIndex);
-      final int surahAyahIdx = toSurahAyahOffset(surahIdx, a.ayahIndex);
-      final Ayat? ayahInDb = widget.getAyatInDB(a.ayahIndex);
-      final bool isMutashabihaAyat = widget.isMutashabihaAyat(
-        surahAyahIdx,
-        surahIdx,
+      final (
+        _,
+        int surahIdx,
+        int surahAyahIdx,
+        Ayat? ayahInDb,
+        bool isMutashabihaAyat,
+      ) = ayahData.firstWhere(
+        (data) {
+          return data.$1 == a.ayahIndex;
+        },
+        orElse: () {
+          throw "Unexpected unable to find the index for given ayahIdx: ${a.ayahIndex}";
+        },
       );
 
       String text = a.text;
@@ -1011,9 +1022,13 @@ class _PageWidgetState extends State<PageWidget> {
     return spans;
   }
 
-  Widget _buildLine(Line line, int lineIdx) {
+  Widget _buildLine(
+    Line line,
+    int lineIdx,
+    List<(int, int, int, Ayat?, bool)> ayahData,
+  ) {
     return Text.rich(
-      TextSpan(children: _buildLineSpans(line, lineIdx)),
+      TextSpan(children: _buildLineSpans(line, lineIdx, ayahData)),
       textDirection: TextDirection.rtl,
       style: TextStyle(
         color: Theme.of(context).textTheme.bodyMedium?.color,
@@ -1059,6 +1074,37 @@ class _PageWidgetState extends State<PageWidget> {
   }
 
   List<Widget> _pageLines() {
+    int lastAyah = -1;
+    List<(int, int, int, Ayat?, bool)> ayahData = [];
+    ayahData.length = 0;
+    for (final l in widget._pageLines) {
+      if (l.lineAyahs.first.ayahIndex < 0) {
+        continue; // bismillah
+      }
+      for (final a in l.lineAyahs) {
+        if (lastAyah == a.ayahIndex) {
+          continue;
+        } else {
+          lastAyah = a.ayahIndex;
+          final int surahIdx = surahForAyah(a.ayahIndex);
+          final int surahAyahIdx = toSurahAyahOffset(surahIdx, a.ayahIndex);
+          final Ayat? ayahInDb = widget.getAyatInDB(a.ayahIndex);
+          final bool isMutashabihaAyat = widget.isMutashabihaAyat(
+            surahAyahIdx,
+            surahIdx,
+          );
+
+          ayahData.add((
+            a.ayahIndex,
+            surahIdx,
+            surahAyahIdx,
+            ayahInDb,
+            isMutashabihaAyat,
+          ));
+        }
+      }
+    }
+
     List<Widget> widgets = [];
     const divider = Divider(color: Colors.grey, height: 1);
     for (final (idx, l) in widget._pageLines.indexed) {
@@ -1070,7 +1116,10 @@ class _PageWidgetState extends State<PageWidget> {
       widgets.add(
         SizedBox(
           height: 46,
-          child: FittedBox(fit: BoxFit.contain, child: _buildLine(l, idx)),
+          child: FittedBox(
+            fit: BoxFit.contain,
+            child: _buildLine(l, idx, ayahData),
+          ),
         ),
       );
     }
