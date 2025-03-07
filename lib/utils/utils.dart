@@ -60,7 +60,7 @@ Future<Map<String, dynamic>> readJsonFromFilePath(String path) async {
     }
 
     final String contents = await jsonFile.readAsString();
-    return jsonDecode(contents);
+    return jsonDecode(contents) as Map<String, dynamic>;
   } catch (e) {
     rethrow;
   }

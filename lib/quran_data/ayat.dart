@@ -112,7 +112,7 @@ MutashabihaAyat ayatFromJsonObj(dynamic m, int ctx) {
   try {
     List<int> ayahIdxes;
     if (m["ayah"] is List) {
-      ayahIdxes = <int>[for (final a in m["ayah"]) a as int];
+      ayahIdxes = <int>[for (final a in m["ayah"] as List<dynamic>) a as int];
     } else {
       ayahIdxes = <int>[m["ayah"] as int];
     }
@@ -169,7 +169,7 @@ Future<List<Mutashabiha>> importParaMutashabihas(int paraIdx) async {
       int ctx = (m["ctx"] as int?) ?? 0;
       MutashabihaAyat src = ayatFromJsonObj(m["src"], ctx);
       List<MutashabihaAyat> matches = [];
-      for (final match in m["muts"]) {
+      for (final match in m["muts"] as List<dynamic>) {
         matches.add(ayatFromJsonObj(match, ctx));
       }
       mutashabihas.add(Mutashabiha(src, matches));

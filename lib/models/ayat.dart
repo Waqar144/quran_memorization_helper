@@ -214,12 +214,14 @@ class ParaAyatModel extends ChangeNotifier {
         if (ayahJsons != null) {
           for (final a in ayahJsons) {
             try {
-              final int idx = a['idx'];
+              final idx = a['idx'] as int;
               if (!ayahBelongsToPara(idx, para - 1)) {
                 continue;
               }
 
-              final wordIdxes = <int>[for (final w in a['words']) w as int];
+              final wordIdxes = <int>[
+                for (final w in a['words'] as List<dynamic>) w as int,
+              ];
               paraData.add(Ayat("", wordIdxes, ayahIdx: idx));
             } catch (_) {
               continue;

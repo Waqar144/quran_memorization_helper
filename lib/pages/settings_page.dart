@@ -138,7 +138,7 @@ class _SettingsPageState extends State<SettingsPage> {
   static const platform = MethodChannel('org.quran_rev_helper/backupDB');
 
   void _showError(String message) async {
-    await showDialog(
+    await showDialog<void>(
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -283,7 +283,7 @@ class _SettingsPageState extends State<SettingsPage> {
       trailing: ElevatedButton(
         child: const Text("Change..."),
         onPressed: () {
-          showDialog(
+          showDialog<void>(
             context: context,
             builder: (context) {
               return _ChangeTranslationDialog();

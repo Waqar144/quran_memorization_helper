@@ -18,7 +18,7 @@ class QuranText {
         "assets/16line/$i.json",
         cache: false,
       );
-      final json = jsonDecode(data);
+      final json = jsonDecode(data) as List<dynamic>;
 
       int lastIndex = -1;
 
@@ -29,7 +29,7 @@ class QuranText {
           final lineayahs = line as List<dynamic>;
           for (final la in lineayahs) {
             final idx = la["idx"] as int;
-            final t = la["text"];
+            final t = la["text"] as String;
             if (idx == lastIndex) {
               _ayahs[idx] = "${_ayahs[idx]}\u200c$t";
             } else {

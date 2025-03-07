@@ -17,7 +17,7 @@ class AyatAndMutashabihaListView extends StatelessWidget {
 
   final List<AyatOrMutashabiha> _ayatsList;
   final VoidCallback onLongPress;
-  final Function(int) onTap;
+  final void Function(int) onTap;
   final bool selectionMode;
   final AyahSelectionState selectionState;
 

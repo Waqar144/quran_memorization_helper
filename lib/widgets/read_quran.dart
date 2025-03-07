@@ -390,7 +390,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
   Future<List<Page>> doload() async {
     int para = widget.model.currentPara;
     final data = await rootBundle.loadString("assets/16line/$para.json");
-    List<dynamic> pagesList = jsonDecode(data);
+    final pagesList = jsonDecode(data) as List<dynamic>;
     List<Page> pages = [];
     List<int> surahAyahStarts =
         surahAyahOffsetsForPara(para - 1).reversed.toList();
