@@ -202,8 +202,8 @@ class _SettingsPageState extends State<SettingsPage> {
             await FilePicker.platform.clearTemporaryFiles();
             FilePickerResult? result = await FilePicker.platform.pickFiles(
               dialogTitle: "Select JSON File",
-              type: FileType.custom,
-              allowedExtensions: ["json"],
+              type: FileType.any,
+              // allowedExtensions: ["json"], doesn't work on android <= 9
             );
             if (result == null) return;
             if (result.paths.isEmpty) return;
