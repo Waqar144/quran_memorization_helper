@@ -16,6 +16,7 @@ import 'package:quran_memorization_helper/widgets/mutashabiha_ayat_list_item.dar
 import 'package:quran_memorization_helper/widgets/tap_and_longpress_gesture_recognizer.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'dart:math';
 
 final _markedWordStyleLight = TextStyle(
   inherit: true,
@@ -73,6 +74,14 @@ TextStyle _mutStyle(bool dark) {
     return _mutStyleLight.copyWith(color: Colors.indigo.shade200);
   }
   return _mutStyleLight;
+}
+
+double availableHeight(BuildContext context) {
+  // top,bottom padding, will include notch and stuff
+  final double top = View.of(context).padding.top;
+  final double bottom = View.of(context).padding.bottom;
+  // dont go below 700, we will scroll if below
+  return max(700, MediaQuery.of(context).size.height - (top + bottom));
 }
 
 class Translation {
@@ -600,7 +609,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
         }
         return SliverToBoxAdapter(
           child: SizedBox(
-            height: 780,
+            height: availableHeight(context),
             child: NotificationListener<OverscrollNotification>(
               onNotification: (noti) {
                 if (noti.depth == 0) {
@@ -708,7 +717,7 @@ class _PageWidgetState extends State<PageWidget> {
       children: [
         // surah name and ayah count
         Container(
-          height: 46,
+          height: rowHeight,
           decoration: BoxDecoration(
             color: Colors.green.withValues(alpha: 0.4),
             border: Border.all(color: Theme.of(context).dividerColor, width: 1),
@@ -733,7 +742,7 @@ class _PageWidgetState extends State<PageWidget> {
         ),
         // bismillah
         Container(
-          height: 46,
+          height: rowHeight,
           width: MediaQuery.of(context).size.width,
           decoration: BoxDecoration(
             color: Colors.green.withValues(alpha: 0.4),
@@ -750,12 +759,12 @@ class _PageWidgetState extends State<PageWidget> {
     );
   }
 
-  Widget getBismillah(int surahIdx) {
+  Widget getBismillah(int surahIdx, double rowHeight) {
     surahIdx = -surahIdx;
     final style = TextStyle(
       color: Theme.of(context).textTheme.bodyMedium?.color,
       fontFamily: "Al Mushaf",
-      fontSize: Settings.fontSize,
+      fontSize: (rowHeight / 1.8).floorToDouble(),
       letterSpacing: 0.0,
       wordSpacing: Settings.wordSpacing,
     );
@@ -763,16 +772,17 @@ class _PageWidgetState extends State<PageWidget> {
     // 30th para ?
     if (widget.pageIndex >= 528) {
       if (surahHas2LineHeadress(surahIdx)) {
-        return getTwoLinesBismillah(surahIdx, style);
+        return getTwoLinesBismillah(surahIdx, style, rowHeight);
       }
     } else if (widget._pageLines.length == 15) {
-      return getTwoLinesBismillah(surahIdx, style);
+      return getTwoLinesBismillah(surahIdx, style, rowHeight);
     }
 
     SurahData surahData = surahDataForIdx(surahIdx, arabic: true);
     final isSurahTawba = surahIdx == 8;
     return Container(
       width: MediaQuery.of(context).size.width,
+      height: rowHeight,
       decoration: BoxDecoration(
         color: Colors.green.withValues(alpha: 0.4),
         border: Border.all(color: Theme.of(context).dividerColor, width: 1),
@@ -994,6 +1004,7 @@ class _PageWidgetState extends State<PageWidget> {
   Widget _buildLine(
     Line line,
     int lineIdx,
+    double rowHeight,
     List<(int, int, int, Ayat?, bool)> ayahData,
   ) {
     return Text.rich(
@@ -1002,7 +1013,7 @@ class _PageWidgetState extends State<PageWidget> {
       style: TextStyle(
         color: Theme.of(context).textTheme.bodyMedium?.color,
         fontFamily: "Al Mushaf",
-        fontSize: 24,
+        fontSize: (rowHeight / 1.8).floorToDouble(),
         letterSpacing: 0,
         wordSpacing: 1,
       ),
@@ -1042,7 +1053,7 @@ class _PageWidgetState extends State<PageWidget> {
     );
   }
 
-  List<Widget> _pageLines() {
+  List<Widget> _pageLines(double rowHeight) {
     int lastAyah = -1;
     List<(int, int, int, Ayat?, bool)> ayahData = [];
     ayahData.length = 0;
@@ -1078,16 +1089,16 @@ class _PageWidgetState extends State<PageWidget> {
     const divider = Divider(color: Colors.grey, height: 1);
     for (final (idx, l) in widget._pageLines.indexed) {
       if (l.lineAyahs.first.ayahIndex < 0) {
-        widgets.add(getBismillah(l.lineAyahs.first.ayahIndex));
+        widgets.add(getBismillah(l.lineAyahs.first.ayahIndex, rowHeight));
         continue;
       }
       widgets.add(divider);
       widgets.add(
         SizedBox(
-          height: 46,
+          height: rowHeight,
           child: FittedBox(
             fit: BoxFit.contain,
-            child: _buildLine(l, idx, ayahData),
+            child: _buildLine(l, idx, rowHeight, ayahData),
           ),
         ),
       );
@@ -1097,9 +1108,14 @@ class _PageWidgetState extends State<PageWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final double height =
+        availableHeight(context) -
+        ( /*padding,margin=*/ 16 +
+            /*topborder=*/ 24);
+    final double rowHeight = max((height / 16.0).floorToDouble(), 38.0);
     return Padding(
       padding: const EdgeInsets.only(left: 8, right: 8),
-      child: Column(children: [_pageTopBorder(), ..._pageLines()]),
+      child: Column(children: [_pageTopBorder(), ..._pageLines(rowHeight)]),
     );
   }
 }
