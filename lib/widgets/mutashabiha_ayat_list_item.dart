@@ -9,6 +9,7 @@ class _AyatListItemWithMetadata extends StatelessWidget {
   final VoidCallback? onTap;
   final Widget? leading;
   final VoidCallback? onLongPress;
+  final VoidCallback? onGoto;
   final bool selectionMode;
   final bool isSelected;
 
@@ -17,6 +18,7 @@ class _AyatListItemWithMetadata extends StatelessWidget {
     this.onTap,
     this.leading,
     this.onLongPress,
+    this.onGoto,
     this.isSelected = false,
     this.selectionMode = false,
   });
@@ -54,8 +56,13 @@ class _AyatListItemWithMetadata extends StatelessWidget {
         textAlign: TextAlign.right,
         textDirection: TextDirection.rtl,
       ),
-      subtitle: Text(
-        "${surahNameForIdx(ayah.surahIdx)}:${ayah.surahAyahIndexesString()} - Para: ${ayah.paraNumber()}",
+      subtitle: Row(
+        children: [
+          Text(
+            "${surahNameForIdx(ayah.surahIdx)}:${ayah.surahAyahIndexesString()} - Para: ${ayah.paraNumber()}",
+          ),
+          IconButton(onPressed: onGoto, icon: const Icon(Icons.shortcut)),
+        ],
       ),
       onTap: onTap,
       onLongPress: _longPress,
@@ -68,6 +75,7 @@ class MutashabihaAyatListItem extends StatelessWidget {
   final ValueNotifier<bool> _showMatches = ValueNotifier(false);
   final VoidCallback? onLongPress;
   final VoidCallback? onTap;
+  final VoidCallback? onGoto;
   final bool selectionMode;
   final bool isSelected;
 
@@ -76,6 +84,7 @@ class MutashabihaAyatListItem extends StatelessWidget {
     required this.mutashabiha,
     this.onLongPress,
     this.onTap,
+    this.onGoto,
     this.isSelected = false,
     this.selectionMode = false,
   });
@@ -126,6 +135,7 @@ class MutashabihaAyatListItem extends StatelessWidget {
           mutashabiha.src,
           onTap: _onTap,
           onLongPress: onLongPress,
+          onGoto: onGoto,
           selectionMode: selectionMode,
           isSelected: isSelected,
           leading: ValueListenableBuilder(

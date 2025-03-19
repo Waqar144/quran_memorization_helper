@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 
+import 'pages.dart';
+
 const String ayahSeparator = " ۞ ";
 
 /// Returns the para idx for given ayah idx
@@ -22,6 +24,21 @@ bool ayahBelongsToPara(int absoluteAyah, int paraIdx) {
 int getFirstAyahOfPara(int paraIndex) {
   if (paraIndex < 0 || paraIndex > 29) throw "Invalid paraIndex: $paraIndex";
   return _paraAyahOffset[paraIndex];
+}
+
+int _getPageForAyah(int ayahIndex) {
+  for (int i = 1; i < pageAyahOffsets.length; ++i) {
+    if (ayahIndex >= pageAyahOffsets[i]) continue;
+    return i - 1;
+  }
+  return pageAyahOffsets.length - 1;
+}
+
+int getParaPageForAyah(int ayahIndex) {
+  int page = _getPageForAyah(ayahIndex);
+  int para = paraForPage(page);
+  int paraPage = page - para16LinePageOffsets[para];
+  return paraPage;
 }
 
 String getParaNameForIndex(int paraIdx) {

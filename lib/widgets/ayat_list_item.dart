@@ -9,6 +9,7 @@ class AyatListItem extends StatefulWidget {
     required this.ayah,
     this.onLongPress,
     this.onTap,
+    this.onGoto,
     this.isSelected = false,
     this.selectionMode = false,
     this.showSurahAyahIndex = true,
@@ -16,6 +17,7 @@ class AyatListItem extends StatefulWidget {
 
   final VoidCallback? onLongPress;
   final VoidCallback? onTap;
+  final VoidCallback? onGoto;
   final bool selectionMode;
   final bool showSurahAyahIndex;
   final bool isSelected;
@@ -64,10 +66,15 @@ class _AyatListItemState extends State<AyatListItem> {
         textAlign: TextAlign.right,
         textDirection: TextDirection.rtl,
       ),
-      subtitle:
-          widget.showSurahAyahIndex
-              ? Text(widget.ayah.surahAyahText())
-              : const SizedBox.shrink(),
+      subtitle: Row(
+        children: [
+          if (widget.showSurahAyahIndex) Text(widget.ayah.surahAyahText()),
+          IconButton(
+            onPressed: widget.onGoto,
+            icon: const Icon(Icons.shortcut),
+          ),
+        ],
+      ),
       onLongPress: _getLongPressCallback(),
       onTap: widget.selectionMode ? widget.onTap : null,
     );

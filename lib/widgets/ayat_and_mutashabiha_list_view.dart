@@ -11,12 +11,14 @@ class AyatAndMutashabihaListView extends StatelessWidget {
     super.key,
     required this.onLongPress,
     required this.onTap,
+    required this.onGotoAyah,
     required this.selectionState,
     this.selectionMode = false,
   });
 
   final List<AyatOrMutashabiha> _ayatsList;
   final VoidCallback onLongPress;
+  final void Function(int) onGotoAyah;
   final void Function(int) onTap;
   final bool selectionMode;
   final AyahSelectionState selectionState;
@@ -28,6 +30,7 @@ class AyatAndMutashabihaListView extends StatelessWidget {
         key: ObjectKey(ayat),
         ayah: ayat,
         onLongPress: onLongPress,
+        onGoto: () => onGotoAyah(ayat.ayahIdx),
         onTap: () => onTap(ayat.ayahIdx),
         selectionMode: selectionMode,
         isSelected: selectionState.isSelected(index),
@@ -38,6 +41,7 @@ class AyatAndMutashabihaListView extends StatelessWidget {
         key: ObjectKey(mutashabiha),
         mutashabiha: mutashabiha,
         onLongPress: onLongPress,
+        onGoto: () => onGotoAyah(mutashabiha.src.ayahIdx),
         onTap: () => onTap(mutashabiha.src.ayahIdx),
         selectionMode: selectionMode,
         isSelected: selectionState.isSelected(index),

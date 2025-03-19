@@ -46,6 +46,19 @@ class _MainPageState extends State<MainPage>
   }
 
   void onParaChanged(int para, bool showLastPage, int jumpToPage) {
+    // if para is same
+    if (para == _paraModel.currentPara) {
+      // page also same?
+      if (jumpToPage != -1 &&
+          _pageController.page != null &&
+          (jumpToPage - 1) == _pageController.page!.toInt()) {
+        return;
+      }
+      // try to jump to page
+      _pageController.jumpToPage(jumpToPage - 1);
+      return;
+    }
+
     _pageController.dispose();
     int page = 1;
     if (showLastPage) {
@@ -54,6 +67,7 @@ class _MainPageState extends State<MainPage>
     if (jumpToPage != -1) {
       page = jumpToPage;
     }
+
     _pageController = PageController(initialPage: (page - 1), keepPage: false);
     // reinstall listeners
     _pageController.removeListener(_saveScrollPosition);

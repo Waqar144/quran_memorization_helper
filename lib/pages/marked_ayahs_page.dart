@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:quran_memorization_helper/models/ayah_selection_model.dart';
 import 'package:quran_memorization_helper/models/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
+import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
 import 'package:quran_memorization_helper/widgets/ayat_and_mutashabiha_list_view.dart';
 
 class MarkedAyahsPage extends StatefulWidget {
@@ -64,6 +65,13 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
   void _onTap(int ayahIndex) {
     _selectionState.toggle(ayahIndex);
     setState(() {});
+  }
+
+  void _onGotoAyah(int ayahIndex) {
+    int para = paraForAyah(ayahIndex);
+    int page = getParaPageForAyah(ayahIndex);
+    widget.model.setCurrentPara(para + 1, jumpToPage: page + 1, force: true);
+    Navigator.of(context).pop();
   }
 
   Future<void> _load() async {
@@ -149,6 +157,7 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
               selectionMode: _multipleSelectMode,
               onLongPress: _enterMultiselectMode,
               onTap: _onTap,
+              onGotoAyah: _onGotoAyah,
             );
           },
         ),

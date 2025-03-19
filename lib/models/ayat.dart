@@ -130,8 +130,9 @@ class ParaAyatModel extends ChangeNotifier {
     int para, {
     bool showLastPage = false,
     int jumpToPage = -1,
+    bool force = false,
   }) {
-    if (para == currentPara) return;
+    if (!force && para == currentPara) return;
     // wrap around
     if (para <= 0) {
       para = 30;
