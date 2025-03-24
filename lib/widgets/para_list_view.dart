@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quran_memorization_helper/models/ayat.dart';
+import 'package:quran_memorization_helper/models/settings.dart';
 import 'package:quran_memorization_helper/quran_data/pages.dart';
 import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
 import 'package:quran_memorization_helper/utils/utils.dart';
@@ -41,6 +42,8 @@ class ParaListView extends StatelessWidget {
 
   Widget paraListItem(int index, BuildContext context) {
     int count = model.markedAyahCountForPara(index);
+    final paraPageList = paraPageOffsetsList();
+    final is16line = Settings.instance.mushaf == Mushaf.Indopak16Line;
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -49,23 +52,29 @@ class ParaListView extends StatelessWidget {
         contentPadding: const EdgeInsets.symmetric(horizontal: 15),
         visualDensity: VisualDensity.compact,
         title: Text(
-          getParaNameForIndex(index),
-          style: const TextStyle(
-            letterSpacing: 0,
-            fontSize: 26,
-            fontFamily: 'Al Mushaf',
-          ),
+          is16line ? getParaNameForIndex(index) : "Juz ${index + 1}",
+          style:
+              is16line
+                  ? TextStyle(
+                    letterSpacing: 0,
+                    fontSize: 26,
+                    fontFamily: getQuranFont(),
+                  )
+                  : null,
         ),
-        leading: Text(
-          "${toUrduNumber(index + 1)}$urduKhatma",
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Theme.of(context).textTheme.bodyMedium?.color,
-            fontFamily: "Urdu",
-            fontSize: 22,
-            letterSpacing: 0.0,
-          ),
-        ),
+        leading:
+            is16line
+                ? Text(
+                  "${toUrduNumber(index + 1)}$urduKhatma",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Theme.of(context).textTheme.bodyMedium?.color,
+                    fontFamily: "Urdu",
+                    fontSize: 22,
+                    letterSpacing: 0.0,
+                  ),
+                )
+                : null,
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.start,
@@ -78,7 +87,7 @@ class ParaListView extends StatelessWidget {
             SizedBox(
               width: 30,
               child: Text(
-                "${para16LinePageOffsets[index] + 1}",
+                "${paraPageList[index] + 1}",
                 textAlign: TextAlign.left,
                 style: TextStyle(
                   fontSize: 16,

@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'pages.dart';
+import 'package:quran_memorization_helper/models/settings.dart';
 
 const String ayahSeparator = " ۞ ";
 
@@ -27,6 +28,10 @@ int getFirstAyahOfPara(int paraIndex) {
 }
 
 int _getPageForAyah(int ayahIndex) {
+  final is16line = Settings.instance.mushaf == Mushaf.Indopak16Line;
+  final pageAyahOffsets =
+      is16line ? pageAyahOffsets16line : pageAyahOffsets15line;
+
   for (int i = 1; i < pageAyahOffsets.length; ++i) {
     if (ayahIndex >= pageAyahOffsets[i]) continue;
     return i - 1;
@@ -37,7 +42,7 @@ int _getPageForAyah(int ayahIndex) {
 int getParaPageForAyah(int ayahIndex) {
   int page = _getPageForAyah(ayahIndex);
   int para = paraForPage(page);
-  int paraPage = page - para16LinePageOffsets[para];
+  int paraPage = page - paraPageOffsetsList()[para];
   return paraPage;
 }
 
@@ -71,7 +76,7 @@ String getParaNameForIndex(int paraIdx) {
     /* ltr */ 25 => "حٰم",
     /* ltr */ 26 => "قَالَ فَمَا خَطْبُكُمْ",
     /* ltr */ 27 => "قَدْ سَمِعَ اللَّهُ",
-    /* ltr */ 28 => "تَبَارَكَ الَّذِی",
+    /* ltr */ 28 => "تَبَارَكَ الَّذِي",
     /* ltr */ 29 => "عَمَّ",
     _ => throw "Invalid para index: $paraIdx",
   };

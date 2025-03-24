@@ -3,6 +3,7 @@ import 'package:quran_memorization_helper/models/ayah_selection_model.dart';
 import 'package:quran_memorization_helper/models/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
+import 'package:quran_memorization_helper/utils/utils.dart';
 import 'package:quran_memorization_helper/widgets/ayat_and_mutashabiha_list_view.dart';
 
 class MarkedAyahsPage extends StatefulWidget {
@@ -92,7 +93,7 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
   AppBar buildAppbar() {
     return AppBar(
       title: Text(
-        "Marked ayahs for Para $_currentPara",
+        "Marked ayahs for ${paraText()} $_currentPara",
         style: TextStyle(fontSize: 18),
       ),
       actions:
@@ -115,7 +116,7 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
               ]
               : [
                 IconButton(
-                  tooltip: "Next Para",
+                  tooltip: "Next ${paraText()}",
                   icon: const Icon(Icons.arrow_back),
                   onPressed: () {
                     _currentPara = _currentPara >= 30 ? 1 : _currentPara + 1;
@@ -123,7 +124,7 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
                   },
                 ),
                 IconButton(
-                  tooltip: "Previous Para",
+                  tooltip: "Previous ${paraText()}",
                   icon: const Icon(Icons.arrow_forward),
                   onPressed: () {
                     _currentPara = _currentPara <= 1 ? 30 : _currentPara - 1;

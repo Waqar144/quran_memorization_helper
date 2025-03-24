@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:quran_memorization_helper/models/settings.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'package:quran_memorization_helper/utils/colors.dart';
+import 'package:quran_memorization_helper/utils/utils.dart';
 
 class AyatListItem extends StatefulWidget {
   const AyatListItem({
@@ -56,7 +57,7 @@ class _AyatListItemState extends State<AyatListItem> {
           children: textSpansForAyah(widget.ayah),
           style: TextStyle(
             color: Theme.of(context).textTheme.bodyMedium?.color,
-            fontFamily: "Al Mushaf",
+            fontFamily: getQuranFont(),
             fontSize: Settings.fontSize,
             letterSpacing: 0,
             wordSpacing: Settings.wordSpacing,

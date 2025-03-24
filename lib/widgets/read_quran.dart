@@ -397,8 +397,9 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
   }
 
   Future<List<Page>> doload() async {
+    final folder = getQuranTextFolder();
     int para = widget.model.currentPara;
-    final data = await rootBundle.loadString("assets/16line/$para.json");
+    final data = await rootBundle.loadString("assets/$folder/$para.json");
     final pagesList = jsonDecode(data) as List<dynamic>;
     List<Page> pages = [];
     List<int> surahAyahStarts =
@@ -709,7 +710,12 @@ class _PageWidgetState extends State<PageWidget> {
     _subscription?.cancel();
   }
 
-  Widget getTwoLinesBismillah(int surahIdx, TextStyle style, double rowHeight) {
+  Widget getTwoLinesBismillah(
+    int surahIdx,
+    TextStyle style,
+    double rowHeight,
+    bool is16Line,
+  ) {
     SurahData surahData = surahDataForIdx(surahIdx, arabic: true);
 
     return Column(
@@ -763,19 +769,26 @@ class _PageWidgetState extends State<PageWidget> {
     surahIdx = -surahIdx;
     final style = TextStyle(
       color: Theme.of(context).textTheme.bodyMedium?.color,
-      fontFamily: "Al Mushaf",
-      fontSize: (rowHeight / 1.8).floorToDouble(),
+      fontFamily: getQuranFont(),
+      fontSize: 26,
       letterSpacing: 0.0,
       wordSpacing: Settings.wordSpacing,
     );
 
-    // 30th para ?
-    if (widget.pageIndex >= 528) {
-      if (surahHas2LineHeadress(surahIdx)) {
-        return getTwoLinesBismillah(surahIdx, style, rowHeight);
+    final is16Line = Settings.instance.mushaf == Mushaf.Indopak16Line;
+    if (is16Line) {
+      // 30th para ?
+      if (widget.pageIndex >= 528) {
+        if (surahHas2LineHeadress(surahIdx)) {
+          return getTwoLinesBismillah(surahIdx, style, rowHeight, true);
+        }
+      } else if (widget._pageLines.length == 15) {
+        return getTwoLinesBismillah(surahIdx, style, rowHeight, true);
       }
-    } else if (widget._pageLines.length == 15) {
-      return getTwoLinesBismillah(surahIdx, style, rowHeight);
+    } else {
+      if (widget._pageLines.length == 14) {
+        return getTwoLinesBismillah(surahIdx, style, rowHeight, false);
+      }
     }
 
     SurahData surahData = surahDataForIdx(surahIdx, arabic: true);
@@ -844,6 +857,26 @@ class _PageWidgetState extends State<PageWidget> {
       95 => ayahIndex == 18,
       _ => false,
     };
+  }
+
+  static String getVerseEndSymbol(int verseNumber) {
+    var arabicNumeric = '';
+    const List<String> arabicNumbers = [
+      "٠",
+      "١",
+      "٢",
+      "٣",
+      "٤",
+      "٥",
+      "٦",
+      "٧",
+      "٨",
+      "٩",
+    ];
+    for (var e in verseNumber.toString().codeUnits) {
+      arabicNumeric += arabicNumbers[e - 48];
+    }
+    return '\u06dd$arabicNumeric';
   }
 
   static String getAyahEndMarkerGlyphCode(int surahIndex, int ayahIndex) {
@@ -920,7 +953,10 @@ class _PageWidgetState extends State<PageWidget> {
       List<String> fullAyahTextWords = widget
           .getFullAyahText(a.ayahIndex, widget.pageIndex)
           .split('\u200c');
-      if (isSajdaAyat(surahIdx, surahAyahIdx)) {
+      final is16Line = Settings.instance.mushaf == Mushaf.Indopak16Line;
+      final isSajdaAya = isSajdaAyat(surahIdx, surahAyahIdx);
+
+      if (is16Line && isSajdaAya) {
         text = text.replaceFirst('\u06E9', '');
         text = text.replaceFirst('\ue022', ''); // ruku marker (para 9)
 
@@ -945,6 +981,7 @@ class _PageWidgetState extends State<PageWidget> {
       bool darkMode = Theme.of(context).brightness == Brightness.dark;
       List<String> words = text.split('\u200c'); // zwj
       int i = getFirstWordIndex(fullAyahTextWords, words);
+      final addSpacesBetweenWords = shouldAddSpaces(widget.pageIndex, lineIdx);
 
       for (final w in words) {
         int wordIdx = i;
@@ -971,15 +1008,19 @@ class _PageWidgetState extends State<PageWidget> {
         // separator
         spans.add(const TextSpan(text: '\u200c'));
         // space
-        if (shouldAddSpaces(widget.pageIndex, lineIdx)) {
+        if (is16Line && addSpacesBetweenWords) {
           spans.add(TextSpan(text: ' ', style: style));
         }
         i++;
       }
 
       if (_shouldDrawAyahEndMarker(a.ayahIndex, lineIdx)) {
-        final marker = getAyahEndMarkerGlyphCode(surahIdx, surahAyahIdx);
-        bool hasRukuMarker = a.text.lastIndexOf("\uE022") != -1;
+        String marker =
+            is16Line
+                ? getAyahEndMarkerGlyphCode(surahIdx, surahAyahIdx)
+                : getVerseEndSymbol(surahAyahIdx + 1);
+
+        bool hasRukuMarker = is16Line && a.text.lastIndexOf("\uE022") != -1;
         spans.add(
           TextSpan(
             text: marker,
@@ -991,7 +1032,7 @@ class _PageWidgetState extends State<PageWidget> {
                           ? Colors.amber.shade700.withAlpha(125)
                           : Colors.amber.shade100)
                       : null,
-              fontFamily: "AyahNumber",
+              fontFamily: is16Line ? "AyahNumber" : "Uthmani",
               fontSize: surahAyahIdx > 100 ? 24 : 20,
             ),
           ),
@@ -1012,8 +1053,8 @@ class _PageWidgetState extends State<PageWidget> {
       textDirection: TextDirection.rtl,
       style: TextStyle(
         color: Theme.of(context).textTheme.bodyMedium?.color,
-        fontFamily: "Al Mushaf",
-        fontSize: (rowHeight / 1.8).floorToDouble(),
+        fontFamily: getQuranFont(),
+        fontSize: 28, // min(26, (rowHeight / 1.8).floorToDouble()),
         letterSpacing: 0,
         wordSpacing: 1,
       ),
@@ -1028,9 +1069,9 @@ class _PageWidgetState extends State<PageWidget> {
             surahForAyah(widget._pageLines.last.lineAyahs.last.ayahIndex),
             arabic: true,
           ).name,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
-            fontFamily: "Al Mushaf",
+            fontFamily: getQuranFont(),
             letterSpacing: 0,
           ),
         ),
@@ -1043,9 +1084,9 @@ class _PageWidgetState extends State<PageWidget> {
         const Spacer(),
         Text(
           getParaNameForIndex(widget.paraNum - 1),
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
-            fontFamily: "Al Mushaf",
+            fontFamily: getQuranFont(),
             letterSpacing: 0,
           ),
         ),
@@ -1108,11 +1149,13 @@ class _PageWidgetState extends State<PageWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final numPageLines =
+        Settings.instance.mushaf == Mushaf.Indopak16Line ? 16 : 15;
     final double height =
         availableHeight(context) -
         ( /*padding,margin=*/ 16 +
             /*topborder=*/ 24);
-    final double rowHeight = max((height / 16.0).floorToDouble(), 38.0);
+    final double rowHeight = max((height / numPageLines).floorToDouble(), 38.0);
     return Padding(
       padding: const EdgeInsets.only(left: 8, right: 8),
       child: Column(children: [_pageTopBorder(), ..._pageLines(rowHeight)]),

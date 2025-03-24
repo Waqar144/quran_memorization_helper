@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'pages.dart';
+import 'package:quran_memorization_helper/models/settings.dart';
 
 int toSurahAyahOffset(int surahIdx, int absoluteAyah) {
   if (surahIdx > _surahAyahOffsets.length) {
@@ -217,11 +218,18 @@ List<int> surahAyahOffsetsForPara(int paraIdx) {
 }
 
 int surahForPage(int page) {
-  if (page < 0 || page > 548) {
+  if (Settings.instance.mushaf == Mushaf.Indopak16Line &&
+      (page < 0 || page > 548)) {
+    throw "Invalid page number: $page";
+  } else if (Settings.instance.mushaf == Mushaf.Uthmani15Line &&
+      (page < 0 || page > 604)) {
     throw "Invalid page number: $page";
   }
+  final is16line = Settings.instance.mushaf == Mushaf.Indopak16Line;
+  final list = is16line ? surah16LinePageOffset : surah15LinePageOffset;
+
   for (int i = 0; i < 114; ++i) {
-    if (page >= surah16LinePageOffset[i]) {
+    if (page >= list[i]) {
       continue;
     }
     return i - 1;

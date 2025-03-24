@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quran_memorization_helper/models/quiz.dart';
+import 'package:quran_memorization_helper/models/settings.dart';
 
 class QuizParaSelectionPage extends StatelessWidget {
   final ValueNotifier<List<int>> _selectedParas = ValueNotifier([]);
@@ -20,9 +21,13 @@ class QuizParaSelectionPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final is16Line = Settings.instance.mushaf == Mushaf.Indopak16Line;
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Select Paras For Quiz"),
+        title:
+            is16Line
+                ? const Text("Select Paras For Quiz")
+                : const Text("Select Juz For Quiz"),
         actions: [
           IconButton(
             icon: const Icon(Icons.check),
@@ -72,7 +77,10 @@ class QuizParaSelectionPage extends StatelessWidget {
                   itemCount: 30,
                   itemBuilder: (context, index) {
                     return CheckboxListTile(
-                      title: Text("Para ${index + 1}"),
+                      title:
+                          is16Line
+                              ? Text("Para ${index + 1}")
+                              : Text("Juz ${index + 1}"),
                       value: selection.contains(index),
                       onChanged: (bool? v) {
                         if (v == null) return;
