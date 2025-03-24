@@ -3,6 +3,7 @@ import 'package:quran_memorization_helper/models/settings.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/surahs.dart';
 import 'package:quran_memorization_helper/utils/colors.dart';
+import 'package:quran_memorization_helper/utils/utils.dart';
 
 class _AyatListItemWithMetadata extends StatelessWidget {
   final MutashabihaAyat ayah;
@@ -46,7 +47,7 @@ class _AyatListItemWithMetadata extends StatelessWidget {
           children: textSpansForAyah(ayah),
           style: TextStyle(
             color: Theme.of(context).textTheme.bodyMedium?.color,
-            fontFamily: "Al Mushaf",
+            fontFamily: getQuranFont(),
             fontSize: Settings.fontSize,
             letterSpacing: 0,
             wordSpacing: Settings.wordSpacing,
@@ -59,7 +60,7 @@ class _AyatListItemWithMetadata extends StatelessWidget {
       subtitle: Row(
         children: [
           Text(
-            "${surahNameForIdx(ayah.surahIdx)}:${ayah.surahAyahIndexesString()} - Para: ${ayah.paraNumber()}",
+            "${surahNameForIdx(ayah.surahIdx)}:${ayah.surahAyahIndexesString()} - ${paraText()}: ${ayah.paraNumber()}",
           ),
           IconButton(onPressed: onGoto, icon: const Icon(Icons.shortcut)),
         ],

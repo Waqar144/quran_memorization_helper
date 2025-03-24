@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:quran_memorization_helper/models/settings.dart';
 import 'page_constants.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'package:quran_memorization_helper/widgets/mutashabiha_ayat_list_item.dart';
+import 'package:quran_memorization_helper/utils/utils.dart';
 
 /// The page where you select the para for which the mutashabihas will be displayed
 class MutashabihasPage extends StatelessWidget {
@@ -9,15 +11,21 @@ class MutashabihasPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isIndoPak = Settings.instance.mushaf == Mushaf.Indopak16Line;
     return Scaffold(
-      appBar: AppBar(title: const Text("Mutashabihas By Para")),
+      appBar: AppBar(
+        title:
+            isIndoPak
+                ? const Text("Mutashabihas By Para")
+                : const Text("Mutashabihas By Para"),
+      ),
       body: ListView.separated(
         separatorBuilder: (context, index) => const Divider(height: 1),
         itemCount: 30,
         itemBuilder: (context, index) {
           return ListTile(
             visualDensity: VisualDensity.compact,
-            title: Text("Para ${index + 1}"),
+            title: Text("${paraText()} ${index + 1}"),
             onTap: () {
               Navigator.of(
                 context,
@@ -46,7 +54,9 @@ class ParaMutashabihas extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Mutashabihas for Para ${_para + 1}")),
+      appBar: AppBar(
+        title: Text("Mutashabihas for ${paraText()} ${_para + 1}"),
+      ),
       body: FutureBuilder(
         future: _importParaMutashabihas(),
         builder: (context, snapshot) {

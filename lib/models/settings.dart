@@ -4,6 +4,8 @@ import 'dart:async';
 import 'dart:core';
 import 'package:quran_memorization_helper/utils/utils.dart' as utils;
 
+enum Mushaf { Indopak16Line, Uthmani15Line }
+
 class Settings extends ChangeNotifier {
   static final Settings _instance = Settings._private();
   static Settings get instance => _instance;
@@ -11,6 +13,7 @@ class Settings extends ChangeNotifier {
   int _currentReadingPage = 0;
   Timer? timer;
   ThemeMode _themeMode = ThemeMode.system;
+  Mushaf _mushaf = Mushaf.Indopak16Line;
   String _translationFile = "";
   bool _tapToShowTranslation = false;
 
@@ -34,6 +37,15 @@ class Settings extends ChangeNotifier {
   set themeMode(ThemeMode m) {
     if (m != _themeMode) {
       _themeMode = m;
+      notifyListeners();
+      persist();
+    }
+  }
+
+  Mushaf get mushaf => _mushaf;
+  set mushaf(Mushaf m) {
+    if (m != _mushaf) {
+      _mushaf = m;
       notifyListeners();
       persist();
     }
@@ -68,6 +80,7 @@ class Settings extends ChangeNotifier {
       'themeMode': _themeMode.index,
       'translationFile': _translationFile,
       'tapToShowTranslation': _tapToShowTranslation,
+      'mushaf': _mushaf.index,
     };
     String json = const JsonEncoder.withIndent("  ").convert(map);
     await utils.saveJsonToDisk(json, "settings");
@@ -82,6 +95,7 @@ class Settings extends ChangeNotifier {
           ThemeMode.values[json["themeMode"] ?? ThemeMode.system.index];
       _translationFile = json["translationFile"] ?? "";
       _tapToShowTranslation = json["tapToShowTranslation"] ?? false;
+      _mushaf = Mushaf.values[json["mushaf"] ?? Mushaf.Indopak16Line.index];
     } catch (e) {
       // nothing for now
     }

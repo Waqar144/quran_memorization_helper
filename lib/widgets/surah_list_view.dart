@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:quran_memorization_helper/quran_data/surahs.dart';
 import 'package:quran_memorization_helper/quran_data/pages.dart';
 import 'package:quran_memorization_helper/utils/utils.dart';
+import 'package:quran_memorization_helper/models/settings.dart';
 
 int lastSurah = 0;
 double? lastScrollPosition;
@@ -19,7 +20,11 @@ class SurahListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    int currentPage = currentPageInPara + para16LinePageOffsets[currentParaIdx];
+    final is16line = Settings.instance.mushaf == Mushaf.Indopak16Line;
+    final surahList = is16line ? surah16LinePageOffset : surah15LinePageOffset;
+    final paraPageList = paraPageOffsetsList();
+
+    int currentPage = currentPageInPara + paraPageList[currentParaIdx];
     int currentSurah = surahForPage(currentPage);
     double surahScrollTo =
         lastScrollPosition != null && lastSurah == currentSurah
@@ -56,14 +61,14 @@ class SurahListView extends StatelessWidget {
             ),
             title: Text(
               surahDataForIdx(index, arabic: true).name,
-              style: const TextStyle(
+              style: TextStyle(
                 letterSpacing: 0,
                 fontSize: 26,
-                fontFamily: 'Al Mushaf',
+                fontFamily: getQuranFont(),
               ),
             ),
             trailing: Text(
-              "${surah16LinePageOffset[index] + 1}",
+              "${surahList[index] + 1}",
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 16,

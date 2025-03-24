@@ -73,6 +73,7 @@ flutter:
     - assets/ur.jalandhry.txt
     - assets/mutashabiha_data.json
     - assets/16line/
+    - assets/15line/
     - android/app/src/main/res/mipmap-hdpi/ic_launcher.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -90,6 +91,9 @@ flutter:
     - family: Al Mushaf
       fonts:
         - asset: fonts/PDMS_SALEEM_QURANFONTQESHIP_0.ttf
+    - family: Uthmanic
+      fonts:
+        - asset: fonts/uthmanic_hafs1_ver17.ttf
     - family: AyahNumber
       fonts:
         - asset: fonts/ayahNumFont.ttf

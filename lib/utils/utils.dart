@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:quran_memorization_helper/models/settings.dart';
 
 Future<String> saveJsonToDisk(String json, String fileName) async {
   if (json.isEmpty) throw "Empty json";
@@ -102,3 +103,17 @@ String toUrduNumber(int num) {
 }
 
 const String urduKhatma = "\u06D4";
+
+String getQuranTextFolder() {
+  return Settings.instance.mushaf == Mushaf.Indopak16Line ? "16line" : "15line";
+}
+
+String getQuranFont() {
+  return Settings.instance.mushaf == Mushaf.Indopak16Line
+      ? "Al Mushaf"
+      : "Uthmanic";
+}
+
+String paraText() {
+  return Settings.instance.mushaf == Mushaf.Indopak16Line ? "Para" : "Juz";
+}

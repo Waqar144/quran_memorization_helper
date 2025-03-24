@@ -122,10 +122,18 @@ String _themeModeToString(ThemeMode m) {
   };
 }
 
+String _mushafToString(Mushaf m) {
+  return switch (m) {
+    Mushaf.Indopak16Line => "16 Line",
+    Mushaf.Uthmani15Line => "15 Line (Uthmani)",
+  };
+}
+
 class SettingsPage extends StatefulWidget {
   final List<int> fontSizes = [20, 22, 24, 26, 28, 30, 32];
   final List<double> wordSpacings = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0];
   final List<ThemeMode> themeModes = ThemeMode.values;
+  final List<Mushaf> mushafs = Mushaf.values;
   final ParaAyatModel paraModel;
   SettingsPage(this.paraModel, {super.key});
 
@@ -135,6 +143,7 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   ThemeMode themeMode = Settings.instance.themeMode;
+  Mushaf selectedMushaf = Settings.instance.mushaf;
   static const platform = MethodChannel('org.quran_rev_helper/backupDB');
 
   void _showError(String message) async {
@@ -239,7 +248,7 @@ class _SettingsPageState extends State<SettingsPage> {
       title: const Text("Theme"),
       subtitle: const Text("Switch between light or dark mode"),
       trailing: SizedBox(
-        width: 100,
+        width: 120,
         child: DropdownButtonFormField<ThemeMode>(
           borderRadius: const BorderRadius.all(Radius.circular(5)),
           decoration: const InputDecoration(contentPadding: EdgeInsets.all(8)),
@@ -256,6 +265,36 @@ class _SettingsPageState extends State<SettingsPage> {
               DropdownMenuItem(
                 value: themeMode,
                 child: Text(_themeModeToString(themeMode)),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _createMushafSelectionTile() {
+    return ListTile(
+      title: const Text("Mushaf"),
+      subtitle: const Text("Switch between available Mushafs"),
+      trailing: SizedBox(
+        width: 180,
+        child: DropdownButtonFormField<Mushaf>(
+          isDense: true,
+          borderRadius: const BorderRadius.all(Radius.circular(5)),
+          decoration: const InputDecoration(contentPadding: EdgeInsets.all(8)),
+          value: selectedMushaf,
+          onChanged: (Mushaf? val) {
+            if (val != null) {
+              selectedMushaf = val;
+              Settings.instance.mushaf = val;
+            }
+          },
+          padding: EdgeInsets.zero,
+          items: [
+            for (final mushaf in widget.mushafs)
+              DropdownMenuItem(
+                value: mushaf,
+                child: Text(_mushafToString(mushaf)),
               ),
           ],
         ),
@@ -374,6 +413,7 @@ class _SettingsPageState extends State<SettingsPage> {
       body: ListView(
         children: [
           _createThemeModeTile(),
+          _createMushafSelectionTile(),
           _tapToShowTranslationTile(),
           _customTranslationTile(),
           _createBackupWidget(),

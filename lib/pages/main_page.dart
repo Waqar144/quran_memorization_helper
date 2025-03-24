@@ -26,13 +26,17 @@ class _MainPageState extends State<MainPage>
   final ScrollController _scrollController = ScrollController();
   late final TabController _drawerTabController;
   PageController _pageController = PageController(keepPage: false);
+  Mushaf _currentFontStyle = Mushaf.Indopak16Line;
 
   @override
   void initState() {
     _paraModel = ParaAyatModel(onParaChanged);
     _drawerTabController = TabController(length: 2, vsync: this);
 
-    QuranText.instance.loadData();
+    _currentFontStyle = Settings.instance.mushaf;
+    QuranText.instance.loadData(_currentFontStyle);
+
+    Settings.instance.addListener(_onSettingsChanged);
 
     WidgetsBinding.instance.addObserver(this);
     super.initState();
@@ -42,7 +46,17 @@ class _MainPageState extends State<MainPage>
   void dispose() {
     _paraModel.dispose();
     WidgetsBinding.instance.removeObserver(this);
+    Settings.instance.removeListener(_onSettingsChanged);
     super.dispose();
+  }
+
+  void _onSettingsChanged() {
+    if (_currentFontStyle != Settings.instance.mushaf) {
+      setState(() {
+        _currentFontStyle = Settings.instance.mushaf;
+        QuranText.instance.loadData(_currentFontStyle);
+      });
+    }
   }
 
   void onParaChanged(int para, bool showLastPage, int jumpToPage) {
@@ -172,9 +186,14 @@ class _MainPageState extends State<MainPage>
       return;
     }
     try {
-      int page = surah16LinePageOffset[surahIndex];
+      final is16line = Settings.instance.mushaf == Mushaf.Indopak16Line;
+      final surahList =
+          is16line ? surah16LinePageOffset : surah15LinePageOffset;
+
+      int page = surahList[surahIndex];
       int paraIdx = paraForPage(page);
-      int paraStartPage = para16LinePageOffsets[paraIdx];
+      final paraPageOffsets = paraPageOffsetsList();
+      int paraStartPage = paraPageOffsets[paraIdx];
       int jumpToPage = page - paraStartPage;
 
       if ((_paraModel.currentPara - 1) != paraIdx) {
@@ -228,7 +247,7 @@ class _MainPageState extends State<MainPage>
                   height: 50,
                   child: TabBar(
                     controller: _drawerTabController,
-                    tabs: const [Tab(text: "Para"), Tab(text: "Surah")],
+                    tabs: [Tab(text: paraText()), Tab(text: "Surah")],
                   ),
                 ),
                 Expanded(
@@ -279,7 +298,7 @@ class _MainPageState extends State<MainPage>
         int? currentPageInPara = _pageController.page?.floor();
         int currentPage =
             (currentPageInPara ?? 0) +
-            para16LinePageOffsets[_paraModel.currentPara - 1];
+            paraPageOffsetsList()[_paraModel.currentPara - 1];
         int currentSurah = surahForPage(currentPage);
         _onSurahTapped(currentSurah == 113 ? 0 : currentSurah + 1, pop: false);
       },
@@ -287,7 +306,7 @@ class _MainPageState extends State<MainPage>
         int? currentPageInPara = _pageController.page?.floor();
         int currentPage =
             (currentPageInPara ?? 0) +
-            para16LinePageOffsets[_paraModel.currentPara - 1];
+            paraPageOffsetsList()[_paraModel.currentPara - 1];
         int currentSurah = surahForPage(currentPage);
         _onSurahTapped(currentSurah == 0 ? 113 : currentSurah - 1, pop: false);
       },

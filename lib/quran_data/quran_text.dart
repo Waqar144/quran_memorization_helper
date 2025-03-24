@@ -1,21 +1,26 @@
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:convert';
+import 'package:quran_memorization_helper/models/settings.dart';
+import 'package:quran_memorization_helper/utils/utils.dart';
 
 class QuranText {
   static final QuranText _instance = QuranText._private();
   static QuranText get instance => _instance;
 
-  late final List<String> _ayahs;
+  List<String> _ayahs = [];
   bool _isReady = false;
 
-  void loadData() async {
+  void loadData(Mushaf fontStyle) async {
+    String folder = getQuranTextFolder();
+    print("Load folder: $folder");
+
     _ayahs = List.filled(6236, "", growable: false);
 
     // final sw = Stopwatch()..start();
 
     for (int i = 1; i <= 30; ++i) {
       final data = await rootBundle.loadString(
-        "assets/16line/$i.json",
+        "assets/$folder/$i.json",
         cache: false,
       );
       final json = jsonDecode(data) as List<dynamic>;
