@@ -5,19 +5,19 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "counter",
+            "name": "QuranMemHelp",
             "request": "launch",
             "type": "dart",
             "abc": "def"
         },
         {
-            "name": "counter (profile mode)",
+            "name": "QuranMemHelp (profile)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
-            "name": "counter (release mode)",
+            "name": "QuranMemHelp (release)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"
