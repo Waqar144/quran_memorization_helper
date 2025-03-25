@@ -47,7 +47,7 @@ class _MainPageState extends State<MainPage>
 
   void onParaChanged(int para, bool showLastPage, int jumpToPage) {
     // if para is same
-    if (para == _paraModel.currentPara) {
+    if (para == _paraModel.currentPara && _pageController.hasClients) {
       // page also same?
       if (jumpToPage != -1 &&
           _pageController.page != null &&
