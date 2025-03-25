@@ -31,8 +31,9 @@ int _getPageForAyah(int ayahIndex) {
   final is16line = Settings.instance.mushaf == Mushaf.Indopak16Line;
   final pageAyahOffsets =
       is16line ? pageAyahOffsets16line : pageAyahOffsets15line;
+  final startIndex = is16line ? 1 : 0;
 
-  for (int i = 1; i < pageAyahOffsets.length; ++i) {
+  for (int i = startIndex; i < pageAyahOffsets.length; ++i) {
     if (ayahIndex >= pageAyahOffsets[i]) continue;
     return i - 1;
   }
