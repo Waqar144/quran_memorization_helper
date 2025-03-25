@@ -74,9 +74,14 @@ Uint16List paraPageOffsetsList() {
 }
 
 int pageCountForPara(int paraIdx) {
-  final is16Line = Settings.instance.mushaf == Mushaf.Indopak16Line;
-  if (is16Line && paraIdx == 29) {
-    return 22;
+  if (paraIdx == 29) {
+    if (Settings.instance.mushaf == Mushaf.Indopak16Line) {
+      return 22;
+    } else if (Settings.instance.mushaf == Mushaf.Uthmani15Line) {
+      return 23;
+    } else {
+      throw "Unknown Mushaf";
+    }
   }
 
   final list = paraPageOffsetsList();
