@@ -82,7 +82,11 @@ class _MainPageState extends State<MainPage>
       if (Settings.instance.currentReadingPara == _paraModel.currentPara) {
         jumpToPage = Settings.instance.currentReadingPage + 1;
       }
-      onParaChanged(_paraModel.currentPara, false, jumpToPage);
+      try {
+        onParaChanged(_paraModel.currentPara, false, jumpToPage);
+      } catch (e) {
+        showSnackBarMessage(context, error: true, "Error: $e");
+      }
     } else {
       if (mounted) showSnackBarMessage(context, error: true, "Error: $error");
     }
@@ -167,15 +171,19 @@ class _MainPageState extends State<MainPage>
     if (surahIndex < 0 || surahIndex > 113) {
       return;
     }
-    int page = surah16LinePageOffset[surahIndex];
-    int paraIdx = paraForPage(page);
-    int paraStartPage = para16LinePageOffsets[paraIdx];
-    int jumpToPage = page - paraStartPage;
+    try {
+      int page = surah16LinePageOffset[surahIndex];
+      int paraIdx = paraForPage(page);
+      int paraStartPage = para16LinePageOffsets[paraIdx];
+      int jumpToPage = page - paraStartPage;
 
-    if ((_paraModel.currentPara - 1) != paraIdx) {
-      _paraModel.setCurrentPara(paraIdx + 1, jumpToPage: jumpToPage + 1);
-    } else {
-      _pageController.jumpToPage(jumpToPage);
+      if ((_paraModel.currentPara - 1) != paraIdx) {
+        _paraModel.setCurrentPara(paraIdx + 1, jumpToPage: jumpToPage + 1);
+      } else {
+        _pageController.jumpToPage(jumpToPage);
+      }
+    } catch (e) {
+      showSnackBarMessage(context, error: true, "Error: $e");
     }
   }
 
