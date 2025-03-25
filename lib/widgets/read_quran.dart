@@ -981,7 +981,11 @@ class _PageWidgetState extends State<PageWidget> {
       bool darkMode = Theme.of(context).brightness == Brightness.dark;
       List<String> words = text.split('\u200c'); // zwj
       int i = getFirstWordIndex(fullAyahTextWords, words);
-      final addSpacesBetweenWords = shouldAddSpaces(widget.pageIndex, lineIdx);
+      final addSpacesBetweenWords = shouldAddSpaces(
+        widget.pageIndex,
+        lineIdx,
+        Settings.instance.mushaf,
+      );
 
       for (final w in words) {
         int wordIdx = i;
@@ -1008,7 +1012,7 @@ class _PageWidgetState extends State<PageWidget> {
         // separator
         spans.add(const TextSpan(text: '\u200c'));
         // space
-        if (is16Line && addSpacesBetweenWords) {
+        if (addSpacesBetweenWords) {
           spans.add(TextSpan(text: ' ', style: style));
         }
         i++;
