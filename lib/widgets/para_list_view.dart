@@ -42,7 +42,7 @@ class ParaListView extends StatelessWidget {
 
   Widget paraListItem(int index, BuildContext context) {
     int count = model.markedAyahCountForPara(index);
-    final paraPageList = paraPageOffsetsList();
+    // // final paraPageList = paraPageOffsetsList();
     final is16line = Settings.instance.mushaf == Mushaf.Indopak16Line;
 
     return Directionality(
@@ -82,18 +82,6 @@ class ParaListView extends StatelessWidget {
             Text(
               count > 0 ? "$count" : " ",
               style: const TextStyle(fontSize: 16, color: Colors.red),
-            ),
-            const SizedBox(width: 5),
-            SizedBox(
-              width: 30,
-              child: Text(
-                "${paraPageList[index] + 1}",
-                textAlign: TextAlign.left,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Theme.of(context).textTheme.bodyMedium?.color,
-                ),
-              ),
             ),
           ],
         ),
