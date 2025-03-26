@@ -81,7 +81,7 @@ TextStyle _mutStyle(bool dark) {
 double availableHeight(BuildContext context) {
   // top,bottom padding, will include notch and stuff
   final double top = View.of(context).padding.top;
-  final double bottom = View.of(context).padding.bottom;
+  final double bottom = MediaQuery.of(context).padding.bottom;
   // dont go below 700, we will scroll if below
   return max(700, MediaQuery.of(context).size.height - (top + bottom));
 }
@@ -772,9 +772,9 @@ class _PageWidgetState extends State<PageWidget> {
     final style = TextStyle(
       color: Theme.of(context).textTheme.bodyMedium?.color,
       fontFamily: getQuranFont(),
-      fontSize: 26,
+      fontSize: Theme.of(context).textTheme.titleLarge?.fontSize,
       letterSpacing: 0.0,
-      wordSpacing: Settings.wordSpacing,
+      wordSpacing: 0,
     );
 
     final is16Line = Settings.instance.mushaf == Mushaf.Indopak16Line;
@@ -1184,7 +1184,7 @@ class _PageWidgetState extends State<PageWidget> {
         Settings.instance.mushaf == Mushaf.Indopak16Line ? 16 : 15;
     final double height =
         availableHeight(context) -
-        ( /*padding,margin=*/ 16 +
+        ( /*padding,margin=*/ 24 +
             /*topborder=*/ 24);
     final double rowHeight = max((height / numPageLines).floorToDouble(), 38.0);
     return Padding(
