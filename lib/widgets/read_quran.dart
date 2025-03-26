@@ -1065,7 +1065,6 @@ class _PageWidgetState extends State<PageWidget> {
                           : Colors.amber.shade100)
                       : null,
               fontFamily: is16Line ? "AyahNumber" : "Uthmani",
-              fontSize: surahAyahIdx > 100 ? 24 : 20,
             ),
           ),
         );
@@ -1170,7 +1169,7 @@ class _PageWidgetState extends State<PageWidget> {
         SizedBox(
           height: rowHeight,
           child: FittedBox(
-            fit: BoxFit.contain,
+            fit: BoxFit.scaleDown,
             child: _buildLine(l, idx, rowHeight, ayahData),
           ),
         ),
