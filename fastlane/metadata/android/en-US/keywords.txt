@@ -1,4 +1,8 @@
 quran
 islam
 quran16line
+quran15line
+huffaz
+mutashabiha
+uthmani
 hafiz

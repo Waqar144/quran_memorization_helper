@@ -1,7 +1,7 @@
-Quran 16 Line is an app for people that are memorizing or have already memorized the holy quran. The pages are in 16 Line format which is the most popular format in the Indopak region.
+This is an app for people that are memorizing or have already memorized the holy quran aka huffaz. There are two page formats that this app supports, 16 line and 15 line.
 
 You can use this app to:
 - Read quran
 - Mark ayahs that you want to revise more often or that have mistakes
 - Take quiz
-- See list of mutashabihas for each para/juz
+- See list of mutashabihas (similar ayats) for each para/juz
