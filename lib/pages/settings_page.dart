@@ -251,7 +251,6 @@ class _SettingsPageState extends State<SettingsPage> {
         width: 120,
         child: DropdownButtonFormField<ThemeMode>(
           borderRadius: const BorderRadius.all(Radius.circular(5)),
-          decoration: const InputDecoration(contentPadding: EdgeInsets.all(8)),
           value: themeMode,
           onChanged: (ThemeMode? val) {
             if (val != null) {
@@ -281,7 +280,6 @@ class _SettingsPageState extends State<SettingsPage> {
         child: DropdownButtonFormField<Mushaf>(
           isDense: true,
           borderRadius: const BorderRadius.all(Radius.circular(5)),
-          decoration: const InputDecoration(contentPadding: EdgeInsets.all(8)),
           value: selectedMushaf,
           onChanged: (Mushaf? val) {
             if (val != null) {
