@@ -10,12 +10,14 @@ import 'package:quran_memorization_helper/models/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/surahs.dart';
 import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
+import 'package:quran_memorization_helper/quran_data/rukus.dart';
 import 'package:quran_memorization_helper/quran_data/should_add_spaces.dart';
 import 'package:quran_memorization_helper/utils/utils.dart';
 import 'package:quran_memorization_helper/widgets/mutashabiha_ayat_list_item.dart';
 import 'package:quran_memorization_helper/widgets/tap_and_longpress_gesture_recognizer.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/gestures.dart';
 import 'dart:math';
 
 final _markedWordStyleLight = TextStyle(
@@ -839,6 +841,22 @@ class _PageWidgetState extends State<PageWidget> {
                 ayahIdx);
   }
 
+  void _onRukuTapped(int ayahIndex) async {
+    final rukuData = getRukuData(ayahIndex)!;
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return SimpleDialog(
+          title: const Text("Ruku"),
+          children: [
+            ListTile(title: Text("Para Ruku No: ${rukuData.paraRuku + 1}")),
+            ListTile(title: Text("Surah Ruku No: ${rukuData.surahRuku + 1}")),
+          ],
+        );
+      },
+    );
+  }
+
   static bool isSajdaAyat(int surahIndex, int ayahIndex) {
     return switch (surahIndex) {
       6 => ayahIndex == 205,
@@ -1024,10 +1042,20 @@ class _PageWidgetState extends State<PageWidget> {
                 ? getAyahEndMarkerGlyphCode(surahIdx, surahAyahIdx)
                 : getVerseEndSymbol(surahAyahIdx + 1);
 
-        bool hasRukuMarker = is16Line && a.text.lastIndexOf("\uE022") != -1;
+        bool hasRukuMarker = false;
+        if (is16Line) {
+          final ruku = getRukuData(a.ayahIndex);
+          hasRukuMarker = ruku != null;
+        }
+
         spans.add(
           TextSpan(
             text: marker,
+            recognizer:
+                hasRukuMarker
+                    ? (TapGestureRecognizer()
+                      ..onTap = () => _onRukuTapped(a.ayahIndex))
+                    : null,
             style: TextStyle(
               color: Theme.of(context).textTheme.bodyMedium?.color,
               backgroundColor:
