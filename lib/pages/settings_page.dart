@@ -249,7 +249,8 @@ class _SettingsPageState extends State<SettingsPage> {
       subtitle: const Text("Switch between light or dark mode"),
       trailing: SizedBox(
         width: 120,
-        child: DropdownButtonFormField<ThemeMode>(
+        child: DropdownButton<ThemeMode>(
+          isExpanded: true,
           borderRadius: const BorderRadius.all(Radius.circular(5)),
           value: themeMode,
           onChanged: (ThemeMode? val) {
@@ -276,9 +277,9 @@ class _SettingsPageState extends State<SettingsPage> {
       title: const Text("Mushaf"),
       subtitle: const Text("Switch between available Mushafs"),
       trailing: SizedBox(
-        width: 180,
-        child: DropdownButtonFormField<Mushaf>(
-          isDense: true,
+        width: 120,
+        child: DropdownButton<Mushaf>(
+          isExpanded: true,
           borderRadius: const BorderRadius.all(Radius.circular(5)),
           value: selectedMushaf,
           onChanged: (Mushaf? val) {
