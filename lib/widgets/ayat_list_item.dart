@@ -58,7 +58,7 @@ class _AyatListItemState extends State<AyatListItem> {
           style: TextStyle(
             color: Theme.of(context).textTheme.bodyMedium?.color,
             fontFamily: getQuranFont(),
-            fontSize: Settings.fontSize,
+            fontSize: Settings.instance.fontSize.toDouble(),
             letterSpacing: 0,
             wordSpacing: Settings.wordSpacing,
           ),

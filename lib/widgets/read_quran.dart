@@ -948,8 +948,9 @@ class _PageWidgetState extends State<PageWidget> {
   List<TextSpan> _buildLineSpans(
     Line line,
     int lineIdx,
-    List<(int ayahIndex, int, int, Ayat?, bool)> ayahData,
-  ) {
+    List<(int ayahIndex, int, int, Ayat?, bool)> ayahData, {
+    required bool reflowMode,
+  }) {
     List<TextSpan> spans = [];
     for (final a in line.lineAyahs) {
       final (
@@ -999,11 +1000,9 @@ class _PageWidgetState extends State<PageWidget> {
       bool darkMode = Theme.of(context).brightness == Brightness.dark;
       List<String> words = text.split('\u200c'); // zwj
       int i = getFirstWordIndex(fullAyahTextWords, words);
-      final addSpacesBetweenWords = shouldAddSpaces(
-        widget.pageIndex,
-        lineIdx,
-        Settings.instance.mushaf,
-      );
+      final addSpacesBetweenWords =
+          reflowMode || // we always add spaces in reflow mode
+          shouldAddSpaces(widget.pageIndex, lineIdx, Settings.instance.mushaf);
 
       for (final w in words) {
         int wordIdx = i;
@@ -1073,6 +1072,16 @@ class _PageWidgetState extends State<PageWidget> {
     return spans;
   }
 
+  TextStyle _getQuranTextStyle(double fontSize) {
+    return TextStyle(
+      color: Theme.of(context).textTheme.bodyMedium?.color,
+      fontFamily: getQuranFont(),
+      fontSize: fontSize,
+      letterSpacing: 0,
+      wordSpacing: 1,
+    );
+  }
+
   Widget _buildLine(
     Line line,
     int lineIdx,
@@ -1125,6 +1134,32 @@ class _PageWidgetState extends State<PageWidget> {
     );
   }
 
+  List<Widget> _reflowModeText(
+    double rowHeight,
+    List<(int, int, int, Ayat?, bool)> ayahData,
+  ) {
+    List<Widget> widgets = [];
+    List<TextSpan> spans = [];
+    for (final (lineIdx, line) in widget._pageLines.indexed) {
+      if (line.lineAyahs.first.ayahIndex < 0) {
+        widgets.add(getBismillah(line.lineAyahs.first.ayahIndex, rowHeight));
+        continue;
+      }
+
+      spans.addAll(_buildLineSpans(line, lineIdx, ayahData, reflowMode: true));
+    }
+    widgets.add(
+      Text.rich(
+        TextSpan(children: spans),
+        textDirection: TextDirection.rtl,
+        textAlign: TextAlign.center,
+        softWrap: true,
+        style: _getQuranTextStyle(Settings.instance.fontSize.toDouble()),
+      ),
+    );
+    return widgets;
+  }
+
   List<Widget> _pageLines(double rowHeight) {
     int lastAyah = -1;
     List<(int, int, int, Ayat?, bool)> ayahData = [];
@@ -1155,6 +1190,10 @@ class _PageWidgetState extends State<PageWidget> {
           ));
         }
       }
+    }
+
+    if (Settings.instance.reflowMode) {
+      return _reflowModeText(rowHeight, ayahData);
     }
 
     List<Widget> widgets = [];

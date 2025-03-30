@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:core';
 import 'package:quran_memorization_helper/utils/utils.dart' as utils;
 
+// ignore: constant_identifier_names
 enum Mushaf { Indopak16Line, Uthmani15Line }
 
 class Settings extends ChangeNotifier {
@@ -16,10 +17,19 @@ class Settings extends ChangeNotifier {
   Mushaf _mushaf = Mushaf.Indopak16Line;
   String _translationFile = "";
   bool _tapToShowTranslation = false;
+  bool _reflowMode = false;
 
   // constants
-  static const double fontSize = 24;
   static const double wordSpacing = 1.0;
+
+  // The font size of ayahs if reflow mode is enabled
+  int _fontSize = 24;
+  int get fontSize => _reflowMode ? _fontSize : 24;
+  set fontSize(int val) {
+    _fontSize = val;
+    notifyListeners();
+    persist();
+  }
 
   int get currentReadingPara => _currentReadingPara;
   set currentReadingPara(int val) {
@@ -64,6 +74,15 @@ class Settings extends ChangeNotifier {
   set tapToShowTranslation(bool newValue) {
     if (newValue != _tapToShowTranslation) {
       _tapToShowTranslation = newValue;
+      notifyListeners();
+      persist();
+    }
+  }
+
+  bool get reflowMode => _reflowMode;
+  set reflowMode(bool s) {
+    if (s != _reflowMode) {
+      _reflowMode = s;
       notifyListeners();
       persist();
     }

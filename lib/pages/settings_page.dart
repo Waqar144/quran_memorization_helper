@@ -130,8 +130,7 @@ String _mushafToString(Mushaf m) {
 }
 
 class SettingsPage extends StatefulWidget {
-  final List<int> fontSizes = [20, 22, 24, 26, 28, 30, 32];
-  final List<double> wordSpacings = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0];
+  final List<int> fontSizes = [24, 26, 28, 30, 32, 34];
   final List<ThemeMode> themeModes = ThemeMode.values;
   final List<Mushaf> mushafs = Mushaf.values;
   final ParaAyatModel paraModel;
@@ -301,6 +300,50 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  Widget _createReflowModeTile() {
+    return ListTile(
+      title: const Text("Reflow text"),
+      subtitle: const Text(
+        "Reflow text instead of following page layout strictly. This allows changing font size",
+      ),
+      trailing: Switch(
+        value: Settings.instance.reflowMode,
+        onChanged: (bool newValue) {
+          Settings.instance.reflowMode = newValue;
+        },
+      ),
+    );
+  }
+
+  Widget _createFontSizeTile() {
+    return ListTile(
+      enabled: Settings.instance.reflowMode,
+      title: const Text("Font size"),
+      subtitle: const Text("Enable 'Reflow text' to change font size"),
+      trailing: SizedBox(
+        width: 80,
+        child: DropdownButtonFormField(
+          borderRadius: const BorderRadius.all(Radius.circular(5)),
+          decoration: const InputDecoration(contentPadding: EdgeInsets.all(8)),
+          value: Settings.instance.fontSize,
+          onChanged:
+              Settings.instance.reflowMode
+                  ? (int? val) {
+                    if (val != null) {
+                      Settings.instance.fontSize = val;
+                    }
+                  }
+                  : null,
+          padding: EdgeInsets.zero,
+          items: [
+            for (final size in widget.fontSizes)
+              DropdownMenuItem(value: size, child: Text(size.toString())),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _tapToShowTranslationTile() {
     return ListTile(
       title: const Text("Tap to show translation"),
@@ -413,6 +456,8 @@ class _SettingsPageState extends State<SettingsPage> {
         children: [
           _createThemeModeTile(),
           _createMushafSelectionTile(),
+          _createReflowModeTile(),
+          _createFontSizeTile(),
           _tapToShowTranslationTile(),
           _customTranslationTile(),
           _createBackupWidget(),
