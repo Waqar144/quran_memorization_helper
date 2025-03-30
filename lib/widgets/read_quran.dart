@@ -89,6 +89,21 @@ double availableHeight(BuildContext context) {
   return max(700, MediaQuery.of(context).size.height - (padding));
 }
 
+double _heightMultiplier() {
+  if (!Settings.instance.reflowMode) return 1.0;
+
+  final fontSize = Settings.instance.fontSize;
+  return switch (fontSize) {
+    24 => 1.0,
+    26 => 1.2,
+    28 => 1.3,
+    30 => 1.5,
+    32 => 1.7,
+    34 => 2.0,
+    _ => throw "unsupported font size $fontSize",
+  };
+}
+
 class Translation {
   /// The filename of translation
   final String fileName;
@@ -356,8 +371,14 @@ class Page {
 class ReadQuranWidget extends StatefulWidget {
   final ParaAyatModel model;
   final PageController pageController;
+  final VoidCallback verticalScrollResetFn;
 
-  const ReadQuranWidget(this.model, {required this.pageController, super.key});
+  const ReadQuranWidget(
+    this.model, {
+    required this.pageController,
+    super.key,
+    required this.verticalScrollResetFn,
+  });
 
   @override
   State<StatefulWidget> createState() => _ReadQuranWidget();
@@ -615,7 +636,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
         }
         return SliverToBoxAdapter(
           child: SizedBox(
-            height: availableHeight(context),
+            height: availableHeight(context) * _heightMultiplier(),
             child: NotificationListener<OverscrollNotification>(
               onNotification: (noti) {
                 if (noti.depth == 0) {
@@ -640,6 +661,9 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
                 return false;
               },
               child: PageView.builder(
+                onPageChanged: (_) {
+                  widget.verticalScrollResetFn();
+                },
                 controller: widget.pageController,
                 reverse: true,
                 itemCount: _pages.length,

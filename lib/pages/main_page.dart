@@ -115,6 +115,10 @@ class _MainPageState extends State<MainPage>
     );
   }
 
+  void _resetVerticalScrollToZero() {
+    _scrollController.jumpTo(0.0);
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.paused) {
@@ -389,6 +393,7 @@ class _MainPageState extends State<MainPage>
                       return ReadQuranWidget(
                         _paraModel,
                         pageController: _pageController,
+                        verticalScrollResetFn: _resetVerticalScrollToZero,
                       );
                     },
                   ),
