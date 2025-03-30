@@ -117,3 +117,12 @@ String getQuranFont() {
 String paraText() {
   return Settings.instance.mushaf == Mushaf.Indopak16Line ? "Para" : "Juz";
 }
+
+bool isBigScreen() {
+  final view = WidgetsBinding.instance.platformDispatcher.views.firstOrNull;
+  if (view != null) {
+    final data = MediaQueryData.fromView(view);
+    return data.size.shortestSide > 550;
+  }
+  return false;
+}

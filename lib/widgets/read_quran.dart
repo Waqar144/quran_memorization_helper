@@ -82,8 +82,11 @@ double availableHeight(BuildContext context) {
   // top,bottom padding, will include notch and stuff
   final double top = View.of(context).padding.top;
   final double bottom = MediaQuery.of(context).padding.bottom;
+
+  final appBarHeight = 56;
+  final padding = top + bottom + (isBigScreen() ? appBarHeight : 0);
   // dont go below 700, we will scroll if below
-  return max(700, MediaQuery.of(context).size.height - (top + bottom));
+  return max(700, MediaQuery.of(context).size.height - (padding));
 }
 
 class Translation {
@@ -1087,17 +1090,15 @@ class _PageWidgetState extends State<PageWidget> {
     int lineIdx,
     double rowHeight,
     List<(int, int, int, Ayat?, bool)> ayahData,
+    double fontSize,
   ) {
     return Text.rich(
-      TextSpan(children: _buildLineSpans(line, lineIdx, ayahData)),
-      textDirection: TextDirection.rtl,
-      style: TextStyle(
-        color: Theme.of(context).textTheme.bodyMedium?.color,
-        fontFamily: getQuranFont(),
-        fontSize: 28, // min(26, (rowHeight / 1.8).floorToDouble()),
-        letterSpacing: 0,
-        wordSpacing: 1,
+      TextSpan(
+        children: _buildLineSpans(line, lineIdx, ayahData, reflowMode: false),
       ),
+      textDirection: TextDirection.rtl,
+      // min(26, (rowHeight / 1.8).floorToDouble()),
+      style: _getQuranTextStyle(fontSize),
     );
   }
 
@@ -1163,6 +1164,16 @@ class _PageWidgetState extends State<PageWidget> {
     return widgets;
   }
 
+  double _textFontSize() {
+    if (isBigScreen()) {
+      return 34.0;
+    } else if (Settings.instance.mushaf == Mushaf.Uthmani15Line) {
+      return 28.0;
+    } else {
+      return 30.0;
+    }
+  }
+
   List<Widget> _pageLines(double rowHeight) {
     int lastAyah = -1;
     List<(int, int, int, Ayat?, bool)> ayahData = [];
@@ -1200,6 +1211,7 @@ class _PageWidgetState extends State<PageWidget> {
     }
 
     List<Widget> widgets = [];
+    final double? maxWidth = isBigScreen() ? 520.0 : null;
     const divider = Divider(color: Colors.grey, height: 1);
     for (final (idx, l) in widget._pageLines.indexed) {
       if (l.lineAyahs.first.ayahIndex < 0) {
@@ -1210,9 +1222,10 @@ class _PageWidgetState extends State<PageWidget> {
       widgets.add(
         SizedBox(
           height: rowHeight,
+          width: maxWidth,
           child: FittedBox(
             fit: BoxFit.scaleDown,
-            child: _buildLine(l, idx, rowHeight, ayahData),
+            child: _buildLine(l, idx, rowHeight, ayahData, _textFontSize()),
           ),
         ),
       );
