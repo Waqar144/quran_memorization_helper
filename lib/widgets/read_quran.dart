@@ -1102,35 +1102,38 @@ class _PageWidgetState extends State<PageWidget> {
   }
 
   Widget _pageTopBorder() {
-    return Row(
-      children: [
-        Text(
-          surahDataForIdx(
-            surahForAyah(widget._pageLines.last.lineAyahs.last.ayahIndex),
-            arabic: true,
-          ).name,
-          style: TextStyle(
-            fontSize: 16,
-            fontFamily: getQuranFont(),
-            letterSpacing: 0,
+    return SizedBox(
+      height: 24,
+      child: Row(
+        children: [
+          Text(
+            surahDataForIdx(
+              surahForAyah(widget._pageLines.last.lineAyahs.last.ayahIndex),
+              arabic: true,
+            ).name,
+            style: TextStyle(
+              fontSize: 16,
+              fontFamily: getQuranFont(),
+              letterSpacing: 0,
+            ),
           ),
-        ),
-        const Spacer(),
-        Text(
-          (widget.pageIndex + 1).toString(),
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 12),
-        ),
-        const Spacer(),
-        Text(
-          getParaNameForIndex(widget.paraNum - 1),
-          style: TextStyle(
-            fontSize: 16,
-            fontFamily: getQuranFont(),
-            letterSpacing: 0,
+          const Spacer(),
+          Text(
+            (widget.pageIndex + 1).toString(),
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 12),
           ),
-        ),
-      ],
+          const Spacer(),
+          Text(
+            getParaNameForIndex(widget.paraNum - 1),
+            style: TextStyle(
+              fontSize: 16,
+              fontFamily: getQuranFont(),
+              letterSpacing: 0,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
