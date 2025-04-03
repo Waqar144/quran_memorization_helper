@@ -320,8 +320,7 @@ class _MainPageState extends State<MainPage>
   SliverAppBar _buildAppBar() {
     return SliverAppBar(
       floating: true,
-      forceElevated: true,
-      // scrolledUnderElevation: v ? 2 : 1,
+      forceElevated: false,
       snap: true,
       pinned: false,
       actions: [

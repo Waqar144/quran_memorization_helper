@@ -21,24 +21,11 @@ class MyApp extends StatelessWidget {
         return MaterialApp(
           title: 'Quran Revision Companion',
           debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            useMaterial3: true,
-            colorSchemeSeed: Colors.blue,
-            appBarTheme: AppBarTheme(
-              elevation: 1,
-              scrolledUnderElevation: 2,
-              shadowColor: Theme.of(context).shadowColor,
-            ),
-          ),
+          theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.blue),
           darkTheme: ThemeData(
             brightness: Brightness.dark,
             useMaterial3: true,
             colorSchemeSeed: Colors.blue,
-            appBarTheme: AppBarTheme(
-              elevation: 1,
-              scrolledUnderElevation: 2,
-              shadowColor: Theme.of(context).shadowColor,
-            ),
           ),
           themeMode: Settings.instance.themeMode,
           home: const MainPage(),
