@@ -80,13 +80,17 @@ TextStyle _mutStyle(bool dark) {
 
 double availableHeight(BuildContext context) {
   // top,bottom padding, will include notch and stuff
-  final double top = View.of(context).padding.top;
-  final double bottom = MediaQuery.of(context).padding.bottom;
+  final mqPadding = MediaQuery.paddingOf(context);
+  final double top = mqPadding.top;
+  final double bottom = mqPadding.bottom;
 
-  final appBarHeight = 56;
-  final padding = top + bottom + (isBigScreen() ? appBarHeight : 0);
+  final appBarHeight =
+      56 +
+      View.of(context).viewPadding.top / MediaQuery.devicePixelRatioOf(context);
+  final padding = top + bottom + appBarHeight;
+
   // dont go below 700, we will scroll if below
-  return max(700, MediaQuery.of(context).size.height - (padding));
+  return max(700, MediaQuery.sizeOf(context).height - (padding));
 }
 
 double _heightMultiplier() {
