@@ -100,6 +100,8 @@ class Settings extends ChangeNotifier {
       'translationFile': _translationFile,
       'tapToShowTranslation': _tapToShowTranslation,
       'mushaf': _mushaf.index,
+      'reflowMode': _reflowMode,
+      'fontSize': _fontSize,
     };
     String json = const JsonEncoder.withIndent("  ").convert(map);
     await utils.saveJsonToDisk(json, "settings");
@@ -115,6 +117,8 @@ class Settings extends ChangeNotifier {
       _translationFile = json["translationFile"] ?? "";
       _tapToShowTranslation = json["tapToShowTranslation"] ?? false;
       _mushaf = Mushaf.values[json["mushaf"] ?? Mushaf.Indopak16Line.index];
+      _reflowMode = json["reflowMode"] ?? false;
+      _fontSize = json["fontSize"] ?? 24;
     } catch (e) {
       // nothing for now
     }
