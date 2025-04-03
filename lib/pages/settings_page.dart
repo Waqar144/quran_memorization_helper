@@ -247,7 +247,7 @@ class _SettingsPageState extends State<SettingsPage> {
       title: const Text("Theme"),
       subtitle: const Text("Switch between light or dark mode"),
       trailing: SizedBox(
-        width: 120,
+        width: 140,
         child: DropdownButton<ThemeMode>(
           isExpanded: true,
           borderRadius: const BorderRadius.all(Radius.circular(5)),
@@ -276,7 +276,7 @@ class _SettingsPageState extends State<SettingsPage> {
       title: const Text("Mushaf"),
       subtitle: const Text("Switch between available Mushafs"),
       trailing: SizedBox(
-        width: 120,
+        width: 140,
         child: DropdownButton<Mushaf>(
           isExpanded: true,
           borderRadius: const BorderRadius.all(Radius.circular(5)),
