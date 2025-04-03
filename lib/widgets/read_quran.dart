@@ -1267,7 +1267,7 @@ class _PageWidgetState extends State<PageWidget> {
         Settings.instance.mushaf == Mushaf.Indopak16Line ? 16 : 15;
     final double height =
         availableHeight(context) -
-        ( /*padding,margin=*/ 24 +
+        ( /*divider between lines(1px)*/ 24 +
             /*topborder=*/ 24);
     final double rowHeight = max((height / numPageLines).floorToDouble(), 38.0);
     return Padding(
