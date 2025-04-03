@@ -413,7 +413,10 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
   }
 
   void clearCachedTranslation() {
-    _translation = null;
+    // rebuild as reflow mode or other setting might have changed
+    setState(() {
+      _translation = null;
+    });
   }
 
   void onModelChanged() {
