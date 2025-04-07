@@ -1258,6 +1258,7 @@ class _PageWidgetState extends State<PageWidget> {
         Container(
           height: rowHeight,
           width: double.infinity,
+          padding: const EdgeInsets.only(left: 4, right: 4),
           decoration: BoxDecoration(
             border: Border.symmetric(
               vertical: BorderSide(
@@ -1288,7 +1289,7 @@ class _PageWidgetState extends State<PageWidget> {
             /*topborder=*/ 24);
     final double rowHeight = max((height / numPageLines).floorToDouble(), 38.0);
     return Padding(
-      padding: const EdgeInsets.only(left: 8, right: 8),
+      padding: const EdgeInsets.only(left: 4, right: 4),
       child: Column(children: [_pageTopBorder(), ..._pageLines(rowHeight)]),
     );
   }
