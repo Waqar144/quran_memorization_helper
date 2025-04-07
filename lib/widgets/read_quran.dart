@@ -1252,8 +1252,17 @@ class _PageWidgetState extends State<PageWidget> {
       }
       widgets.add(divider);
       widgets.add(
-        SizedBox(
+        Container(
           height: rowHeight,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            border: Border.symmetric(
+              vertical: BorderSide(
+                color: Theme.of(context).dividerColor,
+                width: 1,
+              ),
+            ),
+          ),
           child: FittedBox(
             fit: BoxFit.scaleDown,
             child: _buildLine(l, idx, rowHeight, ayahData, _textFontSize()),
@@ -1261,6 +1270,8 @@ class _PageWidgetState extends State<PageWidget> {
         ),
       );
     }
+    widgets.add(divider);
+
     return widgets;
   }
 
