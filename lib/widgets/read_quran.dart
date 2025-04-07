@@ -78,7 +78,7 @@ TextStyle _mutStyle(bool dark) {
   return _mutStyleLight;
 }
 
-double availableHeight(BuildContext context) {
+double _availableHeight(BuildContext context) {
   // top,bottom padding, will include notch and stuff
   final mqPadding = MediaQuery.paddingOf(context);
   final double top = mqPadding.top;
@@ -643,7 +643,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
         }
         return SliverToBoxAdapter(
           child: SizedBox(
-            height: availableHeight(context) * _heightMultiplier(),
+            height: _availableHeight(context) * _heightMultiplier(),
             child: NotificationListener<OverscrollNotification>(
               onNotification: (noti) {
                 if (noti.depth == 0) {
@@ -1269,7 +1269,7 @@ class _PageWidgetState extends State<PageWidget> {
     final numPageLines =
         Settings.instance.mushaf == Mushaf.Indopak16Line ? 16 : 15;
     final double height =
-        availableHeight(context) -
+        _availableHeight(context) -
         ( /*divider between lines(1px)*/ 24 +
             /*topborder=*/ 24);
     final double rowHeight = max((height / numPageLines).floorToDouble(), 38.0);
