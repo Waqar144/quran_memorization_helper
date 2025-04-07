@@ -62,7 +62,8 @@ class _AyatListItemWithMetadata extends StatelessWidget {
           Text(
             "${surahNameForIdx(ayah.surahIdx)}:${ayah.surahAyahIndexesString()} - ${paraText()}: ${ayah.paraNumber()}",
           ),
-          IconButton(onPressed: onGoto, icon: const Icon(Icons.shortcut)),
+          if (onGoto != null)
+            IconButton(onPressed: onGoto, icon: const Icon(Icons.shortcut)),
         ],
       ),
       onTap: onTap,

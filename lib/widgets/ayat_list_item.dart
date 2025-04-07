@@ -70,10 +70,11 @@ class _AyatListItemState extends State<AyatListItem> {
       subtitle: Row(
         children: [
           if (widget.showSurahAyahIndex) Text(widget.ayah.surahAyahText()),
-          IconButton(
-            onPressed: widget.onGoto,
-            icon: const Icon(Icons.shortcut),
-          ),
+          if (widget.onGoto != null)
+            IconButton(
+              onPressed: widget.onGoto,
+              icon: const Icon(Icons.shortcut),
+            ),
         ],
       ),
       onLongPress: _getLongPressCallback(),
