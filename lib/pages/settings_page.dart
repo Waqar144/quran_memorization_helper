@@ -130,7 +130,7 @@ String _mushafToString(Mushaf m) {
 }
 
 class SettingsPage extends StatefulWidget {
-  final List<int> fontSizes = [24, 26, 28, 30, 32, 34];
+  final List<int> fontSizes = [28, 30, 32, 34, 36, 38];
   final List<ThemeMode> themeModes = ThemeMode.values;
   final List<Mushaf> mushafs = Mushaf.values;
   final ParaAyatModel paraModel;

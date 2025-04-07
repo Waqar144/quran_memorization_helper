@@ -7,6 +7,8 @@ import 'package:quran_memorization_helper/utils/utils.dart' as utils;
 // ignore: constant_identifier_names
 enum Mushaf { Indopak16Line, Uthmani15Line }
 
+const _minFontSize = 28;
+
 class Settings extends ChangeNotifier {
   static final Settings _instance = Settings._private();
   static Settings get instance => _instance;
@@ -23,8 +25,8 @@ class Settings extends ChangeNotifier {
   static const double wordSpacing = 1.0;
 
   // The font size of ayahs if reflow mode is enabled
-  int _fontSize = 24;
-  int get fontSize => _reflowMode ? _fontSize : 24;
+  int _fontSize = _minFontSize;
+  int get fontSize => _reflowMode ? _fontSize : _minFontSize;
   set fontSize(int val) {
     _fontSize = val;
     notifyListeners();
@@ -118,7 +120,10 @@ class Settings extends ChangeNotifier {
       _tapToShowTranslation = json["tapToShowTranslation"] ?? false;
       _mushaf = Mushaf.values[json["mushaf"] ?? Mushaf.Indopak16Line.index];
       _reflowMode = json["reflowMode"] ?? false;
-      _fontSize = json["fontSize"] ?? 24;
+      _fontSize = json["fontSize"] ?? _minFontSize;
+      if (_fontSize < _minFontSize) {
+        _fontSize = _minFontSize;
+      }
     } catch (e) {
       // nothing for now
     }
