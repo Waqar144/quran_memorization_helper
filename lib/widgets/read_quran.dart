@@ -986,6 +986,7 @@ class _PageWidgetState extends State<PageWidget> {
     required bool reflowMode,
   }) {
     List<TextSpan> spans = [];
+    final bigScreen = isBigScreen();
     for (final a in line.lineAyahs) {
       final (
         _,
@@ -1036,6 +1037,7 @@ class _PageWidgetState extends State<PageWidget> {
       int i = getFirstWordIndex(fullAyahTextWords, words);
       final addSpacesBetweenWords =
           reflowMode || // we always add spaces in reflow mode
+          bigScreen ||
           shouldAddSpaces(widget.pageIndex, lineIdx, Settings.instance.mushaf);
 
       for (final w in words) {
@@ -1197,7 +1199,7 @@ class _PageWidgetState extends State<PageWidget> {
 
   double _textFontSize() {
     if (isBigScreen()) {
-      return 34.0;
+      return 40.0;
     } else if (Settings.instance.mushaf == Mushaf.Uthmani15Line) {
       return 28.0;
     } else {
@@ -1242,7 +1244,6 @@ class _PageWidgetState extends State<PageWidget> {
     }
 
     List<Widget> widgets = [];
-    final double? maxWidth = isBigScreen() ? 520.0 : null;
     const divider = Divider(color: Colors.grey, height: 1);
     for (final (idx, l) in widget._pageLines.indexed) {
       if (l.lineAyahs.first.ayahIndex < 0) {
@@ -1253,7 +1254,6 @@ class _PageWidgetState extends State<PageWidget> {
       widgets.add(
         SizedBox(
           height: rowHeight,
-          width: maxWidth,
           child: FittedBox(
             fit: BoxFit.scaleDown,
             child: _buildLine(l, idx, rowHeight, ayahData, _textFontSize()),
