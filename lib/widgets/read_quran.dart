@@ -1290,7 +1290,17 @@ class _PageWidgetState extends State<PageWidget> {
     final double rowHeight = max((height / numPageLines).floorToDouble(), 38.0);
     return Padding(
       padding: const EdgeInsets.only(left: 4, right: 4),
-      child: Column(children: [_pageTopBorder(), ..._pageLines(rowHeight)]),
+      child: Column(
+        children: [
+          // Top border
+          _pageTopBorder(),
+          // Divider
+          if (Settings.instance.reflowMode)
+            const Divider(color: Colors.grey, height: 1),
+          // The actual page text
+          ..._pageLines(rowHeight),
+        ],
+      ),
     );
   }
 }
