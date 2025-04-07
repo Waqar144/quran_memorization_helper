@@ -1199,6 +1199,9 @@ class _PageWidgetState extends State<PageWidget> {
 
   double _textFontSize() {
     if (isBigScreen()) {
+      if (Settings.instance.mushaf == Mushaf.Uthmani15Line) {
+        return 38.0;
+      }
       return 40.0;
     } else if (Settings.instance.mushaf == Mushaf.Uthmani15Line) {
       return 28.0;
