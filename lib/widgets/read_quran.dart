@@ -1103,6 +1103,10 @@ class _PageWidgetState extends State<PageWidget> {
             ),
           ),
         );
+
+        if (addSpacesBetweenWords) {
+          spans.add(TextSpan(text: ' '));
+        }
       }
     }
     return spans;
