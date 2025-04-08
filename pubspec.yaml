@@ -103,6 +103,9 @@ flutter:
     - family: SurahNames
       fonts:
         - asset: fonts/surah_names.ttf
+    - family: Bismillah
+      fonts:
+        - asset: fonts/bismillah.ttf
           # - asset: fonts/Al Qalam Quran Majeed 2.ttf
   #   - family: Schyler
   #     fonts:

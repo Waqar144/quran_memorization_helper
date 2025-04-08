@@ -759,6 +759,7 @@ class _PageWidgetState extends State<PageWidget> {
       children: [
         // surah name and ayah count
         Container(
+          padding: const EdgeInsets.only(left: 2, right: 2),
           height: rowHeight,
           decoration: BoxDecoration(
             color: Colors.green.withValues(alpha: 0.4),
@@ -774,10 +775,9 @@ class _PageWidgetState extends State<PageWidget> {
               ),
               const Spacer(),
               Text(
-                "\uFD3Fسورۃ ${surahData.name}\uFD3E",
+                String.fromCharCodes([surahGlyphCode(surahIdx), 0xe903]),
                 textDirection: TextDirection.rtl,
-                textAlign: TextAlign.center,
-                style: style.copyWith(fontFamily: "Al Mushaf"),
+                style: style.copyWith(fontFamily: "SurahNames"),
               ),
             ],
           ),
@@ -791,10 +791,13 @@ class _PageWidgetState extends State<PageWidget> {
             border: Border.all(color: Theme.of(context).dividerColor, width: 1),
           ),
           child: Text(
-            /*data:*/ "بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ",
-            textDirection: TextDirection.rtl,
+            String.fromCharCode(0xFDFD),
             textAlign: TextAlign.center,
-            style: style,
+            textDirection: TextDirection.rtl,
+            style: style.copyWith(
+              fontFamily: "Bismillah",
+              fontSize: Theme.of(context).textTheme.headlineLarge?.fontSize,
+            ),
           ),
         ),
       ],
@@ -831,6 +834,7 @@ class _PageWidgetState extends State<PageWidget> {
     final isSurahTawba = surahIdx == 8;
     return Container(
       width: MediaQuery.of(context).size.width,
+      padding: const EdgeInsets.only(left: 2, right: 2),
       height: rowHeight,
       decoration: BoxDecoration(
         color: Colors.green.withValues(alpha: 0.4),
@@ -841,21 +845,21 @@ class _PageWidgetState extends State<PageWidget> {
         textDirection: TextDirection.rtl,
         children: [
           Text(
-            "\uFD3F${surahData.name}\uFD3E",
+            String.fromCharCodes([surahGlyphCode(surahIdx)]),
             textDirection: TextDirection.rtl,
-            textAlign: TextAlign.center,
-            style: style.copyWith(fontFamily: "Al Mushaf"),
+            style: style.copyWith(fontFamily: "SurahNames"),
           ),
           Text(
-            isSurahTawba ? "-" : "بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ",
+            isSurahTawba ? "-" : String.fromCharCode(0xFDFD),
             textDirection: TextDirection.rtl,
-            textAlign: TextAlign.center,
-            style: style,
+            style: style.copyWith(
+              fontFamily: "Bismillah",
+              fontSize: Theme.of(context).textTheme.headlineLarge?.fontSize,
+            ),
           ),
           Text(
             "\uFD3F${toUrduNumber(surahData.ayahCount)}\uFD3E",
             textDirection: TextDirection.rtl,
-            textAlign: TextAlign.center,
             style: style.copyWith(fontFamily: "Al Mushaf"),
           ),
         ],
