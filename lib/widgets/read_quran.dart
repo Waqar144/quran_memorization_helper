@@ -932,7 +932,7 @@ class _PageWidgetState extends State<PageWidget> {
     for (var e in verseNumber.toString().codeUnits) {
       arabicNumeric += arabicNumbers[e - 48];
     }
-    return '\u06dd$arabicNumeric';
+    return arabicNumeric;
   }
 
   static String getAyahEndMarkerGlyphCode(int surahIndex, int ayahIndex) {
@@ -1103,7 +1103,7 @@ class _PageWidgetState extends State<PageWidget> {
                           ? Colors.amber.shade700.withAlpha(125)
                           : Colors.amber.shade100)
                       : null,
-              fontFamily: is16Line ? "AyahNumber" : "Uthmani",
+              fontFamily: is16Line ? "AyahNumber" : "Uthmanic",
             ),
           ),
         );
