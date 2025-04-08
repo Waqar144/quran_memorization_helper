@@ -1187,21 +1187,36 @@ class _PageWidgetState extends State<PageWidget> {
     List<TextSpan> spans = [];
     for (final (lineIdx, line) in widget._pageLines.indexed) {
       if (line.lineAyahs.first.ayahIndex < 0) {
+        if (spans.isNotEmpty) {
+          widgets.add(
+            Text.rich(
+              TextSpan(children: spans),
+              textDirection: TextDirection.rtl,
+              textAlign: TextAlign.center,
+              softWrap: true,
+              style: _getQuranTextStyle(Settings.instance.fontSize.toDouble()),
+            ),
+          );
+          spans = [];
+        }
         widgets.add(getBismillah(line.lineAyahs.first.ayahIndex, rowHeight));
         continue;
       }
 
       spans.addAll(_buildLineSpans(line, lineIdx, ayahData, reflowMode: true));
     }
-    widgets.add(
-      Text.rich(
-        TextSpan(children: spans),
-        textDirection: TextDirection.rtl,
-        textAlign: TextAlign.center,
-        softWrap: true,
-        style: _getQuranTextStyle(Settings.instance.fontSize.toDouble()),
-      ),
-    );
+    if (spans.isNotEmpty) {
+      widgets.add(
+        Text.rich(
+          TextSpan(children: spans),
+          textDirection: TextDirection.rtl,
+          textAlign: TextAlign.center,
+          softWrap: true,
+          style: _getQuranTextStyle(Settings.instance.fontSize.toDouble()),
+        ),
+      );
+      spans = [];
+    }
     return widgets;
   }
 
