@@ -102,6 +102,27 @@ String toUrduNumber(int num) {
   return ret;
 }
 
+String toArabicNumber(int num) {
+  const List<String> arabicNumbers = [
+    "٠",
+    "١",
+    "٢",
+    "٣",
+    "٤",
+    "٥",
+    "٦",
+    "٧",
+    "٨",
+    "٩",
+  ];
+  final numStr = num.toString();
+  String ret = "";
+  for (final c in numStr.codeUnits) {
+    ret += arabicNumbers[c - 48];
+  }
+  return ret;
+}
+
 const String urduKhatma = "\u06D4";
 
 String getQuranTextFolder() {

@@ -50,7 +50,9 @@ class SurahListView extends StatelessWidget {
           child: ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 15),
             leading: Text(
-              "${toUrduNumber(index + 1)}$urduKhatma",
+              is16line
+                  ? "${toUrduNumber(index + 1)}$urduKhatma"
+                  : "${toArabicNumber(index + 1)}$urduKhatma",
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Theme.of(context).textTheme.bodyMedium?.color,
