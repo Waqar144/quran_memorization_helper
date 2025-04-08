@@ -594,7 +594,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
       context: context,
       builder: (context) {
         return SizedBox(
-          width: MediaQuery.of(context).size.width,
+          width: MediaQuery.sizeOf(context).width,
           child: Padding(
             padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
             child: LongPressActionSheet(
@@ -785,7 +785,7 @@ class _PageWidgetState extends State<PageWidget> {
         // bismillah
         Container(
           height: rowHeight,
-          width: MediaQuery.of(context).size.width,
+          width: MediaQuery.sizeOf(context).width,
           decoration: BoxDecoration(
             color: Colors.green.withValues(alpha: 0.4),
             border: Border.all(color: Theme.of(context).dividerColor, width: 1),
@@ -833,7 +833,7 @@ class _PageWidgetState extends State<PageWidget> {
     SurahData surahData = surahDataForIdx(surahIdx, arabic: true);
     final isSurahTawba = surahIdx == 8;
     return Container(
-      width: MediaQuery.of(context).size.width,
+      width: MediaQuery.sizeOf(context).width,
       padding: const EdgeInsets.only(left: 2, right: 2),
       height: rowHeight,
       decoration: BoxDecoration(

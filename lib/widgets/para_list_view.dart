@@ -25,7 +25,7 @@ class ParaListView extends StatelessWidget {
     }
 
     int maxVisibleItems =
-        ((MediaQuery.of(context).size.height - (48 + 4)) / 48).floor();
+        ((MediaQuery.sizeOf(context).height - (48 + 4)) / 48).floor();
     const totalParas = 30;
     final maxScrollablePara =
         totalParas -
