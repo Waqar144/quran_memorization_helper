@@ -60,11 +60,11 @@ class SurahListView extends StatelessWidget {
               ),
             ),
             title: Text(
-              surahDataForIdx(index, arabic: true).name,
+              String.fromCharCode(surahGlyphCode(index)),
               style: TextStyle(
                 letterSpacing: 0,
                 fontSize: 26,
-                fontFamily: getQuranFont(),
+                fontFamily: "SurahNames",
               ),
             ),
             trailing: Text(

@@ -100,6 +100,9 @@ flutter:
     - family: Urdu
       fonts:
         - asset: fonts/Mehr_Nastaliq_Web v. 2.0.ttf
+    - family: SurahNames
+      fonts:
+        - asset: fonts/surah_names.ttf
           # - asset: fonts/Al Qalam Quran Majeed 2.ttf
   #   - family: Schyler
   #     fonts:
