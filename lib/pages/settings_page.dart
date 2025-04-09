@@ -421,12 +421,12 @@ class _SettingsPageState extends State<SettingsPage> {
     return ListTile(
       leading: const Icon(Icons.email),
       title: const Text("Email support"),
-      subtitle: const Text("Reach out to us via email directly"),
+      subtitle: const Text("Reach out to us at waqar.17a@gmail.com"),
       onTap: () async {
-        await launchUrl(
-          Uri.parse("support@streetwriters.co"),
-          mode: LaunchMode.externalApplication,
-        );
+        final email = Uri.parse("mailto:waqar.17a@gmail.com");
+        if (await canLaunchUrl(email)) {
+          await launchUrl(email, mode: LaunchMode.externalApplication);
+        }
       },
     );
   }
