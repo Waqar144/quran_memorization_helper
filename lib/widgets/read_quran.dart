@@ -1271,6 +1271,7 @@ class _PageWidgetState extends State<PageWidget> {
 
     List<Widget> widgets = [];
     const divider = Divider(color: Colors.grey, height: 1);
+    final bigScreen = isBigScreen();
     for (final (idx, l) in widget._pageLines.indexed) {
       if (l.lineAyahs.first.ayahIndex < 0) {
         widgets.add(getBismillah(l.lineAyahs.first.ayahIndex, rowHeight));
@@ -1291,7 +1292,7 @@ class _PageWidgetState extends State<PageWidget> {
             ),
           ),
           child: FittedBox(
-            fit: isBigScreen()? BoxFit.contain:BoxFit.scaleDown,
+            fit: bigScreen ? BoxFit.contain : BoxFit.scaleDown,
             child: _buildLine(l, idx, rowHeight, ayahData, _textFontSize()),
           ),
         ),
