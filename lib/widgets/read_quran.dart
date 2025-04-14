@@ -1291,7 +1291,7 @@ class _PageWidgetState extends State<PageWidget> {
             ),
           ),
           child: FittedBox(
-            fit: BoxFit.scaleDown,
+            fit: isBigScreen()? BoxFit.contain:BoxFit.scaleDown,
             child: _buildLine(l, idx, rowHeight, ayahData, _textFontSize()),
           ),
         ),
