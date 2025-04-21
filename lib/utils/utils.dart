@@ -6,6 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:quran_memorization_helper/models/settings.dart';
 
+Future<String> getDataDir() async {
+  return (await getApplicationDocumentsDirectory()).path;
+}
+
 Future<String> saveJsonToDisk(String json, String fileName) async {
   if (json.isEmpty) throw "Empty json";
   Directory dir = await getApplicationDocumentsDirectory();
