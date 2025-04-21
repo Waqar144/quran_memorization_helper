@@ -217,8 +217,9 @@ class _SettingsPageState extends State<SettingsPage> {
                       return;
                     }
                     // success message
-                    if (mounted)
+                    if (mounted) {
                       showSnackBarMessage(context, "Backup Succesful");
+                    }
                   } catch (e) {
                     // do nothing
                     _showError("Error creating backup: $e");
