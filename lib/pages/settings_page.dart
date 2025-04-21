@@ -153,21 +153,27 @@ class _SettingsPageState extends State<SettingsPage> {
         return AlertDialog(
           title: const Text('Error'),
           content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text(message, softWrap: true),
-                const Text(
-                  "Please try again. If the error persists please report a bug.",
-                ),
-              ],
+            child: SelectableRegion(
+              selectionControls: materialTextSelectionControls,
+              child: ListBody(
+                children: <Widget>[
+                  Text(message, softWrap: true),
+                  const Text(
+                    "Please try again. If the error persists please report a bug.",
+                  ),
+                ],
+              ),
             ),
           ),
           actions: <Widget>[
+            TextButton.icon(
+              icon: const Icon(Icons.copy),
+              label: const Text('Copy'),
+              onPressed: () => Clipboard.setData(ClipboardData(text: message)),
+            ),
             TextButton(
               child: const Text('Ok'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.of(context).pop(),
             ),
           ],
         );
