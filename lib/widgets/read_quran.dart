@@ -177,7 +177,11 @@ class _TranslationTileState extends State<TranslationTile> {
       return ListTile(title: Column(children: children));
     }
 
-    return ExpansionTile(title: const Text("Translation"), children: children);
+    return ExpansionTile(
+      title: const Text("Translation"),
+      childrenPadding: EdgeInsets.only(left: 8, right: 8),
+      children: children,
+    );
   }
 }
 
