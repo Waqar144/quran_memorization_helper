@@ -135,14 +135,12 @@ class TranslationTile extends StatefulWidget {
   final String translation;
   final bool isUrduTranslation;
   final String metadata;
-  final bool expanded;
   final bool hasNoMutashabihas;
 
   const TranslationTile(
     this.translation,
     this.isUrduTranslation, {
     required this.metadata,
-    required this.expanded,
     required this.hasNoMutashabihas,
     super.key,
   });
@@ -179,11 +177,7 @@ class _TranslationTileState extends State<TranslationTile> {
       return ListTile(title: Column(children: children));
     }
 
-    return ExpansionTile(
-      initiallyExpanded: widget.expanded,
-      title: const Text("Translation"),
-      children: children,
-    );
+    return ExpansionTile(title: const Text("Translation"), children: children);
   }
 }
 
@@ -252,15 +246,15 @@ class _LongPressActionSheetState extends State<LongPressActionSheet> {
         final int surahAyahIdx = toSurahAyahOffset(surahIdx, ayah);
 
         // if mutashabiha is null, we always show translation
-        bool expanded =
+        bool dontShowMutashabih =
+            (widget.mutashabihaList == null) ||
             // else if user has swiped, then we expand
             (widget.mutashabihaList != null && widget.tappedAyahIdx != ayah);
         final translationWidget = TranslationTile(
           translation,
           widget.translation.isUrdu,
           metadata: metadata,
-          expanded: expanded,
-          hasNoMutashabihas: widget.mutashabihaList == null,
+          hasNoMutashabihas: dontShowMutashabih,
         );
 
         final openOnQuranCom = TextButton.icon(
