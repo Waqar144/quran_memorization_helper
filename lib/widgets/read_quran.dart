@@ -316,7 +316,7 @@ class _LongPressActionSheetState extends State<LongPressActionSheet> {
   }
 }
 
-class CustomPageViewScrollPhysics extends ScrollPhysics {
+class CustomPageViewScrollPhysics extends ClampingScrollPhysics {
   const CustomPageViewScrollPhysics({super.parent});
 
   @override
