@@ -136,11 +136,14 @@ class TranslationTile extends StatefulWidget {
   final bool isUrduTranslation;
   final String metadata;
   final bool expanded;
+  final bool hasNoMutashabihas;
+
   const TranslationTile(
     this.translation,
     this.isUrduTranslation, {
     required this.metadata,
     required this.expanded,
+    required this.hasNoMutashabihas,
     super.key,
   });
 
@@ -149,64 +152,37 @@ class TranslationTile extends StatefulWidget {
 }
 
 class _TranslationTileState extends State<TranslationTile> {
-  late final ValueNotifier<bool> expanded;
-
-  @override
-  void initState() {
-    expanded = ValueNotifier(widget.expanded);
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    expanded.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: expanded,
-      builder: (context, value, _) {
-        return ListTile(
-          leading:
-              widget.expanded
-                  ? null
-                  : Icon(!value ? Icons.chevron_right : Icons.expand_more),
-          title:
-              !value
-                  ? const Text("Show Translation")
-                  : Column(
-                    children: [
-                      Text(
-                        widget.metadata,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                      Text(
-                        widget.translation.trim(),
-                        textDirection:
-                            widget.isUrduTranslation ? TextDirection.rtl : null,
-                        style:
-                            widget.isUrduTranslation
-                                ? const TextStyle(
-                                  fontFamily: "Urdu",
-                                  fontSize: 22,
-                                  letterSpacing: 0.0,
-                                  height: 1.8,
-                                )
-                                : null,
-                      ),
-                    ],
-                  ),
-          onTap: () {
-            if (widget.expanded) return;
-            expanded.value = !expanded.value;
-          },
-        );
-      },
+    final children = [
+      Text(
+        widget.metadata,
+        textAlign: TextAlign.center,
+        style: const TextStyle(decoration: TextDecoration.underline),
+      ),
+      Text(
+        widget.translation.trim(),
+        textDirection: widget.isUrduTranslation ? TextDirection.rtl : null,
+        style:
+            widget.isUrduTranslation
+                ? const TextStyle(
+                  fontFamily: "Urdu",
+                  fontSize: 22,
+                  letterSpacing: 0.0,
+                  height: 1.8,
+                )
+                : null,
+      ),
+    ];
+
+    if (widget.hasNoMutashabihas) {
+      return ListTile(title: Column(children: children));
+    }
+
+    return ExpansionTile(
+      initiallyExpanded: widget.expanded,
+      title: const Text("Translation"),
+      children: children,
     );
   }
 }
@@ -275,9 +251,8 @@ class _LongPressActionSheetState extends State<LongPressActionSheet> {
         final int surahIdx = surahForAyah(ayah);
         final int surahAyahIdx = toSurahAyahOffset(surahIdx, ayah);
 
-        // if mutashabiha is null, we always expand
+        // if mutashabiha is null, we always show translation
         bool expanded =
-            widget.mutashabihaList == null ||
             // else if user has swiped, then we expand
             (widget.mutashabihaList != null && widget.tappedAyahIdx != ayah);
         final translationWidget = TranslationTile(
@@ -285,6 +260,7 @@ class _LongPressActionSheetState extends State<LongPressActionSheet> {
           widget.translation.isUrdu,
           metadata: metadata,
           expanded: expanded,
+          hasNoMutashabihas: widget.mutashabihaList == null,
         );
 
         final openOnQuranCom = TextButton.icon(
