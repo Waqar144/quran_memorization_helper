@@ -464,6 +464,11 @@ class _SettingsPageState extends State<SettingsPage> {
         final email = Uri.parse("mailto:waqar.17a@gmail.com");
         if (await canLaunchUrl(email)) {
           await launchUrl(email, mode: LaunchMode.externalApplication);
+        } else {
+          await Clipboard.setData(ClipboardData(text: "waqar.17a@gmail.com"));
+          if (mounted) {
+            showSnackBarMessage(context, "Copied to clipboard");
+          }
         }
       },
     );

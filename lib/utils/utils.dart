@@ -80,7 +80,7 @@ void showSnackBarMessage(
     SnackBar(
       content: Text(message),
       duration: Duration(seconds: error ? 5 : 2),
-      backgroundColor: error ? Colors.red : Colors.green,
+      backgroundColor: error ? Colors.red : Colors.blue,
     ),
   );
 }
