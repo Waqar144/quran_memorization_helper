@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quran_memorization_helper/models/ayat.dart';
 import 'package:quran_memorization_helper/models/settings.dart';
-import 'package:quran_memorization_helper/quran_data/pages.dart';
 import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
 import 'package:quran_memorization_helper/utils/utils.dart';
 
