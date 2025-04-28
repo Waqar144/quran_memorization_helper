@@ -1050,9 +1050,17 @@ class _PageWidgetState extends State<PageWidget> {
           reflowMode || // we always add spaces in reflow mode
           bigScreen ||
           shouldAddSpaces(widget.pageIndex, lineIdx, Settings.instance.mushaf);
-      final int lastWordInLineIndex = words.length - 1;
+      int lastWordInLineIndex = words.length - 1;
+      if (words.last.isEmpty) {
+        lastWordInLineIndex -= 1;
+      }
 
       for (final (idx, w) in words.indexed) {
+        if (w.isEmpty) {
+          i++;
+          continue;
+        }
+
         int wordIdx = i;
         final tapHandler = TapAndLongPressGestureRecognizer(
           onTap: () => widget.onAyahTapped(a.ayahIndex, wordIdx, false),
@@ -1066,7 +1074,7 @@ class _PageWidgetState extends State<PageWidget> {
           final hasRukuMarker = ruku != null;
           spans.add(
             TextSpan(
-              text: hasRukuMarker ? "$w " : w,
+              text: hasRukuMarker ? " $w" : w,
               recognizer:
                   hasRukuMarker
                       ? (TapGestureRecognizer()
@@ -1101,10 +1109,8 @@ class _PageWidgetState extends State<PageWidget> {
         }
         // word
         spans.add(TextSpan(recognizer: tapHandler, text: w, style: style));
-        // separator
-        spans.add(const TextSpan(text: '\u200c'));
         // space
-        if (addSpacesBetweenWords && idx != lastWordInLineIndex) {
+        if (idx != lastWordInLineIndex) {
           spans.add(TextSpan(text: ' ', style: style));
         }
 
@@ -1132,14 +1138,41 @@ class _PageWidgetState extends State<PageWidget> {
     return spans;
   }
 
-  TextStyle _getQuranTextStyle(double fontSize) {
+  TextStyle _getQuranTextStyle(double fontSize, {double wordSpacing = 1.0}) {
     return TextStyle(
       color: Theme.of(context).textTheme.bodyMedium?.color,
       fontFamily: getQuranFont(),
       fontSize: fontSize,
       letterSpacing: 0,
-      wordSpacing: 1,
+      wordSpacing: wordSpacing,
     );
+  }
+
+  double _getWordSpacing(List<TextSpan> spans, double width, double fontSize) {
+    final textPainter = TextPainter(
+      text: TextSpan(children: spans, style: _getQuranTextStyle(fontSize)),
+      textDirection: TextDirection.rtl,
+      maxLines: 1,
+    );
+    textPainter.layout();
+    var diffW = (min(width, 700) - textPainter.width);
+    if (diffW > 10) {
+      if (diffW >= min(width, 700) / 3) {
+        return 2;
+      }
+      int spaces = 0;
+      for (final s in spans) {
+        if (s.text == ' ') spaces++;
+      }
+      return (spaces > 0 ? diffW / (spaces) : 1).roundToDouble();
+    } else if (diffW < -10) {
+      if (diffW <= 20) {
+        return -1;
+      }
+      return -4;
+    } else {
+      return 2;
+    }
   }
 
   Widget _buildLine(
@@ -1148,14 +1181,18 @@ class _PageWidgetState extends State<PageWidget> {
     double rowHeight,
     List<(int, int, int, Ayat?, bool)> ayahData,
     double fontSize,
+    double width,
   ) {
+    final spans = _buildLineSpans(line, lineIdx, ayahData, reflowMode: false);
+    // dont try to space first two pages
+    final wordSpacing =
+        widget.pageIndex < 2 ? 1.0 : _getWordSpacing(spans, width, fontSize);
+
     return Text.rich(
-      TextSpan(
-        children: _buildLineSpans(line, lineIdx, ayahData, reflowMode: false),
-      ),
+      TextSpan(children: spans),
       textDirection: TextDirection.rtl,
       // min(26, (rowHeight / 1.8).floorToDouble()),
-      style: _getQuranTextStyle(fontSize),
+      style: _getQuranTextStyle(fontSize, wordSpacing: wordSpacing),
     );
   }
 
@@ -1239,9 +1276,9 @@ class _PageWidgetState extends State<PageWidget> {
   double _textFontSize() {
     if (isBigScreen()) {
       if (Settings.instance.mushaf == Mushaf.Uthmani15Line) {
-        return 38.0;
+        return 36.0;
       }
-      return 40.0;
+      return 34.0;
     } else if (Settings.instance.mushaf == Mushaf.Uthmani15Line) {
       return 28.0;
     } else {
@@ -1249,7 +1286,7 @@ class _PageWidgetState extends State<PageWidget> {
     }
   }
 
-  List<Widget> _pageLines(double rowHeight) {
+  List<Widget> _pageLines(double rowHeight, double rowWidth) {
     int lastAyah = -1;
     List<(int, int, int, Ayat?, bool)> ayahData = [];
     ayahData.length = 0;
@@ -1309,7 +1346,14 @@ class _PageWidgetState extends State<PageWidget> {
           ),
           child: FittedBox(
             fit: bigScreen ? BoxFit.contain : BoxFit.scaleDown,
-            child: _buildLine(l, idx, rowHeight, ayahData, _textFontSize()),
+            child: _buildLine(
+              l,
+              idx,
+              rowHeight,
+              ayahData,
+              _textFontSize(),
+              rowWidth,
+            ),
           ),
         ),
       );
@@ -1328,6 +1372,7 @@ class _PageWidgetState extends State<PageWidget> {
         ( /*divider between lines(1px)*/ 24 +
             /*topborder=*/ 24);
     final double rowHeight = max((height / numPageLines).floorToDouble(), 38.0);
+    final double rowWidth = MediaQuery.sizeOf(context).width;
     return Padding(
       padding: const EdgeInsets.only(left: 4, right: 4),
       child: Column(
@@ -1338,7 +1383,7 @@ class _PageWidgetState extends State<PageWidget> {
           if (Settings.instance.reflowMode)
             const Divider(color: Colors.grey, height: 1),
           // The actual page text
-          ..._pageLines(rowHeight),
+          ..._pageLines(rowHeight, rowWidth),
         ],
       ),
     );
