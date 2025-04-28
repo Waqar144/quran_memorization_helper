@@ -134,13 +134,11 @@ class Translation {
 class TranslationTile extends StatefulWidget {
   final String translation;
   final bool isUrduTranslation;
-  final String metadata;
   final bool hasNoMutashabihas;
 
   const TranslationTile(
     this.translation,
     this.isUrduTranslation, {
-    required this.metadata,
     required this.hasNoMutashabihas,
     super.key,
   });
@@ -153,11 +151,6 @@ class _TranslationTileState extends State<TranslationTile> {
   @override
   Widget build(BuildContext context) {
     final children = [
-      Text(
-        widget.metadata,
-        textAlign: TextAlign.center,
-        style: const TextStyle(decoration: TextDecoration.underline),
-      ),
       Text(
         widget.translation.trim(),
         textDirection: widget.isUrduTranslation ? TextDirection.rtl : null,
@@ -257,7 +250,6 @@ class _LongPressActionSheetState extends State<LongPressActionSheet> {
         final translationWidget = TranslationTile(
           translation,
           widget.translation.isUrdu,
-          metadata: metadata,
           hasNoMutashabihas: dontShowMutashabih,
         );
 
@@ -270,7 +262,7 @@ class _LongPressActionSheetState extends State<LongPressActionSheet> {
             );
           },
           icon: const Icon(Icons.open_in_new),
-          label: const Text("Open on Quran.com"),
+          label: Text("$metadata on Quran.com"),
         );
 
         if (widget.tappedAyahIdx == ayah && widget.mutashabihaList != null) {
