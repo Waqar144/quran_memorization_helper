@@ -56,5 +56,10 @@ class QuranText {
     return _ayahs[i];
   }
 
+  String spaceSplittedAyahText(int i) {
+    if (!_isReady) return "";
+    return _ayahs[i].splitMapJoin("\u200c", onMatch: (_) => " ");
+  }
+
   QuranText._private();
 }

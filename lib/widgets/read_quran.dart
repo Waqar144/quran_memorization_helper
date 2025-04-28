@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'dart:async';
 import 'package:quran_memorization_helper/models/settings.dart';
 import 'package:quran_memorization_helper/models/ayat.dart';
+import 'package:quran_memorization_helper/quran_data/quran_text.dart';
 import 'package:quran_memorization_helper/quran_data/surahs.dart';
 import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
@@ -135,11 +136,13 @@ class TranslationTile extends StatefulWidget {
   final String translation;
   final bool isUrduTranslation;
   final bool hasNoMutashabihas;
+  final int ayahIndex;
 
   const TranslationTile(
     this.translation,
     this.isUrduTranslation, {
     required this.hasNoMutashabihas,
+    required this.ayahIndex,
     super.key,
   });
 
@@ -167,7 +170,21 @@ class _TranslationTileState extends State<TranslationTile> {
     ];
 
     if (widget.hasNoMutashabihas) {
-      return ListTile(title: Column(children: children));
+      return ListTile(
+        title: Column(
+          children: [...children, const Divider(indent: 10, endIndent: 10)],
+        ),
+        subtitle: Text(
+          QuranText.instance.spaceSplittedAyahText(widget.ayahIndex),
+          textDirection: TextDirection.rtl,
+          style: TextStyle(
+            fontFamily: getQuranFont(),
+            fontSize: 22,
+            wordSpacing: 1,
+            letterSpacing: 0,
+          ),
+        ),
+      );
     }
 
     return ExpansionTile(
@@ -250,6 +267,7 @@ class _LongPressActionSheetState extends State<LongPressActionSheet> {
         final translationWidget = TranslationTile(
           translation,
           widget.translation.isUrdu,
+          ayahIndex: ayah,
           hasNoMutashabihas: dontShowMutashabih,
         );
 
