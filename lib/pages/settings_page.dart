@@ -11,6 +11,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:quran_memorization_helper/utils/utils.dart';
 
 const String appVersion = "1.5.2";
+const String appTitle = "Quran Revision Companion";
 
 class _ChangeTranslationDialog extends StatefulWidget {
   @override
@@ -481,7 +482,7 @@ class _SettingsPageState extends State<SettingsPage> {
         showLicensePage(
           context: context,
           applicationVersion: appVersion,
-          applicationName: "Quran 16 Line",
+          applicationName: appTitle,
         );
       },
     );
