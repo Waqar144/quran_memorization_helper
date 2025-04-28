@@ -339,17 +339,15 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget _createReflowModeTile() {
-    return ListTile(
+    return SwitchListTile(
       title: const Text("Reflow text"),
       subtitle: const Text(
         "Reflow text instead of following page layout strictly. This allows changing font size",
       ),
-      trailing: Switch(
-        value: Settings.instance.reflowMode,
-        onChanged: (bool newValue) {
-          Settings.instance.reflowMode = newValue;
-        },
-      ),
+      value: Settings.instance.reflowMode,
+      onChanged: (bool newValue) {
+        Settings.instance.reflowMode = newValue;
+      },
     );
   }
 
@@ -383,15 +381,13 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget _tapToShowTranslationTile() {
-    return ListTile(
+    return SwitchListTile(
       title: const Text("Tap to show translation"),
       subtitle: const Text("Long press will mark a mistake"),
-      trailing: Switch(
-        value: Settings.instance.tapToShowTranslation,
-        onChanged: (bool newValue) {
-          Settings.instance.tapToShowTranslation = newValue;
-        },
-      ),
+      value: Settings.instance.tapToShowTranslation,
+      onChanged: (bool newValue) {
+        Settings.instance.tapToShowTranslation = newValue;
+      },
     );
   }
 
