@@ -145,8 +145,10 @@ class _QuizPageState extends State<QuizPage> {
 
         // find ayah and next ayah
         int first = getFirstAyahOfPara(para);
-        String ayah = QuranText.instance.ayahText(first + r);
-        String nextAyah = QuranText.instance.ayahText(first + r + 1);
+        String ayah = QuranText.instance.spaceSplittedAyahText(first + r);
+        String nextAyah = QuranText.instance.spaceSplittedAyahText(
+          first + r + 1,
+        );
 
         yield _addQuestion(ayah, nextAyah, para, r);
 
