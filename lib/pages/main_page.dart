@@ -325,14 +325,14 @@ class _MainPageState extends State<MainPage>
       pinned: false,
       actions: [
         IconButton(
-          tooltip: "Next Para",
+          tooltip: "Next ${paraText()}",
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
             _paraModel.setCurrentPara(_paraModel.currentPara + 1);
           },
         ),
         IconButton(
-          tooltip: "Previous Para",
+          tooltip: "Previous ${paraText()}",
           icon: const Icon(Icons.arrow_forward),
           onPressed: () {
             _paraModel.setCurrentPara(_paraModel.currentPara - 1);
