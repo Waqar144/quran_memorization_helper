@@ -65,7 +65,7 @@ class SurahListView extends StatelessWidget {
               String.fromCharCode(surahGlyphCode(index)),
               style: TextStyle(
                 letterSpacing: 0,
-                fontSize: 26,
+                fontSize: 28,
                 fontFamily: "SurahNames",
               ),
             ),

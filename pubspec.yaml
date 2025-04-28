@@ -90,7 +90,7 @@ flutter:
   fonts:
     - family: Al Mushaf
       fonts:
-        - asset: fonts/PDMS_SALEEM_QURANFONTQESHIP_0.ttf
+        - asset: fonts/DigitalKhattIndoPak.otf
     - family: Uthmanic
       fonts:
         - asset: fonts/uthmanic_hafs1_ver17.ttf

@@ -743,7 +743,7 @@ class _PageWidgetState extends State<PageWidget> {
           child: Row(
             children: [
               Text(
-                "\uFD3Fآیاتھا ${toUrduNumber(surahData.ayahCount)}\uFD3E",
+                "آیاتھا ${toUrduNumber(surahData.ayahCount)}",
                 textDirection: TextDirection.rtl,
                 textAlign: TextAlign.center,
                 style: style.copyWith(fontFamily: "Al Mushaf"),
@@ -833,7 +833,7 @@ class _PageWidgetState extends State<PageWidget> {
             ),
           ),
           Text(
-            "\uFD3F${toUrduNumber(surahData.ayahCount)}\uFD3E",
+            "آياتها ${toUrduNumber(surahData.ayahCount)}",
             textDirection: TextDirection.rtl,
             style: style.copyWith(fontFamily: "Al Mushaf"),
           ),
@@ -908,29 +908,6 @@ class _PageWidgetState extends State<PageWidget> {
       arabicNumeric += arabicNumbers[e - 48];
     }
     return arabicNumeric;
-  }
-
-  static String getAyahEndMarkerGlyphCode(int surahIndex, int ayahIndex) {
-    if (isSajdaAyat(surahIndex, ayahIndex)) {
-      return switch (surahIndex) {
-        6 => '\uf68e',
-        12 => '\uf681',
-        15 => '\uf688',
-        16 => '\uf68d',
-        18 => '\uf689',
-        21 => '\uf682',
-        24 => '\uf68a',
-        26 => '\uf686',
-        31 => '\uf68b',
-        37 => '\uf685',
-        40 => '\uf687',
-        52 => '\uf68c',
-        83 => '\uf684',
-        95 => '\uf683',
-        _ => throw "Invalid sajda ayah",
-      };
-    }
-    return String.fromCharCode(0xF500 + ayahIndex);
   }
 
   // Finds the correct position of the first word of the line
@@ -1018,8 +995,9 @@ class _PageWidgetState extends State<PageWidget> {
           reflowMode || // we always add spaces in reflow mode
           bigScreen ||
           shouldAddSpaces(widget.pageIndex, lineIdx, Settings.instance.mushaf);
+      final int lastWordInLineIndex = words.length - 1;
 
-      for (final w in words) {
+      for (final (idx, w) in words.indexed) {
         int wordIdx = i;
         final tapHandler = TapAndLongPressGestureRecognizer(
           onTap: () => widget.onAyahTapped(a.ayahIndex, wordIdx, false),
@@ -1027,6 +1005,33 @@ class _PageWidgetState extends State<PageWidget> {
         );
 
         TextStyle? style;
+
+        if (is16Line && w.contains("\u06dd")) {
+          final ruku = getRukuData(a.ayahIndex);
+          final hasRukuMarker = ruku != null;
+          spans.add(
+            TextSpan(
+              text: hasRukuMarker ? "$w " : w,
+              recognizer:
+                  hasRukuMarker
+                      ? (TapGestureRecognizer()
+                        ..onTap = () => _onRukuTapped(a.ayahIndex))
+                      : null,
+              style: TextStyle(
+                inherit: true,
+                color: Theme.of(context).textTheme.bodyMedium?.color,
+                backgroundColor:
+                    hasRukuMarker
+                        ? (darkMode
+                            ? Colors.amber.shade700.withAlpha(125)
+                            : Colors.amber.shade100)
+                        : null,
+              ),
+            ),
+          );
+          i++;
+          continue;
+        }
 
         if (ayahInDb != null) {
           if (ayahInDb.markedWords.contains(wordIdx)) {
@@ -1044,41 +1049,22 @@ class _PageWidgetState extends State<PageWidget> {
         // separator
         spans.add(const TextSpan(text: '\u200c'));
         // space
-        if (addSpacesBetweenWords) {
+        if (addSpacesBetweenWords && idx != lastWordInLineIndex) {
           spans.add(TextSpan(text: ' ', style: style));
         }
+
         i++;
       }
 
-      if (_shouldDrawAyahEndMarker(a.ayahIndex, lineIdx)) {
-        String marker =
-            is16Line
-                ? getAyahEndMarkerGlyphCode(surahIdx, surahAyahIdx)
-                : getVerseEndSymbol(surahAyahIdx + 1);
-
-        bool hasRukuMarker = false;
-        if (is16Line) {
-          final ruku = getRukuData(a.ayahIndex);
-          hasRukuMarker = ruku != null;
-        }
+      if (!is16Line && _shouldDrawAyahEndMarker(a.ayahIndex, lineIdx)) {
+        String marker = getVerseEndSymbol(surahAyahIdx + 1);
 
         spans.add(
           TextSpan(
             text: marker,
-            recognizer:
-                hasRukuMarker
-                    ? (TapGestureRecognizer()
-                      ..onTap = () => _onRukuTapped(a.ayahIndex))
-                    : null,
             style: TextStyle(
               color: Theme.of(context).textTheme.bodyMedium?.color,
-              backgroundColor:
-                  hasRukuMarker
-                      ? (darkMode
-                          ? Colors.amber.shade700.withAlpha(125)
-                          : Colors.amber.shade100)
-                      : null,
-              fontFamily: is16Line ? "AyahNumber" : "Uthmanic",
+              // fontFamily: is16Line ? "AyahNumber" : "Uthmanic",
             ),
           ),
         );
@@ -1204,7 +1190,7 @@ class _PageWidgetState extends State<PageWidget> {
     } else if (Settings.instance.mushaf == Mushaf.Uthmani15Line) {
       return 28.0;
     } else {
-      return 30.0;
+      return 26.0;
     }
   }
 

@@ -57,7 +57,7 @@ class ParaListView extends StatelessWidget {
               is16line
                   ? TextStyle(
                     letterSpacing: 0,
-                    fontSize: 26,
+                    fontSize: 22,
                     fontFamily: getQuranFont(),
                   )
                   : null,

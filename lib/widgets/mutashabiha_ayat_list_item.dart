@@ -22,6 +22,7 @@ class _AyatListItemWithMetadata extends StatelessWidget {
           fontSize: Settings.instance.fontSize.toDouble(),
           letterSpacing: 0,
           wordSpacing: Settings.wordSpacing,
+          height: Settings.instance.mushaf == Mushaf.Indopak16Line ? 1.7 : null,
         ),
       ),
       softWrap: true,
@@ -68,6 +69,10 @@ class MutashabihaAyatListItem extends StatelessWidget {
                 fontSize: Settings.instance.fontSize.toDouble(),
                 letterSpacing: 0,
                 wordSpacing: Settings.wordSpacing,
+                height:
+                    Settings.instance.mushaf == Mushaf.Indopak16Line
+                        ? 1.7
+                        : null,
               ),
             ),
             softWrap: true,

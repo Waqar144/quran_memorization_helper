@@ -7,7 +7,7 @@ import 'package:quran_memorization_helper/utils/utils.dart' as utils;
 // ignore: constant_identifier_names
 enum Mushaf { Indopak16Line, Uthmani15Line }
 
-const _minFontSize = 28;
+const _minFontSize = 24;
 
 class Settings extends ChangeNotifier {
   static final Settings _instance = Settings._private();
