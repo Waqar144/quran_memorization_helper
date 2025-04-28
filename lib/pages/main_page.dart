@@ -340,18 +340,19 @@ class _MainPageState extends State<MainPage>
         ),
         IconButton(
           onPressed: () {
-            Settings.instance.themeMode =
-                Settings.instance.themeMode == ThemeMode.light
-                    ? ThemeMode.dark
-                    : ThemeMode.light;
+            if (Theme.of(context).brightness == Brightness.dark) {
+              Settings.instance.themeMode = ThemeMode.light;
+            } else {
+              Settings.instance.themeMode = ThemeMode.dark;
+            }
           },
           icon: Icon(
-            Settings.instance.themeMode == ThemeMode.light
+            Theme.of(context).brightness == Brightness.light
                 ? Icons.mode_night
-                : Icons.sunny,
+                : Icons.light_mode,
           ),
           tooltip:
-              Settings.instance.themeMode == ThemeMode.light
+              Theme.of(context).brightness == Brightness.light
                   ? "Switch to night mode"
                   : "Switch to light mode",
         ),
