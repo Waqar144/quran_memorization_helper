@@ -784,7 +784,13 @@ class _PageWidgetState extends State<PageWidget> {
           child: Row(
             children: [
               Text(
-                "آیاتھا ${toUrduNumber(surahData.ayahCount)}",
+                " ${toArabicNumber(surahData.ayahCount)}",
+                textDirection: TextDirection.rtl,
+                textAlign: TextAlign.center,
+                style: style.copyWith(fontFamily: "Urdu"),
+              ),
+              Text(
+                "آياتها",
                 textDirection: TextDirection.rtl,
                 textAlign: TextAlign.center,
                 style: style.copyWith(fontFamily: "Al Mushaf"),
@@ -857,7 +863,6 @@ class _PageWidgetState extends State<PageWidget> {
         border: Border.all(color: Theme.of(context).dividerColor, width: 1),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         textDirection: TextDirection.rtl,
         children: [
           Text(
@@ -865,6 +870,7 @@ class _PageWidgetState extends State<PageWidget> {
             textDirection: TextDirection.rtl,
             style: style.copyWith(fontFamily: "SurahNames"),
           ),
+          const Spacer(),
           Text(
             isSurahTawba ? "-" : String.fromCharCode(0xFDFD),
             textDirection: TextDirection.rtl,
@@ -873,10 +879,18 @@ class _PageWidgetState extends State<PageWidget> {
               fontSize: Theme.of(context).textTheme.headlineLarge?.fontSize,
             ),
           ),
+          const Spacer(),
           Text(
-            "آياتها ${toUrduNumber(surahData.ayahCount)}",
+            "آياتها",
             textDirection: TextDirection.rtl,
+            textAlign: TextAlign.center,
             style: style.copyWith(fontFamily: "Al Mushaf"),
+          ),
+          Text(
+            " ${toArabicNumber(surahData.ayahCount)}",
+            textDirection: TextDirection.rtl,
+            textAlign: TextAlign.center,
+            style: style.copyWith(fontFamily: "Urdu"),
           ),
         ],
       ),
