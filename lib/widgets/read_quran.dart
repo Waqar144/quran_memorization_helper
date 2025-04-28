@@ -374,9 +374,50 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
   void initState() {
     widget.model.addListener(onModelChanged);
     Settings.instance.addListener(clearCachedTranslation);
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   Future.delayed(const Duration(milliseconds: 100), () {
+    //     print("FIRING!");
+    //     _fwdPgs();
+    //   });
+    // });
     super.initState();
     WakelockPlus.enable(); // disable auto screen turn off
   }
+
+  /* Test code to scroll through all pages */
+  // void _fwdPgs() {
+  //   if (!widget.pageController.hasClients) {
+  //     Future.delayed(const Duration(milliseconds: 10), () {
+  //       _fwdPgs();
+  //     });
+  //   }
+  //
+  //   if (widget.pageController.page == null) {
+  //     print("Page Controller is null!");
+  //     return;
+  //   }
+  //   if (widget.pageController.page!.toInt() + 1 < _pages.length) {
+  //     widget.pageController.jumpToPage(widget.pageController.page!.toInt() + 1);
+  //     Future.delayed(const Duration(milliseconds: 1), () {
+  //       // print("Next! ${widget.pageController.page!.toInt()} ${_pages.length}");
+  //       _fwdPgs();
+  //     });
+  //   } else {
+  //     print("JUMP TO NEXT PARA!");
+  //     int currentPara = widget.model.currentPara;
+  //     int nextPara = currentPara + 1;
+  //     if (nextPara > 30) {
+  //       print("Done!");
+  //       return;
+  //     }
+  //     widget.model.setCurrentPara(nextPara, showLastPage: false);
+  //
+  //     Future.delayed(const Duration(milliseconds: 100), () {
+  //       // print("Next! ${widget.pageController.page!.toInt()} ${_pages.length}");
+  //       _fwdPgs();
+  //     });
+  //   }
+  // }
 
   @override
   void dispose() {
