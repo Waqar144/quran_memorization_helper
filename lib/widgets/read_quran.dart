@@ -935,26 +935,6 @@ class _PageWidgetState extends State<PageWidget> {
     );
   }
 
-  static bool isSajdaAyat(int surahIndex, int ayahIndex) {
-    return switch (surahIndex) {
-      6 => ayahIndex == 205,
-      12 => ayahIndex == 14,
-      15 => ayahIndex == 49,
-      16 => ayahIndex == 108,
-      18 => ayahIndex == 57,
-      21 => ayahIndex == 17,
-      24 => ayahIndex == 59,
-      26 => ayahIndex == 25,
-      31 => ayahIndex == 14,
-      37 => ayahIndex == 23,
-      40 => ayahIndex == 37,
-      52 => ayahIndex == 61,
-      83 => ayahIndex == 20,
-      95 => ayahIndex == 18,
-      _ => false,
-    };
-  }
-
   static String getVerseEndSymbol(int verseNumber) {
     return toArabicNumber(verseNumber);
   }
@@ -991,8 +971,8 @@ class _PageWidgetState extends State<PageWidget> {
     required bool reflowMode,
   }) {
     List<TextSpan> spans = [];
-    final bigScreen = isBigScreen();
-    for (final a in line.lineAyahs) {
+
+    for (final (lineAyahIdx, a) in line.lineAyahs.indexed) {
       final (
         _,
         int surahIdx,
@@ -1013,37 +993,10 @@ class _PageWidgetState extends State<PageWidget> {
           .getFullAyahText(a.ayahIndex, widget.pageIndex)
           .split('\u200c');
       final is16Line = Settings.instance.mushaf == Mushaf.Indopak16Line;
-      final isSajdaAya = isSajdaAyat(surahIdx, surahAyahIdx);
-
-      if (is16Line && isSajdaAya) {
-        text = text.replaceFirst('\u06E9', '');
-        text = text.replaceFirst('\ue022', ''); // ruku marker (para 9)
-
-        for (int i = fullAyahTextWords.length - 1; i >= 0; --i) {
-          String w = fullAyahTextWords[i];
-          w = w.replaceFirst('\ue022', '');
-          int found = w.indexOf('\u06E9');
-
-          if (found != -1) {
-            // for whatever reason, dart is unable to replace '\u06E9' from this word
-            // so manually grab substrings of before and after the marker and create
-            // a new string
-            String b = w.substring(0, found);
-            String a = w.substring(found + 1, null);
-            w = b + a;
-            fullAyahTextWords[i] = w;
-            break;
-          }
-        }
-      }
 
       bool darkMode = Theme.of(context).brightness == Brightness.dark;
       List<String> words = text.split('\u200c'); // zwj
       int i = getFirstWordIndex(fullAyahTextWords, words);
-      final addSpacesBetweenWords =
-          reflowMode || // we always add spaces in reflow mode
-          bigScreen ||
-          shouldAddSpaces(widget.pageIndex, lineIdx, Settings.instance.mushaf);
       int lastWordInLineIndex = words.length - 1;
       if (words.last.isEmpty) {
         lastWordInLineIndex -= 1;
@@ -1112,19 +1065,19 @@ class _PageWidgetState extends State<PageWidget> {
       }
 
       if (!is16Line && _shouldDrawAyahEndMarker(a.ayahIndex, lineIdx)) {
-        String marker = getVerseEndSymbol(surahAyahIdx + 1);
-
         spans.add(
           TextSpan(
-            text: marker,
+            text: getVerseEndSymbol(surahAyahIdx + 1),
             style: TextStyle(
               color: Theme.of(context).textTheme.bodyMedium?.color,
-              // fontFamily: is16Line ? "AyahNumber" : "Uthmanic",
+              fontFamily: "Uthmanic",
             ),
           ),
         );
 
-        if (addSpacesBetweenWords) {
+        // space
+        // dont add if the marker is at the end of line
+        if (lineAyahIdx != line.lineAyahs.length - 1) {
           spans.add(TextSpan(text: ' '));
         }
       }
