@@ -1128,7 +1128,7 @@ class _PageWidgetState extends State<PageWidget> {
     final spans = _buildLineSpans(line, lineIdx, ayahData, reflowMode: false);
     // dont try to space first two pages
     final wordSpacing =
-        widget.pageIndex < 2 ? 1.0 : _getWordSpacing(spans, width, fontSize);
+        widget.pageIndex < 3 ? 1.0 : _getWordSpacing(spans, width, style);
 
     return Text.rich(
       TextSpan(children: spans),
