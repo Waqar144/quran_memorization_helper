@@ -934,7 +934,7 @@ class _PageWidgetState extends State<PageWidget> {
                 color:
                     is16Line
                         ? Theme.of(context).textTheme.bodyMedium?.color
-                        : Theme.of(context).textTheme.bodyMedium?.color,
+                        : Colors.black,
                 backgroundColor:
                     hasRukuMarker
                         ? (darkMode
