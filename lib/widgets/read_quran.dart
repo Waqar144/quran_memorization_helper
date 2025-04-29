@@ -871,10 +871,12 @@ class _PageWidgetState extends State<PageWidget> {
   List<TextSpan> _buildLineSpans(
     Line line,
     int lineIdx,
-    List<(int ayahIndex, int, int, Ayat?, bool)> ayahData, {
+    List<(int ayahIndex, int, int, Ayat?, bool, String)> ayahData, {
     required bool reflowMode,
   }) {
     List<TextSpan> spans = [];
+    final is16Line = Settings.instance.mushaf == Mushaf.Indopak16Line;
+    bool darkMode = Theme.of(context).brightness == Brightness.dark;
 
     for (final a in line.lineAyahs) {
       final (
@@ -883,6 +885,7 @@ class _PageWidgetState extends State<PageWidget> {
         int surahAyahIdx,
         Ayat? ayahInDb,
         bool isMutashabihaAyat,
+        String fullAyahText,
       ) = ayahData.firstWhere(
         (data) {
           return data.$1 == a.ayahIndex;
@@ -893,14 +896,9 @@ class _PageWidgetState extends State<PageWidget> {
       );
 
       String text = a.text;
-      final is16Line = Settings.instance.mushaf == Mushaf.Indopak16Line;
 
-      bool darkMode = Theme.of(context).brightness == Brightness.dark;
       List<String> words = text.split('\u200c'); // zwj
-      int i = getFirstWordIndex(
-        widget.getFullAyahText(a.ayahIndex, widget.pageIndex),
-        text,
-      );
+      int i = getFirstWordIndex(fullAyahText, text);
 
       int lastWordInLineIndex = words.length - 1;
       if (words.last.isEmpty) {
@@ -1016,7 +1014,7 @@ class _PageWidgetState extends State<PageWidget> {
     Line line,
     int lineIdx,
     double rowHeight,
-    List<(int, int, int, Ayat?, bool)> ayahData,
+    List<(int, int, int, Ayat?, bool, String)> ayahData,
     double fontSize,
     double width,
     TextStyle style,
@@ -1088,7 +1086,7 @@ class _PageWidgetState extends State<PageWidget> {
 
   List<Widget> _reflowModeText(
     double rowHeight,
-    List<(int, int, int, Ayat?, bool)> ayahData,
+    List<(int, int, int, Ayat?, bool, String)> ayahData,
   ) {
     List<Widget> widgets = [];
     List<TextSpan> spans = [];
@@ -1167,7 +1165,7 @@ class _PageWidgetState extends State<PageWidget> {
 
   List<Widget> _pageLines(double rowHeight, double rowWidth) {
     int lastAyah = -1;
-    List<(int, int, int, Ayat?, bool)> ayahData = [];
+    List<(int, int, int, Ayat?, bool, String)> ayahData = [];
     ayahData.length = 0;
     for (final l in widget._pageLines) {
       if (l.lineAyahs.first.ayahIndex < 0) {
@@ -1181,6 +1179,7 @@ class _PageWidgetState extends State<PageWidget> {
           final int surahIdx = surahForAyah(a.ayahIndex);
           final int surahAyahIdx = toSurahAyahOffset(surahIdx, a.ayahIndex);
           final Ayat? ayahInDb = widget.getAyatInDB(a.ayahIndex);
+          final text = widget.getFullAyahText(a.ayahIndex, widget.pageIndex);
           final bool isMutashabihaAyat = widget.isMutashabihaAyat(
             surahAyahIdx,
             surahIdx,
@@ -1192,6 +1191,7 @@ class _PageWidgetState extends State<PageWidget> {
             surahAyahIdx,
             ayahInDb,
             isMutashabihaAyat,
+            text,
           ));
         }
       }
