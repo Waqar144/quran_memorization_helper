@@ -34,6 +34,7 @@ class QuranText {
           final lineayahs = line as List<dynamic>;
           for (final la in lineayahs) {
             final idx = la["idx"] as int;
+            if (idx < 0) continue; // bismillah, surah name
             final t = la["text"] as String;
             if (idx == lastIndex) {
               _ayahs[idx] = "${_ayahs[idx]}\u200c$t";

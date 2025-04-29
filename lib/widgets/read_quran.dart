@@ -328,22 +328,13 @@ class Page {
   final List<Line> lines;
   const Page(this.pageNum, this.lines);
 
-  static Page fromJson(dynamic json, List<int> surahAyahStarts) {
+  static Page fromJson(dynamic json) {
     int pageNum = json["pageNum"] as int;
     List<dynamic> lineDatas = json["lines"] as List<dynamic>;
     List<Line> lines = [];
     for (final lineData in lineDatas) {
       final lineArray = lineData as List<dynamic>;
       List<LineAyah> lineAyahs = [];
-
-      int firstAyahIdx = lineArray.first['idx'] as int;
-      if (surahAyahStarts.lastOrNull == firstAyahIdx) {
-        int surah = getSurahAyahStarts().indexOf(surahAyahStarts.last);
-        assert(surah != -1);
-        lines.add(Line([LineAyah(-surah, "")]));
-        surahAyahStarts.removeLast();
-      }
-
       for (final lineArrayItem in lineArray) {
         int ayahIdx = lineArrayItem['idx'] as int;
         final ayahText = lineArrayItem['text'] as String;
@@ -459,10 +450,8 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
     final data = await rootBundle.loadString("assets/$folder/$para.json");
     final pagesList = jsonDecode(data) as List<dynamic>;
     List<Page> pages = [];
-    List<int> surahAyahStarts =
-        surahAyahOffsetsForPara(para - 1).reversed.toList();
     for (final p in pagesList) {
-      pages.add(Page.fromJson(p, surahAyahStarts));
+      pages.add(Page.fromJson(p));
     }
     _pages = pages;
 
@@ -771,100 +760,36 @@ class _PageWidgetState extends State<PageWidget> {
     _subscription?.cancel();
   }
 
-  Widget getTwoLinesBismillah(
-    int surahIdx,
-    TextStyle style,
-    double rowHeight,
-    bool is16Line,
-  ) {
-    SurahData surahData = surahDataForIdx(surahIdx, arabic: true);
-
-    return Column(
-      textDirection: TextDirection.rtl,
-      children: [
-        // surah name and ayah count
-        Container(
-          padding: const EdgeInsets.only(left: 2, right: 2),
-          height: rowHeight,
-          decoration: BoxDecoration(
-            color: Colors.green.withValues(alpha: 0.4),
-            border: Border.all(color: Theme.of(context).dividerColor, width: 1),
-          ),
-          child: Row(
-            children: [
-              Text(
-                " ${toArabicNumber(surahData.ayahCount)}",
-                textDirection: TextDirection.rtl,
-                textAlign: TextAlign.center,
-                style: style.copyWith(fontFamily: "Urdu"),
-              ),
-              Text(
-                "آياتها",
-                textDirection: TextDirection.rtl,
-                textAlign: TextAlign.center,
-                style: style.copyWith(fontFamily: "Al Mushaf"),
-              ),
-              const Spacer(),
-              Text(
-                String.fromCharCodes([surahGlyphCode(surahIdx), 0xe903]),
-                textDirection: TextDirection.rtl,
-                style: style.copyWith(fontFamily: "SurahNames"),
-              ),
-            ],
-          ),
+  Widget _getBism(TextStyle style, double rowHeight) {
+    return Container(
+      height: rowHeight,
+      width: MediaQuery.sizeOf(context).width,
+      decoration: BoxDecoration(
+        color: Colors.green.withValues(alpha: 0.4),
+        border: Border.all(color: Theme.of(context).dividerColor, width: 1),
+      ),
+      child: Text(
+        String.fromCharCode(0xFDFD),
+        textAlign: TextAlign.center,
+        textDirection: TextDirection.rtl,
+        style: style.copyWith(
+          fontFamily: "Bismillah",
+          fontSize: Theme.of(context).textTheme.headlineLarge?.fontSize,
         ),
-        // bismillah
-        Container(
-          height: rowHeight,
-          width: MediaQuery.sizeOf(context).width,
-          decoration: BoxDecoration(
-            color: Colors.green.withValues(alpha: 0.4),
-            border: Border.all(color: Theme.of(context).dividerColor, width: 1),
-          ),
-          child: Text(
-            String.fromCharCode(0xFDFD),
-            textAlign: TextAlign.center,
-            textDirection: TextDirection.rtl,
-            style: style.copyWith(
-              fontFamily: "Bismillah",
-              fontSize: Theme.of(context).textTheme.headlineLarge?.fontSize,
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 
-  Widget getBismillah(int surahIdx, double rowHeight) {
-    surahIdx = -surahIdx;
-    final style = TextStyle(
-      color: Theme.of(context).textTheme.bodyMedium?.color,
-      fontFamily: getQuranFont(),
-      fontSize: Theme.of(context).textTheme.titleLarge?.fontSize,
-      letterSpacing: 0.0,
-      wordSpacing: 0,
-    );
-
-    final is16Line = Settings.instance.mushaf == Mushaf.Indopak16Line;
-    if (is16Line) {
-      // 30th para ?
-      if (widget.pageIndex >= 528) {
-        if (surahHas2LineHeadress(surahIdx)) {
-          return getTwoLinesBismillah(surahIdx, style, rowHeight, true);
-        }
-      } else if (widget._pageLines.length == 15) {
-        return getTwoLinesBismillah(surahIdx, style, rowHeight, true);
-      }
-    } else {
-      if (widget._pageLines.length == 14) {
-        return getTwoLinesBismillah(surahIdx, style, rowHeight, false);
-      }
-    }
-
+  Widget _getSurahHeaddress(
+    int surahIdx,
+    TextStyle style,
+    double rowHeight,
+    bool is16Line, {
+    bool includeBismillah = false,
+  }) {
     SurahData surahData = surahDataForIdx(surahIdx, arabic: true);
     final isSurahTawba = surahIdx == 8;
     return Container(
-      width: MediaQuery.sizeOf(context).width,
       padding: const EdgeInsets.only(left: 2, right: 2),
       height: rowHeight,
       decoration: BoxDecoration(
@@ -872,34 +797,34 @@ class _PageWidgetState extends State<PageWidget> {
         border: Border.all(color: Theme.of(context).dividerColor, width: 1),
       ),
       child: Row(
-        textDirection: TextDirection.rtl,
         children: [
           Text(
-            String.fromCharCodes([surahGlyphCode(surahIdx)]),
+            " ${toArabicNumber(surahData.ayahCount)}",
             textDirection: TextDirection.rtl,
-            style: style.copyWith(fontFamily: "SurahNames"),
+            textAlign: TextAlign.center,
+            style: style.copyWith(fontFamily: "Urdu"),
           ),
-          const Spacer(),
-          Text(
-            isSurahTawba ? "-" : String.fromCharCode(0xFDFD),
-            textDirection: TextDirection.rtl,
-            style: style.copyWith(
-              fontFamily: "Bismillah",
-              fontSize: Theme.of(context).textTheme.headlineLarge?.fontSize,
-            ),
-          ),
-          const Spacer(),
           Text(
             "آياتها",
             textDirection: TextDirection.rtl,
             textAlign: TextAlign.center,
             style: style.copyWith(fontFamily: "Al Mushaf"),
           ),
+          if (includeBismillah && !isSurahTawba) const Spacer(),
+          if (includeBismillah && !isSurahTawba)
+            Text(
+              isSurahTawba ? "-" : String.fromCharCode(0xFDFD),
+              textDirection: TextDirection.rtl,
+              style: style.copyWith(
+                fontFamily: "Bismillah",
+                fontSize: Theme.of(context).textTheme.headlineLarge?.fontSize,
+              ),
+            ),
+          const Spacer(),
           Text(
-            " ${toArabicNumber(surahData.ayahCount)}",
+            String.fromCharCodes([surahGlyphCode(surahIdx), 0xe903]),
             textDirection: TextDirection.rtl,
-            textAlign: TextAlign.center,
-            style: style.copyWith(fontFamily: "Urdu"),
+            style: style.copyWith(fontFamily: "SurahNames"),
           ),
         ],
       ),
@@ -1111,6 +1036,17 @@ class _PageWidgetState extends State<PageWidget> {
     );
   }
 
+  int _getLastLineAyah() {
+    for (final line in widget._pageLines.reversed) {
+      for (final a in line.lineAyahs) {
+        if (a.ayahIndex >= 0) {
+          return a.ayahIndex;
+        }
+      }
+    }
+    throw "Did not find any ayahs!!";
+  }
+
   Widget _pageTopBorder() {
     return SizedBox(
       height: 24,
@@ -1118,7 +1054,7 @@ class _PageWidgetState extends State<PageWidget> {
         children: [
           Text(
             surahDataForIdx(
-              surahForAyah(widget._pageLines.last.lineAyahs.last.ayahIndex),
+              surahForAyah(_getLastLineAyah()),
               arabic: true,
             ).name,
             style: TextStyle(
@@ -1167,7 +1103,32 @@ class _PageWidgetState extends State<PageWidget> {
           );
           spans = [];
         }
-        widgets.add(getBismillah(line.lineAyahs.first.ayahIndex, rowHeight));
+
+        final style = TextStyle(
+          color: Theme.of(context).textTheme.bodyMedium?.color,
+          fontFamily: getQuranFont(),
+          fontSize: Theme.of(context).textTheme.titleLarge?.fontSize,
+          letterSpacing: 0.0,
+          wordSpacing: 0,
+        );
+        final is16Line = Settings.instance.mushaf == Mushaf.Indopak16Line;
+        if (line.lineAyahs.first.ayahIndex == -999) {
+          widgets.add(_getBism(style, rowHeight));
+        } else {
+          bool drawBismillah =
+              is16Line &&
+              lineIdx + 1 < widget._pageLines.length &&
+              widget._pageLines[lineIdx + 1].lineAyahs.first.ayahIndex >= 0;
+          widgets.add(
+            _getSurahHeaddress(
+              -line.lineAyahs.first.ayahIndex,
+              style,
+              rowHeight,
+              is16Line,
+              includeBismillah: drawBismillah,
+            ),
+          );
+        }
         continue;
       }
 
@@ -1242,9 +1203,35 @@ class _PageWidgetState extends State<PageWidget> {
     final bigScreen = isBigScreen();
     final defaultTextStyle = _getQuranTextStyle(_textFontSize());
 
+    final bismillahStyle = TextStyle(
+      color: Theme.of(context).textTheme.bodyMedium?.color,
+      fontFamily: getQuranFont(),
+      fontSize: Theme.of(context).textTheme.titleLarge?.fontSize,
+      letterSpacing: 0.0,
+      wordSpacing: 0,
+    );
+    final is16Line = Settings.instance.mushaf == Mushaf.Indopak16Line;
+
     for (final (idx, l) in widget._pageLines.indexed) {
       if (l.lineAyahs.first.ayahIndex < 0) {
-        widgets.add(getBismillah(l.lineAyahs.first.ayahIndex, rowHeight));
+        if (l.lineAyahs.first.ayahIndex == -999) {
+          widgets.add(_getBism(bismillahStyle, rowHeight));
+        } else {
+          bool drawBismillah =
+              is16Line &&
+              idx + 1 < widget._pageLines.length &&
+              widget._pageLines[idx + 1].lineAyahs.first.ayahIndex >= 0;
+
+          widgets.add(
+            _getSurahHeaddress(
+              -l.lineAyahs.first.ayahIndex,
+              bismillahStyle,
+              rowHeight,
+              is16Line,
+              includeBismillah: drawBismillah,
+            ),
+          );
+        }
         continue;
       }
       widgets.add(divider);
