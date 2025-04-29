@@ -107,8 +107,6 @@ class _MainPageState extends State<MainPage>
   }
 
   void _saveScrollPosition() {
-    // multiply by 500 to make the offset bigger so it can be saved, otherwise it gets ignored
-    // as the difference between last save value and this one might be too small
     Settings.instance.saveScrollPositionDelayed(
       _paraModel.currentPara,
       _pageController.page?.floor() ?? 0,
