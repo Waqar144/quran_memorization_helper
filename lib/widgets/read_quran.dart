@@ -941,27 +941,20 @@ class _PageWidgetState extends State<PageWidget> {
 
   // Finds the correct position of the first word of the line
   // in the full ayah text
-  static int getFirstWordIndex(
-    List<String> fullAyahWords,
-    List<String> currentLineWords, {
-    int start = -1,
-  }) {
-    String first = currentLineWords.first;
-    int idx = fullAyahWords.indexOf(first, start);
-    int c = 0;
-    const int maxMatch = 4;
-    for (
-      int i = idx;
-      i < fullAyahWords.length && c < currentLineWords.length;
-      ++i, ++c
-    ) {
-      String next = currentLineWords[c];
-      if (fullAyahWords[i] != next) {
-        return getFirstWordIndex(fullAyahWords, currentLineWords, start: i + 1);
-      }
-      if (c >= maxMatch) break;
+  static int getFirstWordIndex(String fullAyah, String currentLine) {
+    // Find the position of currentLine in full Ayah
+    int match = fullAyah.indexOf(currentLine);
+    if (match == -1) throw "Didn't find anything, bug!";
+
+    // Find the index of first word
+    int s = fullAyah.indexOf("\u200c");
+    int wordIndex = 0;
+    while (true) {
+      if (s >= match) break;
+      s = fullAyah.indexOf("\u200c", s + 1);
+      wordIndex++;
     }
-    return idx;
+    return wordIndex;
   }
 
   List<TextSpan> _buildLineSpans(
@@ -989,14 +982,15 @@ class _PageWidgetState extends State<PageWidget> {
       );
 
       String text = a.text;
-      List<String> fullAyahTextWords = widget
-          .getFullAyahText(a.ayahIndex, widget.pageIndex)
-          .split('\u200c');
       final is16Line = Settings.instance.mushaf == Mushaf.Indopak16Line;
 
       bool darkMode = Theme.of(context).brightness == Brightness.dark;
       List<String> words = text.split('\u200c'); // zwj
-      int i = getFirstWordIndex(fullAyahTextWords, words);
+      int i = getFirstWordIndex(
+        widget.getFullAyahText(a.ayahIndex, widget.pageIndex),
+        text,
+      );
+
       int lastWordInLineIndex = words.length - 1;
       if (words.last.isEmpty) {
         lastWordInLineIndex -= 1;
