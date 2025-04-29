@@ -350,12 +350,14 @@ class ReadQuranWidget extends StatefulWidget {
   final ParaAyatModel model;
   final PageController pageController;
   final VoidCallback verticalScrollResetFn;
+  final VoidCallback pageChangedCallback;
 
   const ReadQuranWidget(
     this.model, {
     required this.pageController,
     super.key,
     required this.verticalScrollResetFn,
+    required this.pageChangedCallback,
   });
 
   @override
@@ -684,6 +686,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
               child: PageView.builder(
                 onPageChanged: (_) {
                   widget.verticalScrollResetFn();
+                  widget.pageChangedCallback();
                 },
                 controller: widget.pageController,
                 reverse: true,

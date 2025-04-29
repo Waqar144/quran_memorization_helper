@@ -83,9 +83,7 @@ class _MainPageState extends State<MainPage>
     }
 
     _pageController = PageController(initialPage: (page - 1), keepPage: false);
-    // reinstall listeners
-    _pageController.removeListener(_saveScrollPosition);
-    _pageController.addListener(_saveScrollPosition);
+    _trySaveScrollPosition(0);
   }
 
   Future<void> _load() async {
@@ -106,6 +104,17 @@ class _MainPageState extends State<MainPage>
     }
   }
 
+  void _trySaveScrollPosition(int tryCount) {
+    if (tryCount > 4) return; // abort after 5 tries
+    Future.delayed(const Duration(milliseconds: 50), () {
+      if (_pageController.hasClients) {
+        _saveScrollPosition();
+      } else {
+        _trySaveScrollPosition(tryCount + 1);
+      }
+    });
+  }
+
   void _saveScrollPosition() {
     Settings.instance.saveScrollPositionDelayed(
       _paraModel.currentPara,
@@ -120,6 +129,7 @@ class _MainPageState extends State<MainPage>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.paused) {
+      if (!_pageController.hasClients) return;
       await Settings.instance.saveScrollPosition(
         _paraModel.currentPara,
         _pageController.page?.floor() ?? 0,
@@ -392,6 +402,7 @@ class _MainPageState extends State<MainPage>
                         _paraModel,
                         pageController: _pageController,
                         verticalScrollResetFn: _resetVerticalScrollToZero,
+                        pageChangedCallback: _saveScrollPosition,
                       );
                     },
                   ),
