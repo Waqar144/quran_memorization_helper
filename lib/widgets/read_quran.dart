@@ -1234,7 +1234,12 @@ class _PageWidgetState extends State<PageWidget> {
         }
         continue;
       }
-      widgets.add(divider);
+
+      // 15 line uthmani is not separated by divider
+      if (is16Line) widgets.add(divider);
+      // except first line, as its the top border of page
+      if (!is16Line && idx == 0) widgets.add(divider);
+
       widgets.add(
         Container(
           height: rowHeight,
