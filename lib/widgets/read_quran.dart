@@ -1089,9 +1089,9 @@ class _PageWidgetState extends State<PageWidget> {
     );
   }
 
-  double _getWordSpacing(List<TextSpan> spans, double width, double fontSize) {
+  double _getWordSpacing(List<TextSpan> spans, double width, TextStyle style) {
     final textPainter = TextPainter(
-      text: TextSpan(children: spans, style: _getQuranTextStyle(fontSize)),
+      text: TextSpan(children: spans, style: style),
       textDirection: TextDirection.rtl,
       maxLines: 1,
     );
@@ -1123,6 +1123,7 @@ class _PageWidgetState extends State<PageWidget> {
     List<(int, int, int, Ayat?, bool)> ayahData,
     double fontSize,
     double width,
+    TextStyle style,
   ) {
     final spans = _buildLineSpans(line, lineIdx, ayahData, reflowMode: false);
     // dont try to space first two pages
@@ -1133,7 +1134,7 @@ class _PageWidgetState extends State<PageWidget> {
       TextSpan(children: spans),
       textDirection: TextDirection.rtl,
       // min(26, (rowHeight / 1.8).floorToDouble()),
-      style: _getQuranTextStyle(fontSize, wordSpacing: wordSpacing),
+      style: style.copyWith(wordSpacing: wordSpacing),
     );
   }
 
@@ -1266,6 +1267,8 @@ class _PageWidgetState extends State<PageWidget> {
     List<Widget> widgets = [];
     const divider = Divider(color: Colors.grey, height: 1);
     final bigScreen = isBigScreen();
+    final defaultTextStyle = _getQuranTextStyle(_textFontSize());
+
     for (final (idx, l) in widget._pageLines.indexed) {
       if (l.lineAyahs.first.ayahIndex < 0) {
         widgets.add(getBismillah(l.lineAyahs.first.ayahIndex, rowHeight));
@@ -1294,6 +1297,7 @@ class _PageWidgetState extends State<PageWidget> {
               ayahData,
               _textFontSize(),
               rowWidth,
+              defaultTextStyle,
             ),
           ),
         ),
