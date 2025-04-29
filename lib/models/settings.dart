@@ -34,16 +34,7 @@ class Settings extends ChangeNotifier {
   }
 
   int get currentReadingPara => _currentReadingPara;
-  set currentReadingPara(int val) {
-    _currentReadingPara = val;
-    persist();
-  }
-
   int get currentReadingPage => _currentReadingPage;
-  set currentReadingPage(int val) {
-    _currentReadingPage = val;
-    persist();
-  }
 
   ThemeMode get themeMode => _themeMode;
   set themeMode(ThemeMode m) {
@@ -134,14 +125,17 @@ class Settings extends ChangeNotifier {
     if (currentReadingPara == paraNumber && page == currentReadingPage) {
       return;
     }
-    currentReadingPara = paraNumber;
-    currentReadingPage = page;
+    _currentReadingPara = paraNumber;
+    _currentReadingPage = page;
     await saveToDisk();
   }
 
   void saveScrollPositionDelayed(int paraNumber, int page) {
-    currentReadingPara = paraNumber;
-    currentReadingPage = page;
+    if (currentReadingPara == paraNumber && page == currentReadingPage) {
+      return;
+    }
+    _currentReadingPara = paraNumber;
+    _currentReadingPage = page;
     persist(seconds: 2);
   }
 
