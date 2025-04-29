@@ -956,23 +956,7 @@ class _PageWidgetState extends State<PageWidget> {
   }
 
   static String getVerseEndSymbol(int verseNumber) {
-    var arabicNumeric = '';
-    const List<String> arabicNumbers = [
-      "٠",
-      "١",
-      "٢",
-      "٣",
-      "٤",
-      "٥",
-      "٦",
-      "٧",
-      "٨",
-      "٩",
-    ];
-    for (var e in verseNumber.toString().codeUnits) {
-      arabicNumeric += arabicNumbers[e - 48];
-    }
-    return arabicNumeric;
+    return toArabicNumber(verseNumber);
   }
 
   // Finds the correct position of the first word of the line
