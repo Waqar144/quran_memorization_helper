@@ -93,7 +93,7 @@ flutter:
         - asset: fonts/DigitalKhattIndoPak.otf
     - family: Uthmanic
       fonts:
-        - asset: fonts/uthmanic_hafs1_ver17.ttf
+        - asset: fonts/Digital Khatt Font.otf
     - family: AyahNumber
       fonts:
         - asset: fonts/ayahNumFont.ttf

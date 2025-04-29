@@ -12,7 +12,6 @@ import 'package:quran_memorization_helper/quran_data/surahs.dart';
 import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/rukus.dart';
-import 'package:quran_memorization_helper/quran_data/should_add_spaces.dart';
 import 'package:quran_memorization_helper/utils/utils.dart';
 import 'package:quran_memorization_helper/widgets/mutashabiha_ayat_list_item.dart';
 import 'package:quran_memorization_helper/widgets/tap_and_longpress_gesture_recognizer.dart';
@@ -907,18 +906,6 @@ class _PageWidgetState extends State<PageWidget> {
     );
   }
 
-  bool _shouldDrawAyahEndMarker(int ayahIdx, int lineIdx) {
-    // If we have multiple ayahs in the line, and this not the last then this is full ayah
-    return (widget._pageLines[lineIdx].lineAyahs.last.ayahIndex != ayahIdx) ||
-        // last line in page, check if its a full ayah
-        (lineIdx == widget._pageLines.length - 1 &&
-            widget.isAyahFull(ayahIdx, widget.pageIndex)) ||
-        // does the next line in page start with this ayah?
-        (lineIdx + 1 < widget._pageLines.length &&
-            widget._pageLines[lineIdx + 1].lineAyahs.first.ayahIndex !=
-                ayahIdx);
-  }
-
   void _onRukuTapped(int ayahIndex) async {
     final rukuData = getRukuData(ayahIndex)!;
     await showDialog(
@@ -933,10 +920,6 @@ class _PageWidgetState extends State<PageWidget> {
         );
       },
     );
-  }
-
-  static String getVerseEndSymbol(int verseNumber) {
-    return toArabicNumber(verseNumber);
   }
 
   // Finds the correct position of the first word of the line
@@ -965,7 +948,7 @@ class _PageWidgetState extends State<PageWidget> {
   }) {
     List<TextSpan> spans = [];
 
-    for (final (lineAyahIdx, a) in line.lineAyahs.indexed) {
+    for (final a in line.lineAyahs) {
       final (
         _,
         int surahIdx,
@@ -1010,8 +993,8 @@ class _PageWidgetState extends State<PageWidget> {
 
         TextStyle? style;
 
-        if (is16Line && w.contains("\u06dd")) {
-          final ruku = getRukuData(a.ayahIndex);
+        if (w.contains("\u06dd")) {
+          final ruku = is16Line ? getRukuData(a.ayahIndex) : null;
           final hasRukuMarker = ruku != null;
           spans.add(
             TextSpan(
@@ -1023,7 +1006,10 @@ class _PageWidgetState extends State<PageWidget> {
                       : null,
               style: TextStyle(
                 inherit: true,
-                color: Theme.of(context).textTheme.bodyMedium?.color,
+                color:
+                    is16Line
+                        ? Theme.of(context).textTheme.bodyMedium?.color
+                        : Theme.of(context).textTheme.bodyMedium?.color,
                 backgroundColor:
                     hasRukuMarker
                         ? (darkMode
@@ -1056,24 +1042,6 @@ class _PageWidgetState extends State<PageWidget> {
         }
 
         i++;
-      }
-
-      if (!is16Line && _shouldDrawAyahEndMarker(a.ayahIndex, lineIdx)) {
-        spans.add(
-          TextSpan(
-            text: getVerseEndSymbol(surahAyahIdx + 1),
-            style: TextStyle(
-              color: Theme.of(context).textTheme.bodyMedium?.color,
-              fontFamily: "Uthmanic",
-            ),
-          ),
-        );
-
-        // space
-        // dont add if the marker is at the end of line
-        if (lineAyahIdx != line.lineAyahs.length - 1) {
-          spans.add(TextSpan(text: ' '));
-        }
       }
     }
     return spans;
@@ -1127,12 +1095,17 @@ class _PageWidgetState extends State<PageWidget> {
   ) {
     final spans = _buildLineSpans(line, lineIdx, ayahData, reflowMode: false);
     // dont try to space first two pages
+    int firstTwo = Settings.instance.mushaf == Mushaf.Indopak16Line ? 3 : 2;
     final wordSpacing =
-        widget.pageIndex < 3 ? 1.0 : _getWordSpacing(spans, width, style);
+        widget.pageIndex < firstTwo
+            ? 1.0
+            : _getWordSpacing(spans, width, style);
 
     return Text.rich(
       TextSpan(children: spans),
       textDirection: TextDirection.rtl,
+      softWrap: false,
+      maxLines: 1,
       // min(26, (rowHeight / 1.8).floorToDouble()),
       style: style.copyWith(wordSpacing: wordSpacing),
     );
@@ -1222,7 +1195,7 @@ class _PageWidgetState extends State<PageWidget> {
       }
       return 34.0;
     } else if (Settings.instance.mushaf == Mushaf.Uthmani15Line) {
-      return 28.0;
+      return 30.0;
     } else {
       return 26.0;
     }
