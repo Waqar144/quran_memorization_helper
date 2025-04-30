@@ -378,7 +378,6 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
     Settings.instance.addListener(clearCachedTranslation);
     // WidgetsBinding.instance.addPostFrameCallback((_) {
     //   Future.delayed(const Duration(milliseconds: 100), () {
-    //     print("FIRING!");
     //     _fwdPgs();
     //   });
     // });
@@ -388,10 +387,11 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
 
   /* Test code to scroll through all pages */
   // void _fwdPgs() {
-  //   if (!widget.pageController.hasClients) {
+  //   if (widget.pageController.positions.isEmpty) {
   //     Future.delayed(const Duration(milliseconds: 10), () {
   //       _fwdPgs();
   //     });
+  //     return;
   //   }
   //
   //   if (widget.pageController.page == null) {
@@ -400,12 +400,12 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
   //   }
   //   if (widget.pageController.page!.toInt() + 1 < _pages.length) {
   //     widget.pageController.jumpToPage(widget.pageController.page!.toInt() + 1);
-  //     Future.delayed(const Duration(milliseconds: 1), () {
+  //     Future.delayed(const Duration(milliseconds: 30), () {
   //       // print("Next! ${widget.pageController.page!.toInt()} ${_pages.length}");
   //       _fwdPgs();
   //     });
   //   } else {
-  //     print("JUMP TO NEXT PARA!");
+  //     // print("JUMP TO NEXT PARA!");
   //     int currentPara = widget.model.currentPara;
   //     int nextPara = currentPara + 1;
   //     if (nextPara > 30) {
