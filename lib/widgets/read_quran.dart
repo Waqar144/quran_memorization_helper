@@ -859,7 +859,11 @@ class _PageWidgetState extends State<PageWidget> {
 
   // Finds the correct position of the first word of the line
   // in the full ayah text
-  static int getFirstWordIndex(String fullAyah, String currentLine, int startSearchAt) {
+  static int getFirstWordIndex(
+    String fullAyah,
+    String currentLine,
+    int startSearchAt,
+  ) {
     // Find the position of currentLine in full Ayah
     int match = fullAyah.indexOf(currentLine, startSearchAt);
     if (match == -1) throw "Didn't find anything, bug!";
@@ -879,8 +883,7 @@ class _PageWidgetState extends State<PageWidget> {
     Line line,
     int lineIdx,
     List<(int ayahIndex, int, int, Ayat?, bool, String)> ayahData,
-    ThemeData themeData,
-    {
+    ThemeData themeData, {
     required bool reflowMode,
   }) {
     List<TextSpan> spans = [];
@@ -1041,7 +1044,13 @@ class _PageWidgetState extends State<PageWidget> {
     TextStyle style,
     ThemeData themeData,
   ) {
-    final spans = _buildLineSpans(line, lineIdx, ayahData, themeData, reflowMode: false);
+    final spans = _buildLineSpans(
+      line,
+      lineIdx,
+      ayahData,
+      themeData,
+      reflowMode: false,
+    );
     // dont try to space first two pages
     int firstTwo = Settings.instance.mushaf == Mushaf.Indopak16Line ? 3 : 2;
     final wordSpacing =
@@ -1156,7 +1165,9 @@ class _PageWidgetState extends State<PageWidget> {
         continue;
       }
 
-      spans.addAll(_buildLineSpans(line, lineIdx, ayahData, themeData, reflowMode: true));
+      spans.addAll(
+        _buildLineSpans(line, lineIdx, ayahData, themeData, reflowMode: true),
+      );
     }
     if (spans.isNotEmpty) {
       widgets.add(
@@ -1247,10 +1258,7 @@ class _PageWidgetState extends State<PageWidget> {
     final boxFit = bigScreen ? BoxFit.contain : BoxFit.scaleDown;
     final leftRightBorder = BoxDecoration(
       border: Border.symmetric(
-        vertical: BorderSide(
-          color: themeData.dividerColor,
-          width: 1,
-        ),
+        vertical: BorderSide(color: themeData.dividerColor, width: 1),
       ),
     );
 
@@ -1298,7 +1306,7 @@ class _PageWidgetState extends State<PageWidget> {
               fontSize,
               rowWidth,
               defaultTextStyle,
-              themeData
+              themeData,
             ),
           ),
         ),
