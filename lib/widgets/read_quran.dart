@@ -695,16 +695,18 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
                     const ScrollBehavior()..copyWith(overscroll: false),
                 physics: const CustomPageViewScrollPhysics(),
                 itemBuilder: (ctx, index) {
-                  return PageWidget(
-                    _pages[index].pageNum,
-                    _pages[index].lines,
-                    paraNum: widget.model.currentPara,
-                    getAyatInDB: _getAyatInDB,
-                    onAyahTapped: _onAyahTapped,
-                    isMutashabihaAyat: _isMutashabihaAyat,
-                    isAyahFull: _isAyahFull,
-                    getFullAyahText: _getFullAyahText,
-                    repaintStream: _repaintNotifier.stream,
+                  return ExcludeSemantics(
+                    child: PageWidget(
+                      _pages[index].pageNum,
+                      _pages[index].lines,
+                      paraNum: widget.model.currentPara,
+                      getAyatInDB: _getAyatInDB,
+                      onAyahTapped: _onAyahTapped,
+                      isMutashabihaAyat: _isMutashabihaAyat,
+                      isAyahFull: _isAyahFull,
+                      getFullAyahText: _getFullAyahText,
+                      repaintStream: _repaintNotifier.stream,
+                    ),
                   );
                 },
               ),
