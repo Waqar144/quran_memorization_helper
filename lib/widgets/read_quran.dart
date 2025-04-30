@@ -747,6 +747,11 @@ class PageWidget extends StatefulWidget {
 class _PageWidgetState extends State<PageWidget> {
   StreamSubscription<int>? _subscription;
 
+  // These variables are used to optimize ayah portion lookup in the
+  // full ayah text
+  int _lastAyahIdx = -1;
+  int _lastRenderedWordIdx = -1;
+
   @override
   void initState() {
     super.initState();
@@ -852,9 +857,9 @@ class _PageWidgetState extends State<PageWidget> {
 
   // Finds the correct position of the first word of the line
   // in the full ayah text
-  static int getFirstWordIndex(String fullAyah, String currentLine) {
+  static int getFirstWordIndex(String fullAyah, String currentLine, int startSearchAt) {
     // Find the position of currentLine in full Ayah
-    int match = fullAyah.indexOf(currentLine);
+    int match = fullAyah.indexOf(currentLine, startSearchAt);
     if (match == -1) throw "Didn't find anything, bug!";
 
     // Find the index of first word
@@ -871,12 +876,14 @@ class _PageWidgetState extends State<PageWidget> {
   List<TextSpan> _buildLineSpans(
     Line line,
     int lineIdx,
-    List<(int ayahIndex, int, int, Ayat?, bool, String)> ayahData, {
+    List<(int ayahIndex, int, int, Ayat?, bool, String)> ayahData,
+    ThemeData themeData,
+    {
     required bool reflowMode,
   }) {
     List<TextSpan> spans = [];
     final is16Line = Settings.instance.mushaf == Mushaf.Indopak16Line;
-    bool darkMode = Theme.of(context).brightness == Brightness.dark;
+    bool darkMode = themeData.brightness == Brightness.dark;
 
     for (final a in line.lineAyahs) {
       final (
@@ -897,8 +904,16 @@ class _PageWidgetState extends State<PageWidget> {
 
       String text = a.text;
 
+      int startSearchAt = 0;
+      if (_lastAyahIdx == a.ayahIndex) {
+        // start search in the full ayah text after the
+        // last rendered word
+        startSearchAt = _lastRenderedWordIdx;
+      }
+      _lastAyahIdx = a.ayahIndex;
+
       List<String> words = text.split('\u200c'); // zwj
-      int i = getFirstWordIndex(fullAyahText, text);
+      int i = getFirstWordIndex(fullAyahText, text, startSearchAt);
 
       int lastWordInLineIndex = words.length - 1;
       if (words.last.isEmpty) {
@@ -934,7 +949,7 @@ class _PageWidgetState extends State<PageWidget> {
                 inherit: true,
                 color:
                     is16Line
-                        ? Theme.of(context).textTheme.bodyMedium?.color
+                        ? themeData.textTheme.bodyMedium?.color
                         : Colors.black,
                 backgroundColor:
                     hasRukuMarker
@@ -969,6 +984,8 @@ class _PageWidgetState extends State<PageWidget> {
 
         i++;
       }
+
+      _lastRenderedWordIdx = i;
     }
     return spans;
   }
@@ -991,6 +1008,8 @@ class _PageWidgetState extends State<PageWidget> {
     );
     textPainter.layout();
     var diffW = (min(width, 700) - textPainter.width);
+    textPainter.dispose();
+
     if (diffW > 10) {
       if (diffW >= min(width, 700) / 3) {
         return 2;
@@ -1018,8 +1037,9 @@ class _PageWidgetState extends State<PageWidget> {
     double fontSize,
     double width,
     TextStyle style,
+    ThemeData themeData,
   ) {
-    final spans = _buildLineSpans(line, lineIdx, ayahData, reflowMode: false);
+    final spans = _buildLineSpans(line, lineIdx, ayahData, themeData, reflowMode: false);
     // dont try to space first two pages
     int firstTwo = Settings.instance.mushaf == Mushaf.Indopak16Line ? 3 : 2;
     final wordSpacing =
@@ -1087,6 +1107,7 @@ class _PageWidgetState extends State<PageWidget> {
   List<Widget> _reflowModeText(
     double rowHeight,
     List<(int, int, int, Ayat?, bool, String)> ayahData,
+    ThemeData themeData,
   ) {
     List<Widget> widgets = [];
     List<TextSpan> spans = [];
@@ -1133,7 +1154,7 @@ class _PageWidgetState extends State<PageWidget> {
         continue;
       }
 
-      spans.addAll(_buildLineSpans(line, lineIdx, ayahData, reflowMode: true));
+      spans.addAll(_buildLineSpans(line, lineIdx, ayahData, themeData, reflowMode: true));
     }
     if (spans.isNotEmpty) {
       widgets.add(
@@ -1150,7 +1171,7 @@ class _PageWidgetState extends State<PageWidget> {
     return widgets;
   }
 
-  double _textFontSize() {
+  static double _textFontSize() {
     if (isBigScreen()) {
       if (Settings.instance.mushaf == Mushaf.Uthmani15Line) {
         return 36.0;
@@ -1197,8 +1218,14 @@ class _PageWidgetState extends State<PageWidget> {
       }
     }
 
+    final themeData = Theme.of(context);
+
+    // reset cached values before page renders
+    _lastAyahIdx = -1;
+    _lastRenderedWordIdx = -1;
+
     if (Settings.instance.reflowMode) {
-      return _reflowModeText(rowHeight, ayahData);
+      return _reflowModeText(rowHeight, ayahData, themeData);
     }
 
     List<Widget> widgets = [];
@@ -1207,13 +1234,23 @@ class _PageWidgetState extends State<PageWidget> {
     final defaultTextStyle = _getQuranTextStyle(_textFontSize());
 
     final bismillahStyle = TextStyle(
-      color: Theme.of(context).textTheme.bodyMedium?.color,
+      color: themeData.textTheme.bodyMedium?.color,
       fontFamily: getQuranFont(),
-      fontSize: Theme.of(context).textTheme.titleLarge?.fontSize,
+      fontSize: themeData.textTheme.titleLarge?.fontSize,
       letterSpacing: 0.0,
       wordSpacing: 0,
     );
     final is16Line = Settings.instance.mushaf == Mushaf.Indopak16Line;
+    final fontSize = _textFontSize();
+    final boxFit = bigScreen ? BoxFit.contain : BoxFit.scaleDown;
+    final leftRightBorder = BoxDecoration(
+      border: Border.symmetric(
+        vertical: BorderSide(
+          color: themeData.dividerColor,
+          width: 1,
+        ),
+      ),
+    );
 
     for (final (idx, l) in widget._pageLines.indexed) {
       if (l.lineAyahs.first.ayahIndex < 0) {
@@ -1248,24 +1285,18 @@ class _PageWidgetState extends State<PageWidget> {
           height: rowHeight,
           width: double.infinity,
           padding: const EdgeInsets.only(left: 4, right: 4),
-          decoration: BoxDecoration(
-            border: Border.symmetric(
-              vertical: BorderSide(
-                color: Theme.of(context).dividerColor,
-                width: 1,
-              ),
-            ),
-          ),
+          decoration: leftRightBorder,
           child: FittedBox(
-            fit: bigScreen ? BoxFit.contain : BoxFit.scaleDown,
+            fit: boxFit,
             child: _buildLine(
               l,
               idx,
               rowHeight,
               ayahData,
-              _textFontSize(),
+              fontSize,
               rowWidth,
               defaultTextStyle,
+              themeData
             ),
           ),
         ),
