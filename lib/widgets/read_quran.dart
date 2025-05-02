@@ -685,7 +685,13 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
               },
               child: PageView.builder(
                 onPageChanged: (_) {
-                  widget.verticalScrollResetFn();
+                  // reset vertical scroll only if in reflow mode
+                  // because otherwise its annoying as we usually
+                  // have vertical scroll of 1 line and the user
+                  // keeps scrolling that 1 line again and again
+                  if (Settings.instance.reflowMode) {
+                    widget.verticalScrollResetFn();
+                  }
                   widget.pageChangedCallback();
                 },
                 controller: widget.pageController,
