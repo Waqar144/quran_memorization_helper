@@ -9,7 +9,7 @@ import 'package:quran_memorization_helper/models/settings.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:quran_memorization_helper/utils/utils.dart';
 
-const String appVersion = "1.6.0";
+const String appVersion = "1.6.1";
 const String appTitle = "Quran Revision Companion";
 
 class _ChangeTranslationDialog extends StatefulWidget {
