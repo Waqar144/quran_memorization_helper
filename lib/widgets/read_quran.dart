@@ -98,6 +98,7 @@ double _heightMultiplier() {
 
   final fontSize = Settings.instance.fontSize;
   return switch (fontSize) {
+    24 => 1.0,
     28 => 1.2,
     30 => 1.4,
     32 => 1.6,
