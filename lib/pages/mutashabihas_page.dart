@@ -17,7 +17,7 @@ class MutashabihasPage extends StatelessWidget {
         title:
             isIndoPak
                 ? const Text("Mutashabihas By Para")
-                : const Text("Mutashabihas By Para"),
+                : const Text("Mutashabihas By Juz"),
       ),
       body: ListView.separated(
         separatorBuilder: (context, index) => const Divider(height: 1),
