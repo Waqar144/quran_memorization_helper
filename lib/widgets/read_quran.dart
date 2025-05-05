@@ -488,12 +488,31 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
               final nextLine = p.lines[i + 1];
               nextAyah = nextLine.ayahIdx;
               nextAyahStart = nextLine.wordStartInAyahIdx;
+            } else {
+              // find next valid ayah
+              for (int j = i + 1; j < p.lines.length; ++j) {
+                if (p.lines[j].ayahIdx >= 0) {
+                  nextAyah = p.lines[j].ayahIdx;
+                  nextAyahStart = 0;
+                  break;
+                }
+              }
             }
           } else if (pi + 1 < pagesList.length) {
-            if (pagesList[pi + 1].lines.first.ayahIdx >= 0) {
-              final nextPageFirstLine = pagesList[pi + 1].lines.first;
+            final nextPage = pagesList[pi + 1];
+            if (nextPage.lines.first.ayahIdx >= 0) {
+              final nextPageFirstLine = nextPage.lines.first;
               nextAyah = nextPageFirstLine.ayahIdx;
               nextAyahStart = nextPageFirstLine.wordStartInAyahIdx;
+            } else {
+              // find next valid ayah
+              for (int j = 0; j < nextPage.lines.length; ++j) {
+                if (nextPage.lines[j].ayahIdx >= 0) {
+                  nextAyah = nextPage.lines[j].ayahIdx;
+                  nextAyahStart = 0;
+                  break;
+                }
+              }
             }
           }
 
