@@ -11,11 +11,11 @@ class MutashabihasPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isIndoPak = Settings.instance.mushaf == Mushaf.Indopak16Line;
+    final isIndoPk = isIndoPak(Settings.instance.mushaf);
     return Scaffold(
       appBar: AppBar(
         title:
-            isIndoPak
+            isIndoPk
                 ? const Text("Mutashabihas By Para")
                 : const Text("Mutashabihas By Juz"),
       ),

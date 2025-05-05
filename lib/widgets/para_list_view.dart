@@ -42,7 +42,7 @@ class ParaListView extends StatelessWidget {
   Widget paraListItem(int index, BuildContext context) {
     int count = model.markedAyahCountForPara(index);
     // // final paraPageList = paraPageOffsetsList();
-    final is16line = Settings.instance.mushaf == Mushaf.Indopak16Line;
+    final isIndoPk = isIndoPak(Settings.instance.mushaf);
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -51,9 +51,9 @@ class ParaListView extends StatelessWidget {
         contentPadding: const EdgeInsets.symmetric(horizontal: 15),
         visualDensity: VisualDensity.compact,
         title: Text(
-          is16line ? getParaNameForIndex(index) : "Juz ${index + 1}",
+          isIndoPk ? getParaNameForIndex(index) : "Juz ${index + 1}",
           style:
-              is16line
+              isIndoPk
                   ? TextStyle(
                     letterSpacing: 0,
                     fontSize: 22,
@@ -62,7 +62,7 @@ class ParaListView extends StatelessWidget {
                   : null,
         ),
         leading:
-            is16line
+            isIndoPk
                 ? Text(
                   "${toUrduNumber(index + 1)}$urduKhatma",
                   textAlign: TextAlign.center,

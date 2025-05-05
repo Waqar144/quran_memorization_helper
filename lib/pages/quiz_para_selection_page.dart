@@ -21,11 +21,11 @@ class QuizParaSelectionPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final is16Line = Settings.instance.mushaf == Mushaf.Indopak16Line;
+    final isIndoPk = isIndoPak(Settings.instance.mushaf);
     return Scaffold(
       appBar: AppBar(
         title:
-            is16Line
+            isIndoPk
                 ? const Text("Select Paras For Quiz")
                 : const Text("Select Juz For Quiz"),
         actions: [
@@ -78,7 +78,7 @@ class QuizParaSelectionPage extends StatelessWidget {
                   itemBuilder: (context, index) {
                     return CheckboxListTile(
                       title:
-                          is16Line
+                          isIndoPk
                               ? Text("Para ${index + 1}")
                               : Text("Juz ${index + 1}"),
                       value: selection.contains(index),
