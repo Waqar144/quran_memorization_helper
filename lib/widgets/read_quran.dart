@@ -932,11 +932,6 @@ class _PageWidgetState extends State<PageWidget> {
   ) {
     // Find the position of currentLine in full Ayah
     int match = fullAyah.indexOf(currentLine, startSearchAt);
-    if (match == -1) {
-      print(match);
-      print(currentLine);
-      print(fullAyah);
-    }
     if (match == -1) throw "Didn't find anything, bug!";
 
     // Find the index of first word
