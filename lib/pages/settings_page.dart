@@ -127,6 +127,7 @@ String _mushafToString(Mushaf m) {
   return switch (m) {
     Mushaf.Indopak16Line => "16 Line",
     Mushaf.Uthmani15Line => "15 Line (Uthmani)",
+    Mushaf.Indopak15Line => "15 Line (Indopak)",
   };
 }
 

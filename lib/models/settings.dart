@@ -5,7 +5,15 @@ import 'dart:core';
 import 'package:quran_memorization_helper/utils/utils.dart' as utils;
 
 // ignore: constant_identifier_names
-enum Mushaf { Indopak16Line, Uthmani15Line }
+enum Mushaf { Indopak16Line, Uthmani15Line, Indopak15Line }
+
+bool isIndoPak(Mushaf m) {
+  return switch (m) {
+    Mushaf.Indopak16Line => true,
+    Mushaf.Uthmani15Line => false,
+    Mushaf.Indopak15Line => true,
+  };
+}
 
 const _minFontSize = 24;
 

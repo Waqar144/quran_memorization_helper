@@ -14,6 +14,7 @@ import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/rukus.dart';
 import 'package:quran_memorization_helper/quran_data/sixteen_line_indopak_layout.dart';
 import 'package:quran_memorization_helper/quran_data/fifteen_line_uthmani_layout.dart';
+import 'package:quran_memorization_helper/quran_data/fifteen_line_indopak_layout.dart';
 import 'package:quran_memorization_helper/quran_data/page_layout_types.dart'
     as layout;
 import 'package:quran_memorization_helper/utils/utils.dart';
@@ -455,6 +456,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
     return switch (Settings.instance.mushaf) {
       Mushaf.Indopak16Line => pagesByPara16,
       Mushaf.Uthmani15Line => pagesByPara15,
+      Mushaf.Indopak15Line => pagesByPara15Indopak,
     };
   }
 
@@ -858,8 +860,7 @@ class _PageWidgetState extends State<PageWidget> {
   Widget _getSurahHeaddress(
     int surahIdx,
     TextStyle style,
-    double rowHeight,
-    bool is16Line, {
+    double rowHeight, {
     bool includeBismillah = false,
   }) {
     SurahData surahData = surahDataForIdx(surahIdx, arabic: true);
@@ -957,7 +958,7 @@ class _PageWidgetState extends State<PageWidget> {
     required bool reflowMode,
   }) {
     List<TextSpan> spans = [];
-    final is16Line = Settings.instance.mushaf == Mushaf.Indopak16Line;
+    final isIndoPk = isIndoPak(Settings.instance.mushaf);
     bool darkMode = themeData.brightness == Brightness.dark;
 
     for (final a in line.lineAyahs) {
@@ -1010,7 +1011,7 @@ class _PageWidgetState extends State<PageWidget> {
         TextStyle? style;
 
         if (w.contains("\u06dd")) {
-          final ruku = is16Line ? getRukuData(a.ayahIndex) : null;
+          final ruku = isIndoPk ? getRukuData(a.ayahIndex) : null;
           final hasRukuMarker = ruku != null;
           spans.add(
             TextSpan(
@@ -1023,7 +1024,7 @@ class _PageWidgetState extends State<PageWidget> {
               style: TextStyle(
                 inherit: true,
                 color:
-                    is16Line
+                    isIndoPk
                         ? themeData.textTheme.bodyMedium?.color
                         : Colors.black,
                 backgroundColor:
@@ -1214,12 +1215,12 @@ class _PageWidgetState extends State<PageWidget> {
           letterSpacing: 0.0,
           wordSpacing: 0,
         );
-        final is16Line = Settings.instance.mushaf == Mushaf.Indopak16Line;
+        final isIndoPk = isIndoPak(Settings.instance.mushaf);
         if (line.lineAyahs.first.ayahIndex == -999) {
           widgets.add(_getBism(style, rowHeight));
         } else {
           bool drawBismillah =
-              is16Line &&
+              isIndoPk &&
               lineIdx + 1 < widget._pageLines.length &&
               widget._pageLines[lineIdx + 1].lineAyahs.first.ayahIndex >= 0;
           widgets.add(
@@ -1227,7 +1228,6 @@ class _PageWidgetState extends State<PageWidget> {
               -line.lineAyahs.first.ayahIndex,
               style,
               rowHeight,
-              is16Line,
               includeBismillah: drawBismillah,
             ),
           );
@@ -1323,7 +1323,7 @@ class _PageWidgetState extends State<PageWidget> {
       letterSpacing: 0.0,
       wordSpacing: 0,
     );
-    final is16Line = Settings.instance.mushaf == Mushaf.Indopak16Line;
+    final isIndoPk = isIndoPak(Settings.instance.mushaf);
     final fontSize = _textFontSize();
     final boxFit = bigScreen ? BoxFit.contain : BoxFit.scaleDown;
     final leftRightBorder = BoxDecoration(
@@ -1338,7 +1338,7 @@ class _PageWidgetState extends State<PageWidget> {
           widgets.add(_getBism(bismillahStyle, rowHeight));
         } else {
           bool drawBismillah =
-              is16Line &&
+              isIndoPk &&
               idx + 1 < widget._pageLines.length &&
               widget._pageLines[idx + 1].lineAyahs.first.ayahIndex >= 0;
 
@@ -1347,7 +1347,6 @@ class _PageWidgetState extends State<PageWidget> {
               -l.lineAyahs.first.ayahIndex,
               bismillahStyle,
               rowHeight,
-              is16Line,
               includeBismillah: drawBismillah,
             ),
           );
@@ -1356,9 +1355,9 @@ class _PageWidgetState extends State<PageWidget> {
       }
 
       // 15 line uthmani is not separated by divider
-      if (is16Line) widgets.add(divider);
+      if (isIndoPk) widgets.add(divider);
       // except first line, as its the top border of page
-      if (!is16Line && idx == 0) widgets.add(divider);
+      if (!isIndoPk && idx == 0) widgets.add(divider);
 
       widgets.add(
         Container(
@@ -1389,8 +1388,11 @@ class _PageWidgetState extends State<PageWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final numPageLines =
-        Settings.instance.mushaf == Mushaf.Indopak16Line ? 16 : 15;
+    final numPageLines = switch (Settings.instance.mushaf) {
+      Mushaf.Indopak16Line => 16,
+      Mushaf.Indopak15Line || Mushaf.Uthmani15Line => 15,
+    };
+
     final double height =
         _availableHeight(context) -
         ( /*divider between lines(1px)*/ 24 +

@@ -130,13 +130,17 @@ String toArabicNumber(int num) {
 const String urduKhatma = "\u06D4";
 
 String getQuranFont() {
-  return Settings.instance.mushaf == Mushaf.Indopak16Line
-      ? "Al Mushaf"
-      : "Uthmanic";
+  return switch (Settings.instance.mushaf) {
+    Mushaf.Indopak16Line || Mushaf.Indopak15Line => "Al Mushaf",
+    Mushaf.Uthmani15Line => "Uthmanic",
+  };
 }
 
 String paraText() {
-  return Settings.instance.mushaf == Mushaf.Indopak16Line ? "Para" : "Juz";
+  return switch (Settings.instance.mushaf) {
+    Mushaf.Indopak16Line || Mushaf.Indopak15Line => "Para",
+    Mushaf.Uthmani15Line => "Juz",
+  };
 }
 
 bool isBigScreen() {
