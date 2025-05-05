@@ -68,20 +68,54 @@ final Uint16List _para15LinePageOffsets = Uint16List.fromList([
   581, // 30
 ]);
 
+final Uint16List _para15LineIndoPakPageOffsets = Uint16List.fromList([
+  1, // 1
+  22, // 2
+  42, // 3
+  62, // 4
+  82, // 5
+  102, // 6
+  122, // 7
+  142, // 8
+  162, // 9
+  182, // 10
+  202, // 11
+  222, // 12
+  242, // 13
+  262, // 14
+  282, // 15
+  302, // 16
+  322, // 17
+  342, // 18
+  362, // 19
+  382, // 20
+  402, // 21
+  422, // 22
+  442, // 23
+  462, // 24
+  482, // 25
+  502, // 26
+  522, // 27
+  542, // 28
+  562, // 29
+  586, // 30
+]);
+
 Uint16List paraPageOffsetsList() {
-  final is16Line = Settings.instance.mushaf == Mushaf.Indopak16Line;
-  return is16Line ? _para16LinePageOffsets : _para15LinePageOffsets;
+  return switch (Settings.instance.mushaf) {
+    Mushaf.Indopak16Line => _para16LinePageOffsets,
+    Mushaf.Uthmani15Line => _para15LinePageOffsets,
+    Mushaf.Indopak15Line => _para15LineIndoPakPageOffsets,
+  };
 }
 
 int pageCountForPara(int paraIdx) {
   if (paraIdx == 29) {
-    if (Settings.instance.mushaf == Mushaf.Indopak16Line) {
-      return 22;
-    } else if (Settings.instance.mushaf == Mushaf.Uthmani15Line) {
-      return 23;
-    } else {
-      throw "Unknown Mushaf";
-    }
+    return switch (Settings.instance.mushaf) {
+      Mushaf.Indopak16Line => 22,
+      Mushaf.Uthmani15Line => 23,
+      Mushaf.Indopak15Line => 25,
+    };
   }
 
   final list = paraPageOffsetsList();
