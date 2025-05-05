@@ -345,8 +345,12 @@ int surahForPage(int page) {
       (page < 0 || page > 604)) {
     throw "Invalid page number: $page";
   }
-  final is16line = Settings.instance.mushaf == Mushaf.Indopak16Line;
-  final list = is16line ? surah16LinePageOffset : surah15LinePageOffset;
+
+  final list = switch (Settings.instance.mushaf) {
+    Mushaf.Indopak16Line => surah16LinePageOffset,
+    Mushaf.Uthmani15Line => surah15LinePageOffset,
+    Mushaf.Indopak15Line => surah15LineIndopakPageOffset,
+  };
 
   for (int i = 0; i < 114; ++i) {
     if (page >= list[i]) {

@@ -195,9 +195,11 @@ class _MainPageState extends State<MainPage>
       return;
     }
     try {
-      final is16line = Settings.instance.mushaf == Mushaf.Indopak16Line;
-      final surahList =
-          is16line ? surah16LinePageOffset : surah15LinePageOffset;
+      final surahList = switch (Settings.instance.mushaf) {
+        Mushaf.Indopak16Line => surah16LinePageOffset,
+        Mushaf.Uthmani15Line => surah15LinePageOffset,
+        Mushaf.Indopak15Line => surah15LineIndopakPageOffset,
+      };
 
       int page = surahList[surahIndex];
       int paraIdx = paraForPage(page);
