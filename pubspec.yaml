@@ -72,8 +72,6 @@ flutter:
   assets:
     - assets/ur.jalandhry.txt
     - assets/mutashabiha_data.json
-    - assets/16line/
-    - assets/15line/
     - android/app/src/main/res/mipmap-hdpi/ic_launcher.png
 
   # An image asset can refer to one or more resolution-specific "variants", see

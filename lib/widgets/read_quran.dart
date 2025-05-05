@@ -12,6 +12,10 @@ import 'package:quran_memorization_helper/quran_data/surahs.dart';
 import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/rukus.dart';
+import 'package:quran_memorization_helper/quran_data/sixteen_line_indopak_layout.dart';
+import 'package:quran_memorization_helper/quran_data/fifteen_line_uthmani_layout.dart';
+import 'package:quran_memorization_helper/quran_data/page_layout_types.dart'
+    as layout;
 import 'package:quran_memorization_helper/utils/utils.dart';
 import 'package:quran_memorization_helper/widgets/mutashabiha_ayat_list_item.dart';
 import 'package:quran_memorization_helper/widgets/tap_and_longpress_gesture_recognizer.dart';
@@ -351,7 +355,7 @@ class ReadQuranWidget extends StatefulWidget {
   final ParaAyatModel model;
   final PageController pageController;
   final VoidCallback verticalScrollResetFn;
-  final VoidCallback pageChangedCallback;
+  final Function(int) pageChangedCallback;
 
   const ReadQuranWidget(
     this.model, {
@@ -447,20 +451,73 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
     super.didUpdateWidget(old);
   }
 
-  Future<List<Page>> doload() async {
-    final folder = getQuranTextFolder();
-    int para = widget.model.currentPara;
-    final data = await rootBundle.loadString("assets/$folder/$para.json");
-    final pagesList = jsonDecode(data) as List<dynamic>;
-    List<Page> pages = [];
-    for (final p in pagesList) {
-      pages.add(Page.fromJson(p));
-    }
-    _pages = pages;
+  Map<int, List<layout.Page>> _getPageLayoutList() {
+    return switch (Settings.instance.mushaf) {
+      Mushaf.Indopak16Line => pagesByPara16,
+      Mushaf.Uthmani15Line => pagesByPara15,
+    };
+  }
 
-    // we lazy load the mutashabiha ayat text
-    _mutashabihat = await importParaMutashabihas(para - 1);
-    return _pages;
+  Future<List<Page>> doload() async {
+    int para = widget.model.currentPara;
+
+    final pagesList = _getPageLayoutList()[para]!;
+    List<Page> pages = [];
+    try {
+      for (int pi = 0; pi < pagesList.length; ++pi) {
+        final p = pagesList[pi];
+        List<Line> pageLines = [];
+        // print("length: ${p.lines.length}");
+        for (int i = 0; i < p.lines.length; ++i) {
+          final l = p.lines[i];
+          final ayah = l.ayahIdx;
+          final start = l.wordStartInAyahIdx;
+          List<LineAyah> lineAyahs = [];
+
+          if (ayah < 0) {
+            pageLines.add(Line([LineAyah(start, "")]));
+            continue;
+          }
+
+          int? nextAyah;
+          int? nextAyahStart;
+          if (i + 1 < p.lines.length) {
+            if (p.lines[i + 1].ayahIdx >= 0) {
+              final nextLine = p.lines[i + 1];
+              nextAyah = nextLine.ayahIdx;
+              nextAyahStart = nextLine.wordStartInAyahIdx;
+            }
+          } else if (pi + 1 < pagesList.length) {
+            if (pagesList[pi + 1].lines.first.ayahIdx >= 0) {
+              final nextPageFirstLine = pagesList[pi + 1].lines.first;
+              nextAyah = nextPageFirstLine.ayahIdx;
+              nextAyahStart = nextPageFirstLine.wordStartInAyahIdx;
+            }
+          }
+
+          final d = QuranText.instance.ayahsForRanges(
+            ayah,
+            start,
+            nextAyah,
+            nextAyahStart,
+          );
+          for (final line in d) {
+            lineAyahs.add(LineAyah(line.$1, line.$2));
+          }
+          pageLines.add(Line(lineAyahs));
+        }
+        pages.add(Page(p.pageNum, pageLines));
+      }
+
+      _pages = pages;
+
+      // we lazy load the mutashabiha ayat text
+      _mutashabihat = await importParaMutashabihas(para - 1);
+      return _pages;
+    } catch (e, s) {
+      print("$e --- \n$s");
+      rethrow;
+    }
   }
 
   bool _isMutashabihaAyat(int surahAyahIdx, int surahIdx) {
@@ -655,7 +712,8 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
     return FutureBuilder(
       future: doload(),
       builder: (context, snapshot) {
-        if (_pages.isEmpty) {
+        if (_pages.isEmpty ||
+            snapshot.connectionState != ConnectionState.done) {
           return const SliverToBoxAdapter(child: SizedBox.shrink());
         }
         return SliverToBoxAdapter(
@@ -685,7 +743,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
                 return false;
               },
               child: PageView.builder(
-                onPageChanged: (_) {
+                onPageChanged: (newPage) {
                   // reset vertical scroll only if in reflow mode
                   // because otherwise its annoying as we usually
                   // have vertical scroll of 1 line and the user
@@ -693,7 +751,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
                   if (Settings.instance.reflowMode) {
                     widget.verticalScrollResetFn();
                   }
-                  widget.pageChangedCallback();
+                  widget.pageChangedCallback(newPage);
                 },
                 controller: widget.pageController,
                 reverse: true,
@@ -873,6 +931,11 @@ class _PageWidgetState extends State<PageWidget> {
   ) {
     // Find the position of currentLine in full Ayah
     int match = fullAyah.indexOf(currentLine, startSearchAt);
+    if (match == -1) {
+      print(match);
+      print(currentLine);
+      print(fullAyah);
+    }
     if (match == -1) throw "Didn't find anything, bug!";
 
     // Find the index of first word

@@ -129,10 +129,6 @@ String toArabicNumber(int num) {
 
 const String urduKhatma = "\u06D4";
 
-String getQuranTextFolder() {
-  return Settings.instance.mushaf == Mushaf.Indopak16Line ? "16line" : "15line";
-}
-
 String getQuranFont() {
   return Settings.instance.mushaf == Mushaf.Indopak16Line
       ? "Al Mushaf"

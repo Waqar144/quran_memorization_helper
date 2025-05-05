@@ -1,65 +1,91 @@
-import 'package:flutter/services.dart' show rootBundle;
-import 'dart:convert';
+// import 'package:flutter/services.dart' show rootBundle;
+// import 'dart:convert';
+// import 'package:quran_memorization_helper/utils/utils.dart';
 import 'package:quran_memorization_helper/models/settings.dart';
-import 'package:quran_memorization_helper/utils/utils.dart';
+import 'package:quran_memorization_helper/quran_data/text_indopak.dart';
+import 'package:quran_memorization_helper/quran_data/text_uthmani.dart';
 
 class QuranText {
   static final QuranText _instance = QuranText._private();
   static QuranText get instance => _instance;
 
   List<String> _ayahs = [];
-  bool _isReady = false;
 
-  void loadData(Mushaf fontStyle) async {
-    String folder = getQuranTextFolder();
-    print("Load folder: $folder");
-
-    _ayahs = List.filled(6236, "", growable: false);
-
-    // final sw = Stopwatch()..start();
-
-    for (int i = 1; i <= 30; ++i) {
-      final data = await rootBundle.loadString(
-        "assets/$folder/$i.json",
-        cache: false,
-      );
-      final json = jsonDecode(data) as List<dynamic>;
-
-      int lastIndex = -1;
-
-      for (final pg in json) {
-        final pageObj = pg as Map<String, dynamic>;
-        final linesArray = pageObj["lines"] as List<dynamic>;
-        for (final line in linesArray) {
-          final lineayahs = line as List<dynamic>;
-          for (final la in lineayahs) {
-            final idx = la["idx"] as int;
-            if (idx < 0) continue; // bismillah, surah name
-            final t = la["text"] as String;
-            if (idx == lastIndex) {
-              _ayahs[idx] = "${_ayahs[idx]}\u200c$t";
-            } else {
-              _ayahs[idx] = t;
-            }
-            lastIndex = idx;
-          }
-        }
-      }
-    }
-
-    _isReady = true;
+  void loadData(Mushaf mushaf) async {
+    _ayahs = switch (mushaf) {
+      Mushaf.Indopak16Line => ayahs16Line,
+      Mushaf.Uthmani15Line => ayahs15Line,
+    };
+    assert(_ayahs.length == 6236, "Ayahs are ${_ayahs.length}");
   }
 
-  bool get isReady => _isReady;
+  bool get isReady => true;
 
   String ayahText(int i) {
-    if (!_isReady) return "";
     return _ayahs[i];
   }
 
   String spaceSplittedAyahText(int i) {
-    if (!_isReady) return "";
     return _ayahs[i].splitMapJoin("\u200c", onMatch: (_) => " ");
+  }
+
+  int _offsetForWordIdx(String text, int wordIdx) {
+    if (wordIdx == 0) return 0;
+    int s = text.indexOf("\u200c");
+    int i = 1;
+    while (s >= 0) {
+      if (i == wordIdx) return s;
+      s = text.indexOf("\u200c", s + 1);
+      i++;
+    }
+    throw "Word not found!, bug -- $s\n$text\n$wordIdx\n---";
+  }
+
+  List<(int, String)> ayahsForRanges(
+    int startAyah,
+    int startWord,
+    int? nextAyah,
+    int? nextAyahWord,
+  ) {
+    List<(int, String)> ret = [];
+
+    if (nextAyah != null) {
+      assert(nextAyahWord != null);
+      if (startAyah == nextAyah) {
+        final text = ayahText(startAyah);
+        int s = _offsetForWordIdx(text, startWord);
+        int e = _offsetForWordIdx(text, nextAyahWord!);
+        // print("return 0 -> ${text.substring(s, e)}");
+        return [(startAyah, text.substring(s, e))];
+      }
+
+      final text = ayahText(startAyah);
+      ret.add((startAyah, text.substring(_offsetForWordIdx(text, startWord))));
+      // print("add 0 -> ${text.substring(_offsetForWordIdx(text, startWord))}");
+      for (int i = startAyah + 1; i < nextAyah; ++i) {
+        final text = ayahText(i);
+        ret.add((i, text));
+        // print("add i -> $text");
+      }
+      if (nextAyahWord == 0) {
+        return ret;
+      }
+
+      final nextText = ayahText(nextAyah);
+      ret.add((
+        nextAyah,
+        nextText.substring(0, _offsetForWordIdx(nextText, nextAyahWord!)),
+      ));
+      // print(
+      //   "add e -> ${nextText.substring(0, _offsetForWordIdx(nextText, nextAyahWord!))}",
+      // );
+      return ret;
+    } else {
+      final text = ayahText(startAyah);
+      int s = _offsetForWordIdx(text, startWord);
+      // print("Final ---> ${text.substring(s)}");
+      return [(startAyah, text.substring(s))];
+    }
   }
 
   QuranText._private();

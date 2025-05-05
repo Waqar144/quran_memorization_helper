@@ -108,18 +108,15 @@ class _MainPageState extends State<MainPage>
     if (tryCount > 4) return; // abort after 5 tries
     Future.delayed(const Duration(milliseconds: 50), () {
       if (_pageController.hasClients) {
-        _saveScrollPosition();
+        _saveScrollPosition(_pageController.page?.floor() ?? 0);
       } else {
         _trySaveScrollPosition(tryCount + 1);
       }
     });
   }
 
-  void _saveScrollPosition() {
-    Settings.instance.saveScrollPositionDelayed(
-      _paraModel.currentPara,
-      _pageController.page?.floor() ?? 0,
-    );
+  void _saveScrollPosition(int page) {
+    Settings.instance.saveScrollPositionDelayed(_paraModel.currentPara, page);
   }
 
   void _resetVerticalScrollToZero() {
