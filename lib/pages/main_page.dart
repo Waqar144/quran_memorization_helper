@@ -76,7 +76,7 @@ class _MainPageState extends State<MainPage>
     _pageController.dispose();
     int page = 1;
     if (showLastPage) {
-      page = pageCountForPara(para - 1);
+      page = pageCountForPara(para - 1, Settings.instance.mushaf);
     }
     if (jumpToPage != -1) {
       page = jumpToPage;
@@ -195,15 +195,16 @@ class _MainPageState extends State<MainPage>
       return;
     }
     try {
-      final surahList = switch (Settings.instance.mushaf) {
+      final mushaf = Settings.instance.mushaf;
+      final surahList = switch (mushaf) {
         Mushaf.Indopak16Line => surah16LinePageOffset,
         Mushaf.Uthmani15Line => surah15LinePageOffset,
         Mushaf.Indopak15Line => surah15LineIndopakPageOffset,
       };
 
       int page = surahList[surahIndex];
-      int paraIdx = paraForPage(page);
-      final paraPageOffsets = paraPageOffsetsList();
+      int paraIdx = paraForPage(page, mushaf);
+      final paraPageOffsets = paraPageOffsetsList(mushaf);
       int paraStartPage = paraPageOffsets[paraIdx];
       int jumpToPage = page - paraStartPage;
 
@@ -219,7 +220,8 @@ class _MainPageState extends State<MainPage>
 
   void _nextPage() {
     int? currentPageInPara = _pageController.page?.floor();
-    int totalPages = pageCountForPara(_paraModel.currentPara - 1);
+    final mushaf = Settings.instance.mushaf;
+    int totalPages = pageCountForPara(_paraModel.currentPara - 1, mushaf);
     int nextPage = (currentPageInPara ?? -1) + 1;
     if (nextPage >= totalPages) {
       _paraModel.setCurrentPara(_paraModel.currentPara + 1);
@@ -298,7 +300,8 @@ class _MainPageState extends State<MainPage>
       const SingleActivator(LogicalKeyboardKey.home):
           () => _pageController.jumpToPage(0),
       const SingleActivator(LogicalKeyboardKey.end): () {
-        int totalPages = pageCountForPara(_paraModel.currentPara - 1);
+        final mushaf = Settings.instance.mushaf;
+        int totalPages = pageCountForPara(_paraModel.currentPara - 1, mushaf);
         _pageController.jumpToPage(totalPages - 1);
       },
       const SingleActivator(LogicalKeyboardKey.arrowLeft, control: true):
@@ -307,17 +310,19 @@ class _MainPageState extends State<MainPage>
           () => _paraModel.setCurrentPara(_paraModel.currentPara - 1),
       const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): () {
         int? currentPageInPara = _pageController.page?.floor();
+        final mushaf = Settings.instance.mushaf;
         int currentPage =
             (currentPageInPara ?? 0) +
-            paraPageOffsetsList()[_paraModel.currentPara - 1];
+            paraPageOffsetsList(mushaf)[_paraModel.currentPara - 1];
         int currentSurah = surahForPage(currentPage);
         _onSurahTapped(currentSurah == 113 ? 0 : currentSurah + 1, pop: false);
       },
       const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): () {
         int? currentPageInPara = _pageController.page?.floor();
+        final mushaf = Settings.instance.mushaf;
         int currentPage =
             (currentPageInPara ?? 0) +
-            paraPageOffsetsList()[_paraModel.currentPara - 1];
+            paraPageOffsetsList(mushaf)[_paraModel.currentPara - 1];
         int currentSurah = surahForPage(currentPage);
         _onSurahTapped(currentSurah == 0 ? 113 : currentSurah - 1, pop: false);
       },

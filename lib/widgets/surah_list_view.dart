@@ -20,13 +20,14 @@ class SurahListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final mushaf = Settings.instance.mushaf;
     final is16line = Settings.instance.mushaf == Mushaf.Indopak16Line;
     final surahList = switch (Settings.instance.mushaf) {
       Mushaf.Indopak16Line => surah16LinePageOffset,
       Mushaf.Uthmani15Line => surah15LinePageOffset,
       Mushaf.Indopak15Line => surah15LineIndopakPageOffset,
     };
-    final paraPageList = paraPageOffsetsList();
+    final paraPageList = paraPageOffsetsList(mushaf);
 
     int currentPage = currentPageInPara + paraPageList[currentParaIdx];
     int currentSurah = surahForPage(currentPage);

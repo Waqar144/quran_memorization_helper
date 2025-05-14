@@ -27,8 +27,8 @@ int getFirstAyahOfPara(int paraIndex) {
   return _paraAyahOffset[paraIndex];
 }
 
-int _getPageForAyah(int ayahIndex) {
-  final is16line = Settings.instance.mushaf == Mushaf.Indopak16Line;
+int _getPageForAyah(int ayahIndex, Mushaf mushaf) {
+  final is16line = mushaf == Mushaf.Indopak16Line;
   final pageAyahOffsets =
       is16line ? pageAyahOffsets16line : pageAyahOffsets15line;
   final startIndex = is16line ? 1 : 0;
@@ -40,10 +40,10 @@ int _getPageForAyah(int ayahIndex) {
   return pageAyahOffsets.length - 1;
 }
 
-int getParaPageForAyah(int ayahIndex) {
-  int page = _getPageForAyah(ayahIndex);
-  int para = paraForPage(page);
-  int paraPage = page - paraPageOffsetsList()[para];
+int getParaPageForAyah(int ayahIndex, Mushaf mushaf) {
+  int page = _getPageForAyah(ayahIndex, mushaf);
+  int para = paraForPage(page, mushaf);
+  int paraPage = page - paraPageOffsetsList(mushaf)[para];
   return paraPage;
 }
 

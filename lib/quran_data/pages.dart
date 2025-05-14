@@ -101,39 +101,37 @@ final Uint16List _para15LineIndoPakPageOffsets = Uint16List.fromList([
   586, // 30
 ]);
 
-Uint16List paraPageOffsetsList() {
-  return switch (Settings.instance.mushaf) {
+Uint16List paraPageOffsetsList(Mushaf mushaf) {
+  return switch (mushaf) {
     Mushaf.Indopak16Line => _para16LinePageOffsets,
     Mushaf.Uthmani15Line => _para15LinePageOffsets,
     Mushaf.Indopak15Line => _para15LineIndoPakPageOffsets,
   };
 }
 
-int pageCountForPara(int paraIdx) {
+int pageCountForPara(int paraIdx, Mushaf mushaf) {
   if (paraIdx == 29) {
-    return switch (Settings.instance.mushaf) {
+    return switch (mushaf) {
       Mushaf.Indopak16Line => 22,
       Mushaf.Uthmani15Line => 23,
       Mushaf.Indopak15Line => 25,
     };
   }
 
-  final list = paraPageOffsetsList();
+  final list = paraPageOffsetsList(mushaf);
   int p1 = list[paraIdx];
   int p2 = list[paraIdx + 1];
   return p2 - p1;
 }
 
-int paraForPage(int page) {
-  if (Settings.instance.mushaf == Mushaf.Indopak16Line &&
-      (page < 0 || page > 548)) {
+int paraForPage(int page, Mushaf mushaf) {
+  if (mushaf == Mushaf.Indopak16Line && (page < 0 || page > 548)) {
     throw "Invalid page number: $page";
-  } else if (Settings.instance.mushaf == Mushaf.Uthmani15Line &&
-      (page < 0 || page > 604)) {
+  } else if (mushaf == Mushaf.Uthmani15Line && (page < 0 || page > 604)) {
     throw "Invalid page number: $page";
   }
 
-  final list = paraPageOffsetsList();
+  final list = paraPageOffsetsList(mushaf);
   for (int i = 0; i < 30; ++i) {
     if (page >= list[i]) {
       continue;

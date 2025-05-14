@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:quran_memorization_helper/models/ayah_selection_model.dart';
 import 'package:quran_memorization_helper/models/ayat.dart';
+import 'package:quran_memorization_helper/models/settings.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
 import 'package:quran_memorization_helper/utils/utils.dart';
@@ -70,7 +71,7 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
 
   void _onGotoAyah(int ayahIndex) {
     int para = paraForAyah(ayahIndex);
-    int page = getParaPageForAyah(ayahIndex);
+    int page = getParaPageForAyah(ayahIndex, Settings.instance.mushaf);
     widget.model.setCurrentPara(para + 1, jumpToPage: page + 1, force: true);
     Navigator.of(context).pop();
   }
