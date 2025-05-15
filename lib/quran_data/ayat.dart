@@ -119,13 +119,10 @@ MutashabihaAyat ayatFromJsonObj(dynamic m, int ctx) {
     String text = "";
     final List<int> surahAyahIdxes = [];
     int surahIdx = -1;
-    final bool quranTextIsReady = QuranText.instance.isReady;
     for (final int ayahIdx in ayahIdxes) {
-      if (quranTextIsReady) {
-        text += QuranText.instance.ayahText(ayahIdx);
-        if (ayahIdx != ayahIdxes.last) {
-          text += ayahSeparator;
-        }
+      text += QuranText.instance.ayahText(ayahIdx);
+      if (ayahIdx != ayahIdxes.last) {
+        text += ayahSeparator;
       }
 
       if (surahIdx == -1) {
@@ -135,7 +132,7 @@ MutashabihaAyat ayatFromJsonObj(dynamic m, int ctx) {
     }
 
     final bool showContext = ctx != 0;
-    if (showContext && quranTextIsReady) {
+    if (showContext) {
       text = _getContext(ayahIdxes.last, text);
     }
     return MutashabihaAyat(

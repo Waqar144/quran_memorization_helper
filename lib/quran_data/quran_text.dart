@@ -1,6 +1,3 @@
-// import 'package:flutter/services.dart' show rootBundle;
-// import 'dart:convert';
-// import 'package:quran_memorization_helper/utils/utils.dart';
 import 'package:quran_memorization_helper/models/settings.dart';
 import 'package:quran_memorization_helper/quran_data/text_indopak.dart';
 import 'package:quran_memorization_helper/quran_data/text_uthmani.dart';
@@ -18,8 +15,6 @@ class QuranText {
     };
     assert(_ayahs.length == 6236, "Ayahs are ${_ayahs.length}");
   }
-
-  bool get isReady => true;
 
   String ayahText(int i) {
     return _ayahs[i];
