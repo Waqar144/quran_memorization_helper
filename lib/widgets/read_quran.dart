@@ -1129,7 +1129,7 @@ class _PageWidgetState extends State<PageWidget> {
               widget._pageLines[lineIdx + 1].lineAyahs.first.ayahIndex >= 0;
           widgets.add(
             _getSurahHeaddress(
-              -line.lineAyahs.first.ayahIndex,
+              -(line.lineAyahs.first.ayahIndex + 1),
               style,
               rowHeight,
               includeBismillah: drawBismillah,
