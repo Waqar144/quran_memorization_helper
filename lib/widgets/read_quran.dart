@@ -576,60 +576,6 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
     return null;
   }
 
-  String _getFullAyahText(int ayahIdx, int pageNum) {
-    int pageIndex = pageNum - _pages[0].pageNum;
-    int startPage = pageIndex == 0 ? pageIndex : pageIndex - 1;
-    int endPage = pageNum == _pages.last.pageNum ? pageIndex : pageIndex + 1;
-
-    bool foundStart = false;
-    String text = "";
-
-    for (int p = startPage; p <= endPage; p++) {
-      Page page = _pages[p];
-      for (final line in page.lines) {
-        for (final lineAyah in line.lineAyahs) {
-          if (lineAyah.ayahIndex == ayahIdx) {
-            if (!foundStart) {
-              foundStart = true;
-            }
-            text += lineAyah.text;
-            text += "\u200c";
-          } else {
-            if (foundStart) {
-              break;
-            }
-          }
-        }
-      }
-    }
-    return text;
-  }
-
-  bool _isAyahFull(int ayahIdx, int pageNum) {
-    bool isFull = true;
-    bool isAtPageEnd = false;
-    bool isAtPageStart = false;
-    int pageIndex = pageNum - _pages[0].pageNum;
-
-    isAtPageEnd =
-        _pages[pageIndex].lines.last.lineAyahs.last.ayahIndex == ayahIdx;
-    isAtPageStart =
-        _pages[pageIndex].lines.first.lineAyahs.first.ayahIndex == ayahIdx;
-
-    if (isAtPageEnd && (pageIndex + 1) < _pages.length) {
-      // next page first ayah != this ayah => we have a full ayah
-      isFull =
-          _pages[pageIndex + 1].lines.first.lineAyahs.first.ayahIndex !=
-          ayahIdx;
-    }
-    if (isAtPageStart && pageIndex > 0) {
-      // prev page last ayah != this ayah => we have a full ayah
-      isFull =
-          _pages[pageIndex - 1].lines.last.lineAyahs.last.ayahIndex != ayahIdx;
-    }
-    return isFull;
-  }
-
   void _onAyahLongPressed(int ayahIdx) async {
     int surahIdx = surahForAyah(ayahIdx);
     int surahAyah = toSurahAyahOffset(surahIdx, ayahIdx);
@@ -789,8 +735,6 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
                       getAyatInDB: _getAyatInDB,
                       onAyahTapped: _onAyahTapped,
                       isMutashabihaAyat: _isMutashabihaAyat,
-                      isAyahFull: _isAyahFull,
-                      getFullAyahText: _getFullAyahText,
                       repaintStream: _repaintNotifier.stream,
                     ),
                   );
@@ -811,8 +755,6 @@ class PageWidget extends StatefulWidget {
   final bool Function(int ayahIdx, int surahIdx) isMutashabihaAyat;
   final Ayat? Function(int ayahIdx) getAyatInDB;
   final void Function(int ayahIdx, int wordIdx, bool longPress) onAyahTapped;
-  final bool Function(int ayahIdx, int pageIdx) isAyahFull;
-  final String Function(int ayahIdx, int pageNum) getFullAyahText;
   final Stream<int> repaintStream;
 
   const PageWidget(
@@ -823,8 +765,6 @@ class PageWidget extends StatefulWidget {
     required this.getAyatInDB,
     required this.onAyahTapped,
     required this.repaintStream,
-    required this.isAyahFull,
-    required this.getFullAyahText,
     super.key,
   });
 
@@ -1297,7 +1237,7 @@ class _PageWidgetState extends State<PageWidget> {
           final int surahIdx = surahForAyah(a.ayahIndex);
           final int surahAyahIdx = toSurahAyahOffset(surahIdx, a.ayahIndex);
           final Ayat? ayahInDb = widget.getAyatInDB(a.ayahIndex);
-          final text = widget.getFullAyahText(a.ayahIndex, widget.pageIndex);
+          final text = QuranText.instance.ayahText(a.ayahIndex);
           final bool isMutashabihaAyat = widget.isMutashabihaAyat(
             surahAyahIdx,
             surahIdx,
