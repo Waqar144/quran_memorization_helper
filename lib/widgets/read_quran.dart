@@ -1090,6 +1090,35 @@ class _PageWidgetState extends State<PageWidget> {
     );
   }
 
+  List<Widget> _buildSurahHeaddress(int lineIdx, Line line, double rowHeight) {
+    List<Widget> widgets = [];
+    final style = TextStyle(
+      color: Theme.of(context).textTheme.bodyMedium?.color,
+      fontFamily: getQuranFont(),
+      fontSize: Theme.of(context).textTheme.titleLarge?.fontSize,
+      letterSpacing: 0.0,
+      wordSpacing: 0,
+    );
+    final isIndoPk = isIndoPak(Settings.instance.mushaf);
+    if (line.lineAyahs.first.ayahIndex == -999) {
+      widgets.add(_getBism(style, rowHeight));
+    } else {
+      bool drawBismillah =
+          isIndoPk &&
+          lineIdx + 1 < widget._pageLines.length &&
+          widget._pageLines[lineIdx + 1].lineAyahs.first.ayahIndex >= 0;
+      widgets.add(
+        _getSurahHeaddress(
+          -(line.lineAyahs.first.ayahIndex + 1),
+          style,
+          rowHeight,
+          includeBismillah: drawBismillah,
+        ),
+      );
+    }
+    return widgets;
+  }
+
   List<Widget> _reflowModeText(
     double rowHeight,
     List<(int, int, int, Ayat?, bool, String)> ayahData,
@@ -1112,30 +1141,7 @@ class _PageWidgetState extends State<PageWidget> {
           spans = [];
         }
 
-        final style = TextStyle(
-          color: Theme.of(context).textTheme.bodyMedium?.color,
-          fontFamily: getQuranFont(),
-          fontSize: Theme.of(context).textTheme.titleLarge?.fontSize,
-          letterSpacing: 0.0,
-          wordSpacing: 0,
-        );
-        final isIndoPk = isIndoPak(Settings.instance.mushaf);
-        if (line.lineAyahs.first.ayahIndex == -999) {
-          widgets.add(_getBism(style, rowHeight));
-        } else {
-          bool drawBismillah =
-              isIndoPk &&
-              lineIdx + 1 < widget._pageLines.length &&
-              widget._pageLines[lineIdx + 1].lineAyahs.first.ayahIndex >= 0;
-          widgets.add(
-            _getSurahHeaddress(
-              -(line.lineAyahs.first.ayahIndex + 1),
-              style,
-              rowHeight,
-              includeBismillah: drawBismillah,
-            ),
-          );
-        }
+        widgets.addAll(_buildSurahHeaddress(lineIdx, line, rowHeight));
         continue;
       }
 
@@ -1220,13 +1226,6 @@ class _PageWidgetState extends State<PageWidget> {
     final bigScreen = isBigScreen();
     final defaultTextStyle = _getQuranTextStyle(_textFontSize());
 
-    final bismillahStyle = TextStyle(
-      color: themeData.textTheme.bodyMedium?.color,
-      fontFamily: getQuranFont(),
-      fontSize: themeData.textTheme.titleLarge?.fontSize,
-      letterSpacing: 0.0,
-      wordSpacing: 0,
-    );
     final isIndoPk = isIndoPak(Settings.instance.mushaf);
     final fontSize = _textFontSize();
     final boxFit = bigScreen ? BoxFit.contain : BoxFit.scaleDown;
@@ -1238,23 +1237,7 @@ class _PageWidgetState extends State<PageWidget> {
 
     for (final (idx, l) in widget._pageLines.indexed) {
       if (l.lineAyahs.first.ayahIndex < 0) {
-        if (l.lineAyahs.first.ayahIndex == -999) {
-          widgets.add(_getBism(bismillahStyle, rowHeight));
-        } else {
-          bool drawBismillah =
-              isIndoPk &&
-              idx + 1 < widget._pageLines.length &&
-              widget._pageLines[idx + 1].lineAyahs.first.ayahIndex >= 0;
-
-          widgets.add(
-            _getSurahHeaddress(
-              -(l.lineAyahs.first.ayahIndex + 1),
-              bismillahStyle,
-              rowHeight,
-              includeBismillah: drawBismillah,
-            ),
-          );
-        }
+        widgets.addAll(_buildSurahHeaddress(idx, l, rowHeight));
         continue;
       }
 
