@@ -2,6 +2,9 @@ import 'dart:typed_data';
 
 import 'pages.dart';
 import 'package:quran_memorization_helper/models/settings.dart';
+import 'fifteen_line_uthmani_layout.dart';
+import 'sixteen_line_indopak_layout.dart';
+import 'fifteen_line_indopak_layout.dart';
 
 const String ayahSeparator = " ۞ ";
 
@@ -27,22 +30,40 @@ int getFirstAyahOfPara(int paraIndex) {
   return _paraAyahOffset[paraIndex];
 }
 
-int _getPageForAyah(int ayahIndex, Mushaf mushaf) {
-  final is16line = mushaf == Mushaf.Indopak16Line;
-  final pageAyahOffsets =
-      is16line ? pageAyahOffsets16line : pageAyahOffsets15line;
-  final startIndex = is16line ? 1 : 0;
-
-  for (int i = startIndex; i < pageAyahOffsets.length; ++i) {
-    if (ayahIndex >= pageAyahOffsets[i]) continue;
-    return i - 1;
-  }
-  return pageAyahOffsets.length - 1;
-}
-
 int getParaPageForAyah(int ayahIndex, Mushaf mushaf) {
-  int page = _getPageForAyah(ayahIndex, mushaf);
-  int para = paraForPage(page, mushaf);
+  final data = switch (mushaf) {
+    Mushaf.Indopak16Line => pagesByPara16,
+    Mushaf.Uthmani15Line => pagesByPara15,
+    Mushaf.Indopak15Line => pagesByPara15Indopak,
+  };
+
+  int fpage = -1;
+  int para = paraForAyah(ayahIndex);
+  final pages = data[para + 1]!;
+  for (final page in pages) {
+    int firstAyahOfPage = page.lines.first.ayahIdx;
+    if (firstAyahOfPage < 0) {
+      firstAyahOfPage = page.lines.firstWhere((l) => l.ayahIdx >= 0).ayahIdx;
+    }
+
+    if (ayahIndex >= firstAyahOfPage) {
+      continue;
+    }
+
+    fpage = (page.pageNum - 1);
+    break;
+  }
+
+  if (fpage == -1) {
+    final lastPage = pages.last;
+    final firstAyahOfPage =
+        lastPage.lines.firstWhere((l) => l.ayahIdx >= 0).ayahIdx;
+    if (ayahIndex >= firstAyahOfPage) {
+      fpage = lastPage.pageNum;
+    }
+  }
+
+  int page = fpage;
   int paraPage = page - paraPageOffsetsList(mushaf)[para];
   return paraPage;
 }
