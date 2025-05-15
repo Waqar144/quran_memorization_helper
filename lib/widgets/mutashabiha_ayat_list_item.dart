@@ -56,6 +56,7 @@ class MutashabihaAyatListItem extends StatelessWidget {
 
   List<Widget> _buildMatches(ThemeData theme) {
     List<Widget> widgets = [];
+    final isIndoPk = isIndoPak(Settings.instance.mushaf);
     widgets.add(const Divider(height: 2));
     for (final m in mutashabiha.matches) {
       widgets.add(
@@ -69,10 +70,7 @@ class MutashabihaAyatListItem extends StatelessWidget {
                 fontSize: Settings.instance.fontSize.toDouble(),
                 letterSpacing: 0,
                 wordSpacing: Settings.wordSpacing,
-                height:
-                    Settings.instance.mushaf == Mushaf.Indopak16Line
-                        ? 1.7
-                        : null,
+                height: isIndoPk ? 1.7 : null,
               ),
             ),
             softWrap: true,

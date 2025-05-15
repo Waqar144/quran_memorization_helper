@@ -43,6 +43,7 @@ class _AyatListItemState extends State<AyatListItem> {
 
   @override
   Widget build(BuildContext context) {
+    final isIndoPk = isIndoPak(Settings.instance.mushaf);
     return ListTile(
       leading:
           widget.selectionMode
@@ -61,8 +62,7 @@ class _AyatListItemState extends State<AyatListItem> {
             fontSize: Settings.instance.fontSize.toDouble(),
             letterSpacing: 0,
             wordSpacing: Settings.wordSpacing,
-            height:
-                Settings.instance.mushaf == Mushaf.Indopak16Line ? 1.7 : null,
+            height: isIndoPk ? 1.7 : null,
           ),
         ),
         softWrap: true,
