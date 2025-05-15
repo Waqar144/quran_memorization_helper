@@ -353,7 +353,7 @@ class _MainPageState extends State<MainPage>
         future: _load(),
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
-            return const SizedBox.shrink();
+            return Center(child: const CircularProgressIndicator());
           }
           return CallbackShortcuts(
             bindings: _shortcutBindings(),
