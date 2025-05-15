@@ -2,6 +2,14 @@ import 'dart:typed_data';
 
 import 'package:quran_memorization_helper/models/settings.dart';
 
+int pageCount(Mushaf m) {
+  return switch (m) {
+    Mushaf.Indopak16Line => 548,
+    Mushaf.Uthmani15Line => 604,
+    Mushaf.Indopak15Line => 610,
+  };
+}
+
 final Uint16List _para16LinePageOffsets = Uint16List.fromList(<int>[
   1, // 1
   20, // 2
@@ -101,12 +109,36 @@ final Uint16List _para15LineIndoPakPageOffsets = Uint16List.fromList([
   586, // 30
 ]);
 
+int paraStartPage(int paraIdx, Mushaf mushaf) {
+  final list = paraPageOffsetsList(mushaf);
+  int extra = switch (mushaf) {
+    Mushaf.Indopak16Line => 1,
+    Mushaf.Uthmani15Line => 0,
+    Mushaf.Indopak15Line => 1,
+  };
+  return list[paraIdx] - extra;
+}
+
 Uint16List paraPageOffsetsList(Mushaf mushaf) {
   return switch (mushaf) {
     Mushaf.Indopak16Line => _para16LinePageOffsets,
     Mushaf.Uthmani15Line => _para15LinePageOffsets,
     Mushaf.Indopak15Line => _para15LineIndoPakPageOffsets,
   };
+}
+
+int surahStartPage(int surahIdx, Mushaf mushaf) {
+  final surahList = switch (mushaf) {
+    Mushaf.Indopak16Line => surah16LinePageOffset,
+    Mushaf.Uthmani15Line => surah15LinePageOffset,
+    Mushaf.Indopak15Line => surah15LineIndopakPageOffset,
+  };
+  int extra = switch (mushaf) {
+    Mushaf.Indopak16Line => 1,
+    Mushaf.Uthmani15Line => 0,
+    Mushaf.Indopak15Line => 1,
+  };
+  return surahList[surahIdx] - extra;
 }
 
 int pageCountForPara(int paraIdx, Mushaf mushaf) {
@@ -125,7 +157,14 @@ int pageCountForPara(int paraIdx, Mushaf mushaf) {
 }
 
 int paraForPage(int page, Mushaf mushaf) {
-  if (mushaf == Mushaf.Indopak16Line && (page < 1 || page > 548)) {
+  int extra = switch (mushaf) {
+    Mushaf.Indopak16Line => 1,
+    Mushaf.Uthmani15Line => 0,
+    Mushaf.Indopak15Line => 1,
+  };
+  page += extra;
+
+  if (mushaf == Mushaf.Indopak16Line && (page < 1 || page > 549)) {
     throw "Invalid page number: $page";
   } else if (mushaf == Mushaf.Uthmani15Line && (page < 0 || page > 604)) {
     throw "Invalid page number: $page";

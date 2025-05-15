@@ -25,6 +25,8 @@ class QuranText {
     return _ayahs[i];
   }
 
+  int ayahCount() => _ayahs.length;
+
   String spaceSplittedAyahText(int i) {
     return _ayahs[i].splitMapJoin("\u200c", onMatch: (_) => " ");
   }

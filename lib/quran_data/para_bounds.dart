@@ -30,17 +30,18 @@ int getFirstAyahOfPara(int paraIndex) {
   return _paraAyahOffset[paraIndex];
 }
 
-int getParaPageForAyah(int ayahIndex, Mushaf mushaf) {
-  final data = switch (mushaf) {
-    Mushaf.Indopak16Line => pagesByPara16,
-    Mushaf.Uthmani15Line => pagesByPara15,
-    Mushaf.Indopak15Line => pagesByPara15Indopak,
+int getPageForAyah(int ayahIndex, Mushaf mushaf) {
+  final pages = switch (mushaf) {
+    Mushaf.Indopak16Line => pages16Indopak,
+    Mushaf.Uthmani15Line => pages15Uthmani,
+    Mushaf.Indopak15Line => pages15Indopak,
   };
 
-  int fpage = -1;
+  int resultPage = -1;
   int para = paraForAyah(ayahIndex);
-  final pages = data[para + 1]!;
-  for (final page in pages) {
+  int start = paraStartPage(para, mushaf);
+  for (int i = start; i < pages.length; ++i) {
+    final page = pages[i];
     int firstAyahOfPage = page.lines.first.ayahIdx;
     if (firstAyahOfPage < 0) {
       firstAyahOfPage = page.lines.firstWhere((l) => l.ayahIdx >= 0).ayahIdx;
@@ -50,22 +51,20 @@ int getParaPageForAyah(int ayahIndex, Mushaf mushaf) {
       continue;
     }
 
-    fpage = (page.pageNum - 1);
+    resultPage = (i - 1);
     break;
   }
 
-  if (fpage == -1) {
+  if (resultPage == -1) {
     final lastPage = pages.last;
     final firstAyahOfPage =
         lastPage.lines.firstWhere((l) => l.ayahIdx >= 0).ayahIdx;
     if (ayahIndex >= firstAyahOfPage) {
-      fpage = lastPage.pageNum;
+      resultPage = lastPage.pageNum;
     }
   }
 
-  int page = fpage;
-  int paraPage = page - paraPageOffsetsList(mushaf)[para];
-  return paraPage;
+  return resultPage;
 }
 
 String getParaNameForIndex(int paraIdx) {

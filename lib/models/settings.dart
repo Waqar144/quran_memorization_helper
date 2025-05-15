@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:async';
 import 'dart:core';
 import 'package:quran_memorization_helper/utils/utils.dart' as utils;
+import 'package:quran_memorization_helper/quran_data/pages.dart';
 
 // ignore: constant_identifier_names
 enum Mushaf { Indopak16Line, Uthmani15Line, Indopak15Line }
@@ -20,7 +21,6 @@ const _minFontSize = 24;
 class Settings extends ChangeNotifier {
   static final Settings _instance = Settings._private();
   static Settings get instance => _instance;
-  int _currentReadingPara = 1;
   int _currentReadingPage = 0;
   Timer? timer;
   ThemeMode _themeMode = ThemeMode.system;
@@ -41,7 +41,6 @@ class Settings extends ChangeNotifier {
     persist();
   }
 
-  int get currentReadingPara => _currentReadingPara;
   int get currentReadingPage => _currentReadingPage;
 
   ThemeMode get themeMode => _themeMode;
@@ -95,8 +94,7 @@ class Settings extends ChangeNotifier {
 
   Future<void> saveToDisk() async {
     Map<String, dynamic> map = {
-      'currentReadingPara': _currentReadingPara,
-      'currentReadingScrollOffset': _currentReadingPage,
+      'currentReadingPage': _currentReadingPage,
       'themeMode': _themeMode.index,
       'translationFile': _translationFile,
       'tapToShowTranslation': _tapToShowTranslation,
@@ -111,8 +109,9 @@ class Settings extends ChangeNotifier {
   Future<void> readSettings() async {
     try {
       final Map<String, dynamic> json = await utils.readJsonFile("settings");
-      _currentReadingPara = json["currentReadingPara"] ?? 1;
-      _currentReadingPage = json["currentReadingScrollOffset"] ?? 0;
+      int? currentReadingPara = json["currentReadingPara"];
+      int? oldCurrentReadingPage = json["currentReadingScrollOffset"];
+
       _themeMode =
           ThemeMode.values[json["themeMode"] ?? ThemeMode.system.index];
       _translationFile = json["translationFile"] ?? "";
@@ -123,26 +122,32 @@ class Settings extends ChangeNotifier {
       if (_fontSize < _minFontSize) {
         _fontSize = _minFontSize;
       }
+
+      if (currentReadingPara != null && oldCurrentReadingPage != null) {
+        int start = paraStartPage(currentReadingPara - 1, _mushaf);
+        int page = start + oldCurrentReadingPage;
+        _currentReadingPage = page;
+      } else {
+        _currentReadingPage = json["currentReadingPage"] ?? 0;
+      }
     } catch (e) {
       // nothing for now
     }
   }
 
-  Future<void> saveScrollPosition(int paraNumber, int page) async {
+  Future<void> saveScrollPosition(int page) async {
     // nothing changed?
-    if (currentReadingPara == paraNumber && page == currentReadingPage) {
+    if (page == currentReadingPage) {
       return;
     }
-    _currentReadingPara = paraNumber;
     _currentReadingPage = page;
     await saveToDisk();
   }
 
-  void saveScrollPositionDelayed(int paraNumber, int page) {
-    if (currentReadingPara == paraNumber && page == currentReadingPage) {
+  void saveScrollPositionDelayed(int page) {
+    if (page == currentReadingPage) {
       return;
     }
-    _currentReadingPara = paraNumber;
     _currentReadingPage = page;
     persist(seconds: 2);
   }

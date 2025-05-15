@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'dart:async';
 import 'package:quran_memorization_helper/models/settings.dart';
 import 'package:quran_memorization_helper/models/ayat.dart';
+import 'package:quran_memorization_helper/quran_data/pages.dart';
 import 'package:quran_memorization_helper/quran_data/quran_text.dart';
 import 'package:quran_memorization_helper/quran_data/surahs.dart';
 import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
@@ -203,7 +204,6 @@ class _TranslationTileState extends State<TranslationTile> {
 class LongPressActionSheet extends StatefulWidget {
   final Widget? mutashabihaList;
   final Translation translation;
-  final int currentParaIdx;
 
   /// absoluteAyah index of tapped ayah
   final int tappedAyahIdx;
@@ -212,7 +212,6 @@ class LongPressActionSheet extends StatefulWidget {
     super.key,
     required this.mutashabihaList,
     required this.translation,
-    required this.currentParaIdx,
     required this.tappedAyahIdx,
   });
 
@@ -221,15 +220,11 @@ class LongPressActionSheet extends StatefulWidget {
 }
 
 class _LongPressActionSheetState extends State<LongPressActionSheet> {
-  late final int _paraFirstAyah;
-  late final int _totalAyahsInPara;
   late PageController _controller;
 
   @override
   void initState() {
-    _totalAyahsInPara = paraAyahCount[widget.currentParaIdx];
-    _paraFirstAyah = getFirstAyahOfPara(widget.currentParaIdx);
-    int currentAyah = widget.tappedAyahIdx - _paraFirstAyah;
+    int currentAyah = widget.tappedAyahIdx;
     _controller = PageController(initialPage: currentAyah);
 
     super.initState();
@@ -251,10 +246,10 @@ class _LongPressActionSheetState extends State<LongPressActionSheet> {
   Widget build(BuildContext context) {
     return PageView.builder(
       reverse: true,
-      itemCount: _totalAyahsInPara,
+      itemCount: QuranText.instance.ayahCount(),
       controller: _controller,
       itemBuilder: (context, index) {
-        final int ayah = _paraFirstAyah + index;
+        final int ayah = index;
         final int s = widget.translation.transLineOffsets[ayah];
         final int e = widget.translation.transLineOffsets[ayah + 1];
         String translation = utf8.decode(
@@ -373,7 +368,7 @@ class ReadQuranWidget extends StatefulWidget {
 class _ReadQuranWidget extends State<ReadQuranWidget>
     with SingleTickerProviderStateMixin {
   List<Line> lines = [];
-  List<Page> _pages = [];
+  List<layout.Page> _pages = [];
   List<Mutashabiha> _mutashabihat = [];
   Translation? _translation;
   final _repaintNotifier = StreamController<int>.broadcast();
@@ -401,26 +396,11 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
   //   }
   //
   //   if (widget.pageController.page == null) {
-  //     print("Page Controller is null!");
   //     return;
   //   }
   //   if (widget.pageController.page!.toInt() + 1 < _pages.length) {
   //     widget.pageController.jumpToPage(widget.pageController.page!.toInt() + 1);
   //     Future.delayed(const Duration(milliseconds: 30), () {
-  //       // print("Next! ${widget.pageController.page!.toInt()} ${_pages.length}");
-  //       _fwdPgs();
-  //     });
-  //   } else {
-  //     // print("JUMP TO NEXT PARA!");
-  //     int currentPara = widget.model.currentPara;
-  //     int nextPara = currentPara + 1;
-  //     if (nextPara > 30) {
-  //       print("Done!");
-  //       return;
-  //     }
-  //     widget.model.setCurrentPara(nextPara, showLastPage: false);
-  //
-  //     Future.delayed(const Duration(milliseconds: 100), () {
   //       // print("Next! ${widget.pageController.page!.toInt()} ${_pages.length}");
   //       _fwdPgs();
   //     });
@@ -446,99 +426,19 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
     _repaintNotifier.add(0);
   }
 
-  @override
-  void didUpdateWidget(ReadQuranWidget old) {
-    _pages.clear();
-    super.didUpdateWidget(old);
-  }
-
-  Map<int, List<layout.Page>> _getPageLayoutList() {
+  List<layout.Page> _getPageLayoutList() {
     return switch (Settings.instance.mushaf) {
-      Mushaf.Indopak16Line => pagesByPara16,
-      Mushaf.Uthmani15Line => pagesByPara15,
-      Mushaf.Indopak15Line => pagesByPara15Indopak,
+      Mushaf.Indopak16Line => pages16Indopak,
+      Mushaf.Uthmani15Line => pages15Uthmani,
+      Mushaf.Indopak15Line => pages15Indopak,
     };
   }
 
-  Future<List<Page>> doload() async {
-    int para = widget.model.currentPara;
-
-    final pagesList = _getPageLayoutList()[para]!;
-    List<Page> pages = [];
-    try {
-      for (int pi = 0; pi < pagesList.length; ++pi) {
-        final p = pagesList[pi];
-        List<Line> pageLines = [];
-        // print("length: ${p.lines.length}");
-        for (int i = 0; i < p.lines.length; ++i) {
-          final l = p.lines[i];
-          final ayah = l.ayahIdx;
-          final start = l.wordStartInAyahIdx;
-          List<LineAyah> lineAyahs = [];
-
-          if (ayah < 0) {
-            pageLines.add(Line([LineAyah(start, "")]));
-            continue;
-          }
-
-          int? nextAyah;
-          int? nextAyahStart;
-          if (i + 1 < p.lines.length) {
-            if (p.lines[i + 1].ayahIdx >= 0) {
-              final nextLine = p.lines[i + 1];
-              nextAyah = nextLine.ayahIdx;
-              nextAyahStart = nextLine.wordStartInAyahIdx;
-            } else {
-              // find next valid ayah
-              for (int j = i + 1; j < p.lines.length; ++j) {
-                if (p.lines[j].ayahIdx >= 0) {
-                  nextAyah = p.lines[j].ayahIdx;
-                  nextAyahStart = 0;
-                  break;
-                }
-              }
-            }
-          } else if (pi + 1 < pagesList.length) {
-            final nextPage = pagesList[pi + 1];
-            if (nextPage.lines.first.ayahIdx >= 0) {
-              final nextPageFirstLine = nextPage.lines.first;
-              nextAyah = nextPageFirstLine.ayahIdx;
-              nextAyahStart = nextPageFirstLine.wordStartInAyahIdx;
-            } else {
-              // find next valid ayah
-              for (int j = 0; j < nextPage.lines.length; ++j) {
-                if (nextPage.lines[j].ayahIdx >= 0) {
-                  nextAyah = nextPage.lines[j].ayahIdx;
-                  nextAyahStart = 0;
-                  break;
-                }
-              }
-            }
-          }
-
-          final d = QuranText.instance.ayahsForRanges(
-            ayah,
-            start,
-            nextAyah,
-            nextAyahStart,
-          );
-          for (final line in d) {
-            lineAyahs.add(LineAyah(line.$1, line.$2));
-          }
-          pageLines.add(Line(lineAyahs));
-        }
-        pages.add(Page(p.pageNum, pageLines));
-      }
-
-      _pages = pages;
-
-      // we lazy load the mutashabiha ayat text
-      _mutashabihat = await importParaMutashabihas(para - 1);
-      return _pages;
-    } catch (e, s) {
-      print("$e --- \n$s");
-      rethrow;
-    }
+  Future<List<layout.Page>> doload() async {
+    // we lazy load the mutashabiha ayat text
+    _pages = _getPageLayoutList();
+    _mutashabihat = await importAllMutashabihas();
+    return _pages;
   }
 
   bool _isMutashabihaAyat(int surahAyahIdx, int surahIdx) {
@@ -570,10 +470,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
   }
 
   Ayat? _getAyatInDB(int ayahIdx) {
-    for (final a in widget.model.ayahs) {
-      if (a.ayahIdx == ayahIdx) return a;
-    }
-    return null;
+    return widget.model.getAyahInDB(ayahIdx);
   }
 
   void _onAyahLongPressed(int ayahIdx) async {
@@ -641,7 +538,6 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
             child: LongPressActionSheet(
               mutashabihaList: mutashabihaWidget,
               translation: _translation!,
-              currentParaIdx: widget.model.currentPara - 1,
               tappedAyahIdx: ayahIdx,
             ),
           ),
@@ -658,13 +554,11 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
       return;
     }
 
-    int currentParaIndex = widget.model.currentPara - 1;
-
     Ayat? ayatInDb = _getAyatInDB(ayahIdx);
     // otherwise we add/remove ayah
     if (ayatInDb != null && ayatInDb.markedWords.contains(wordIdx)) {
       // remove
-      widget.model.removeMarkedWordInAyat(currentParaIndex, ayahIdx, wordIdx);
+      widget.model.removeMarkedWordInAyat(ayahIdx, wordIdx);
     } else {
       // add
       Ayat ayat = Ayat("", [wordIdx], ayahIdx: ayahIdx);
@@ -675,7 +569,6 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
   @override
   Widget build(BuildContext context) {
     // set to true when swiping to load next para
-    bool loadingNext = false;
     return FutureBuilder(
       future: doload(),
       builder: (context, snapshot) {
@@ -690,22 +583,12 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
               onNotification: (noti) {
                 if (noti.depth == 0) {
                   int dir = noti.overscroll >= 0 ? 1 : -1;
-                  int currentPara = widget.model.currentPara;
-                  int nextPara = currentPara + dir;
-
-                  if (nextPara <= 0) {
-                    nextPara = 30;
-                  } else if (nextPara > 30) {
-                    nextPara = 1;
-                  }
-
-                  if (loadingNext) {
-                    return false;
-                  }
-                  loadingNext = true;
-
                   bool lastpage = dir < 0;
-                  widget.model.setCurrentPara(nextPara, showLastPage: lastpage);
+                  if (lastpage) {
+                    widget.pageController.jumpToPage(_pages.length - 1);
+                  } else {
+                    widget.pageController.jumpToPage(0);
+                  }
                 }
                 return false;
               },
@@ -727,11 +610,74 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
                     const ScrollBehavior()..copyWith(overscroll: false),
                 physics: const CustomPageViewScrollPhysics(),
                 itemBuilder: (ctx, index) {
+                  final page = _pages[index];
+                  List<Line> pageLines = [];
+
+                  for (int i = 0; i < page.lines.length; ++i) {
+                    final l = page.lines[i];
+                    final ayah = l.ayahIdx;
+                    final start = l.wordStartInAyahIdx;
+                    List<LineAyah> lineAyahs = [];
+
+                    if (ayah < 0) {
+                      pageLines.add(
+                        Line([LineAyah(start == -999 ? start : start - 1, "")]),
+                      );
+                      continue;
+                    }
+
+                    int? nextAyah;
+                    int? nextAyahStart;
+                    if (i + 1 < page.lines.length) {
+                      if (page.lines[i + 1].ayahIdx >= 0) {
+                        final nextLine = page.lines[i + 1];
+                        nextAyah = nextLine.ayahIdx;
+                        nextAyahStart = nextLine.wordStartInAyahIdx;
+                      } else {
+                        // find next valid ayah
+                        for (int j = i + 1; j < page.lines.length; ++j) {
+                          if (page.lines[j].ayahIdx >= 0) {
+                            nextAyah = page.lines[j].ayahIdx;
+                            nextAyahStart = 0;
+                            break;
+                          }
+                        }
+                      }
+                    } else if (index + 1 < _pages.length) {
+                      final nextPage = _pages[index + 1];
+                      if (nextPage.lines.first.ayahIdx >= 0) {
+                        final nextPageFirstLine = nextPage.lines.first;
+                        nextAyah = nextPageFirstLine.ayahIdx;
+                        nextAyahStart = nextPageFirstLine.wordStartInAyahIdx;
+                      } else {
+                        // find next valid ayah
+                        for (int j = 0; j < nextPage.lines.length; ++j) {
+                          if (nextPage.lines[j].ayahIdx >= 0) {
+                            nextAyah = nextPage.lines[j].ayahIdx;
+                            nextAyahStart = 0;
+                            break;
+                          }
+                        }
+                      }
+                    }
+
+                    final d = QuranText.instance.ayahsForRanges(
+                      ayah,
+                      start,
+                      nextAyah,
+                      nextAyahStart,
+                    );
+                    for (final line in d) {
+                      lineAyahs.add(LineAyah(line.$1, line.$2));
+                    }
+                    pageLines.add(Line(lineAyahs));
+                  }
+
                   return ExcludeSemantics(
                     child: PageWidget(
+                      index,
                       _pages[index].pageNum,
-                      _pages[index].lines,
-                      paraNum: widget.model.currentPara,
+                      pageLines,
                       getAyatInDB: _getAyatInDB,
                       onAyahTapped: _onAyahTapped,
                       isMutashabihaAyat: _isMutashabihaAyat,
@@ -750,7 +696,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
 
 class PageWidget extends StatefulWidget {
   final int pageIndex;
-  final int paraNum;
+  final int pageNumber;
   final List<Line> _pageLines;
   final bool Function(int ayahIdx, int surahIdx) isMutashabihaAyat;
   final Ayat? Function(int ayahIdx) getAyatInDB;
@@ -759,8 +705,8 @@ class PageWidget extends StatefulWidget {
 
   const PageWidget(
     this.pageIndex,
+    this.pageNumber,
     this._pageLines, {
-    required this.paraNum,
     required this.isMutashabihaAyat,
     required this.getAyatInDB,
     required this.onAyahTapped,
@@ -891,7 +837,9 @@ class _PageWidgetState extends State<PageWidget> {
   ) {
     // Find the position of currentLine in full Ayah
     int match = fullAyah.indexOf(currentLine, startSearchAt);
-    if (match == -1) throw "Didn't find anything, bug!";
+    if (match == -1) {
+      throw "Didn't find anything, bug!\n$currentLine\n$fullAyah";
+    }
 
     // Find the index of first word
     int s = fullAyah.indexOf("\u200c");
@@ -1079,7 +1027,7 @@ class _PageWidgetState extends State<PageWidget> {
     // dont try to space first two pages
     int firstTwo = Settings.instance.mushaf == Mushaf.Indopak16Line ? 3 : 2;
     final wordSpacing =
-        widget.pageIndex < firstTwo
+        widget.pageNumber < firstTwo
             ? 1.0
             : _getWordSpacing(spans, width, style);
 
@@ -1122,13 +1070,15 @@ class _PageWidgetState extends State<PageWidget> {
           ),
           const Spacer(),
           Text(
-            (widget.pageIndex + 1).toString(),
+            (widget.pageNumber + 1).toString(),
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 12),
           ),
           const Spacer(),
           Text(
-            getParaNameForIndex(widget.paraNum - 1),
+            getParaNameForIndex(
+              paraForPage(widget.pageIndex, Settings.instance.mushaf),
+            ),
             style: TextStyle(
               fontSize: 16,
               fontFamily: getQuranFont(),
@@ -1298,7 +1248,7 @@ class _PageWidgetState extends State<PageWidget> {
 
           widgets.add(
             _getSurahHeaddress(
-              -l.lineAyahs.first.ayahIndex,
+              -(l.lineAyahs.first.ayahIndex + 1),
               bismillahStyle,
               rowHeight,
               includeBismillah: drawBismillah,

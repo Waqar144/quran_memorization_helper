@@ -22,7 +22,7 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage>
     with WidgetsBindingObserver, TickerProviderStateMixin {
-  late final ParaAyatModel _paraModel;
+  final ParaAyatModel _paraModel = ParaAyatModel();
   final ScrollController _scrollController = ScrollController();
   late final TabController _drawerTabController;
   PageController _pageController = PageController(keepPage: false);
@@ -30,7 +30,6 @@ class _MainPageState extends State<MainPage>
 
   @override
   void initState() {
-    _paraModel = ParaAyatModel(onParaChanged);
     _drawerTabController = TabController(length: 2, vsync: this);
 
     _currentFontStyle = Settings.instance.mushaf;
@@ -59,43 +58,12 @@ class _MainPageState extends State<MainPage>
     }
   }
 
-  void onParaChanged(int para, bool showLastPage, int jumpToPage) {
-    // if para is same
-    if (para == _paraModel.currentPara && _pageController.hasClients) {
-      // page also same?
-      if (jumpToPage != -1 &&
-          _pageController.page != null &&
-          (jumpToPage - 1) == _pageController.page!.toInt()) {
-        return;
-      }
-      // try to jump to page
-      _pageController.jumpToPage(jumpToPage - 1);
-      return;
-    }
-
-    _pageController.dispose();
-    int page = 1;
-    if (showLastPage) {
-      page = pageCountForPara(para - 1, Settings.instance.mushaf);
-    }
-    if (jumpToPage != -1) {
-      page = jumpToPage;
-    }
-
-    _pageController = PageController(initialPage: (page - 1), keepPage: false);
-    _trySaveScrollPosition(0);
-  }
-
   Future<void> _load() async {
     final (ok, error) = await _paraModel.readJsonDB();
     if (ok) {
-      // If the para is same as what's in settings, then try to restore scroll position
-      int jumpToPage = 0;
-      if (Settings.instance.currentReadingPara == _paraModel.currentPara) {
-        jumpToPage = Settings.instance.currentReadingPage + 1;
-      }
+      int jumpToPage = Settings.instance.currentReadingPage;
       try {
-        onParaChanged(_paraModel.currentPara, false, jumpToPage);
+        _pageController = PageController(initialPage: jumpToPage);
       } catch (e) {
         showSnackBarMessage(context, error: true, "Error: $e");
       }
@@ -104,19 +72,8 @@ class _MainPageState extends State<MainPage>
     }
   }
 
-  void _trySaveScrollPosition(int tryCount) {
-    if (tryCount > 4) return; // abort after 5 tries
-    Future.delayed(const Duration(milliseconds: 50), () {
-      if (_pageController.hasClients) {
-        _saveScrollPosition(_pageController.page?.floor() ?? 0);
-      } else {
-        _trySaveScrollPosition(tryCount + 1);
-      }
-    });
-  }
-
   void _saveScrollPosition(int page) {
-    Settings.instance.saveScrollPositionDelayed(_paraModel.currentPara, page);
+    Settings.instance.saveScrollPositionDelayed(page);
   }
 
   void _resetVerticalScrollToZero() {
@@ -128,7 +85,6 @@ class _MainPageState extends State<MainPage>
     if (state == AppLifecycleState.paused) {
       if (!_pageController.hasClients) return;
       await Settings.instance.saveScrollPosition(
-        _paraModel.currentPara,
         _pageController.page?.floor() ?? 0,
       );
     }
@@ -145,7 +101,7 @@ class _MainPageState extends State<MainPage>
         await Navigator.of(
               context,
             ).pushNamed(quizPage, arguments: quizCreationArgs)
-            as Map<int, List<Ayat>>?;
+            as List<Ayat>?;
     if (!mounted) return;
     if (ayahsToAdd == null || ayahsToAdd.isEmpty) return;
     _paraModel.merge(ayahsToAdd);
@@ -164,7 +120,18 @@ class _MainPageState extends State<MainPage>
   }
 
   void _openMarkedAyahsPage() async {
-    Navigator.pushNamed(context, markedAyahsPage, arguments: _paraModel);
+    final mushaf = Settings.instance.mushaf;
+    final para = paraForPage(_pageController.page!.toInt(), mushaf) + 1;
+    int? page =
+        await Navigator.pushNamed(
+              context,
+              markedAyahsPage,
+              arguments: {'model': _paraModel, 'para': para},
+            )
+            as int?;
+    if (page != null) {
+      _pageController.jumpToPage(page);
+    }
   }
 
   Widget buildThreeDotMenu() {
@@ -196,35 +163,20 @@ class _MainPageState extends State<MainPage>
     }
     try {
       final mushaf = Settings.instance.mushaf;
-      final surahList = switch (mushaf) {
-        Mushaf.Indopak16Line => surah16LinePageOffset,
-        Mushaf.Uthmani15Line => surah15LinePageOffset,
-        Mushaf.Indopak15Line => surah15LineIndopakPageOffset,
-      };
-
-      int page = surahList[surahIndex];
-      int paraIdx = paraForPage(page, mushaf);
-      final paraPageOffsets = paraPageOffsetsList(mushaf);
-      int paraStartPage = paraPageOffsets[paraIdx];
-      int jumpToPage = page - paraStartPage;
-
-      if ((_paraModel.currentPara - 1) != paraIdx) {
-        _paraModel.setCurrentPara(paraIdx + 1, jumpToPage: jumpToPage + 1);
-      } else {
-        _pageController.jumpToPage(jumpToPage);
-      }
+      int jumpToPage = surahStartPage(surahIndex, mushaf);
+      _pageController.jumpToPage(jumpToPage);
     } catch (e) {
       showSnackBarMessage(context, error: true, "Error: $e");
     }
   }
 
   void _nextPage() {
-    int? currentPageInPara = _pageController.page?.floor();
+    int? currentPage = _pageController.page?.floor();
     final mushaf = Settings.instance.mushaf;
-    int totalPages = pageCountForPara(_paraModel.currentPara - 1, mushaf);
-    int nextPage = (currentPageInPara ?? -1) + 1;
+    int totalPages = pageCount(mushaf);
+    int nextPage = (currentPage ?? -1) + 1;
     if (nextPage >= totalPages) {
-      _paraModel.setCurrentPara(_paraModel.currentPara + 1);
+      _pageController.jumpToPage(0);
     } else {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 200),
@@ -234,10 +186,11 @@ class _MainPageState extends State<MainPage>
   }
 
   void _previousPage() {
-    int? currentPageInPara = _pageController.page?.floor();
-    int previousPage = (currentPageInPara ?? 1) - 1;
+    int? currentPage = _pageController.page?.floor();
+    int previousPage = (currentPage ?? 1) - 1;
     if (previousPage < 0) {
-      _paraModel.setCurrentPara(_paraModel.currentPara - 1, showLastPage: true);
+      final mushaf = Settings.instance.mushaf;
+      _pageController.jumpToPage(pageCount(mushaf));
     } else {
       _pageController.previousPage(
         duration: const Duration(milliseconds: 200),
@@ -246,11 +199,34 @@ class _MainPageState extends State<MainPage>
     }
   }
 
+  void _nextPara() {
+    final mushaf = Settings.instance.mushaf;
+    final current = paraForPage(_pageController.page!.toInt(), mushaf);
+    if (current == 29) {
+      _pageController.jumpToPage(0);
+    } else {
+      _pageController.jumpToPage(paraStartPage(current + 1, mushaf));
+    }
+  }
+
+  void _previousPara() {
+    final mushaf = Settings.instance.mushaf;
+    final current = paraForPage(_pageController.page!.toInt(), mushaf);
+    if (current == 0) {
+      _pageController.jumpToPage(paraStartPage(29, mushaf));
+    } else {
+      _pageController.jumpToPage(paraStartPage(current - 1, mushaf));
+    }
+  }
+
   Widget _buildDrawer() {
     return Builder(
       builder: (context) {
-        final int currentParaIdx = _paraModel.currentPara - 1;
-        final int currentPageInPara = (_pageController.page?.floor() ?? 0);
+        final int currentPage = (_pageController.page?.floor() ?? 0);
+        final int currentParaIdx = paraForPage(
+          currentPage,
+          Settings.instance.mushaf,
+        );
         return Drawer(
           child: SafeArea(
             child: Column(
@@ -271,13 +247,15 @@ class _MainPageState extends State<MainPage>
                         model: _paraModel,
                         currentParaIdx: currentParaIdx,
                         onParaTapped: (int idx) {
-                          _paraModel.setCurrentPara(idx + 1);
+                          final mushaf = Settings.instance.mushaf;
+                          _pageController.jumpToPage(
+                            paraStartPage(idx, mushaf),
+                          );
                           Navigator.of(context).pop();
                         },
                       ),
                       SurahListView(
                         currentParaIdx: currentParaIdx,
-                        currentPageInPara: currentPageInPara,
                         onSurahTapped: _onSurahTapped,
                       ),
                     ],
@@ -300,30 +278,23 @@ class _MainPageState extends State<MainPage>
       const SingleActivator(LogicalKeyboardKey.home):
           () => _pageController.jumpToPage(0),
       const SingleActivator(LogicalKeyboardKey.end): () {
-        final mushaf = Settings.instance.mushaf;
-        int totalPages = pageCountForPara(_paraModel.currentPara - 1, mushaf);
-        _pageController.jumpToPage(totalPages - 1);
+        _nextPara();
+        _previousPage();
       },
       const SingleActivator(LogicalKeyboardKey.arrowLeft, control: true):
-          () => _paraModel.setCurrentPara(_paraModel.currentPara + 1),
+          _nextPara,
       const SingleActivator(LogicalKeyboardKey.arrowRight, control: true):
-          () => _paraModel.setCurrentPara(_paraModel.currentPara - 1),
+          _previousPara,
       const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): () {
-        int? currentPageInPara = _pageController.page?.floor();
         final mushaf = Settings.instance.mushaf;
-        int currentPage =
-            (currentPageInPara ?? 0) +
-            paraPageOffsetsList(mushaf)[_paraModel.currentPara - 1];
-        int currentSurah = surahForPage(currentPage);
+        int currentPage = _pageController.page?.floor() ?? 0;
+        int currentSurah = surahForPage(currentPage, mushaf);
         _onSurahTapped(currentSurah == 113 ? 0 : currentSurah + 1, pop: false);
       },
       const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): () {
-        int? currentPageInPara = _pageController.page?.floor();
         final mushaf = Settings.instance.mushaf;
-        int currentPage =
-            (currentPageInPara ?? 0) +
-            paraPageOffsetsList(mushaf)[_paraModel.currentPara - 1];
-        int currentSurah = surahForPage(currentPage);
+        int currentPage = _pageController.page?.floor() ?? 0;
+        int currentSurah = surahForPage(currentPage, mushaf);
         _onSurahTapped(currentSurah == 0 ? 113 : currentSurah - 1, pop: false);
       },
     };
@@ -339,16 +310,12 @@ class _MainPageState extends State<MainPage>
         IconButton(
           tooltip: "Next ${paraText()}",
           icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            _paraModel.setCurrentPara(_paraModel.currentPara + 1);
-          },
+          onPressed: _nextPara,
         ),
         IconButton(
           tooltip: "Previous ${paraText()}",
           icon: const Icon(Icons.arrow_forward),
-          onPressed: () {
-            _paraModel.setCurrentPara(_paraModel.currentPara - 1);
-          },
+          onPressed: _previousPara,
         ),
         IconButton(
           onPressed: () {
@@ -399,16 +366,11 @@ class _MainPageState extends State<MainPage>
                 slivers: [
                   _buildAppBar(),
                   // The actual quran reading widget
-                  ValueListenableBuilder<int>(
-                    valueListenable: _paraModel.currentParaNotifier,
-                    builder: (context, _, __) {
-                      return ReadQuranWidget(
-                        _paraModel,
-                        pageController: _pageController,
-                        verticalScrollResetFn: _resetVerticalScrollToZero,
-                        pageChangedCallback: _saveScrollPosition,
-                      );
-                    },
+                  ReadQuranWidget(
+                    _paraModel,
+                    pageController: _pageController,
+                    verticalScrollResetFn: _resetVerticalScrollToZero,
+                    pageChangedCallback: _saveScrollPosition,
                   ),
                 ],
               ),

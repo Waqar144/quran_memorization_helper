@@ -24,7 +24,9 @@ MaterialPageRoute handleRoute(RouteSettings settings) {
         mutashabihasPage => const MutashabihasPage(),
         // ParaMutashabihas
         paraMutashabihasPage => ParaMutashabihas(settings.arguments as int),
-        markedAyahsPage => MarkedAyahsPage(settings.arguments as ParaAyatModel),
+        markedAyahsPage => MarkedAyahsPage(
+          settings.arguments as Map<String, dynamic>,
+        ),
         // MainPage is the default
         _ => const MainPage(),
       };

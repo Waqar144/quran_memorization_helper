@@ -32,7 +32,7 @@ dynamic getDiskJson() async {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  ParaAyatModel model = ParaAyatModel((a, b, c) {});
+  ParaAyatModel model = ParaAyatModel();
 
   setUpAll(() async {
     PathProviderPlatform.instance = FakePath();
@@ -43,19 +43,23 @@ void main() {
     await model.readJsonDB();
   });
 
-  test('test current para', () {
-    expect(model.currentPara, 3);
-    expect(model.ayahs, isEmpty);
-
-    model.setCurrentPara(1);
-    expect(model.currentPara, 1);
+  test("ParaAyatModel initial state", () async {
     expect(model.ayahs.length, 3);
-    print("test current para OK");
+    await model.saveToDisk();
+
+    final diskJson = await getDiskJson();
+    final expected = jsonDecode('''{
+  "ayats": [
+      {"idx": 9, "words": [0]},
+      {"idx": 141, "words": [0]},
+      {"idx": 144, "words": [0]}
+  ],
+  "version": 1
+  }''');
+    expect(diskJson, equals(expected));
   });
 
-  test('test modify model', () async {
-    model.setCurrentPara(1);
-    expect(model.currentPara, 1);
+  test('ParaAyatModel test modify model', () async {
     expect(model.ayahs.length, 3);
 
     model.addAyahs([]);
@@ -72,9 +76,6 @@ void main() {
     // wait one and a half second for save to happen
     await Future.delayed(const Duration(seconds: 1, milliseconds: 500), () {});
 
-    var diskJson = await getDiskJson();
-    final initJson = jsonDecode(initData);
-    expect(diskJson, isNot(equals(initJson)));
     // our backup file should be there
     final docPath = await getDocPath();
     expect(
@@ -82,7 +83,7 @@ void main() {
       isTrue,
     );
 
-    model.removeMarkedWordInAyat(0, 4, 0);
+    model.removeMarkedWordInAyat(4, 0);
     expect(model.ayahs.length, 3);
     expect(model.timer!.isActive, isTrue);
 
@@ -95,24 +96,10 @@ void main() {
     expect(model.ayahs.length, 3);
     expect(model.timer!.isActive, isTrue);
 
-    // wait one and a half second for save to happen
-    await Future.delayed(const Duration(seconds: 1, milliseconds: 500), () {});
-
-    // should be same after removal
-    diskJson = await getDiskJson();
-    expect(diskJson['1'], equals(initJson['1']));
-
     print("test modify model OK");
   });
 
-  test('test add invalid ayah', () async {
-    model.setCurrentPara(1);
-    expect(model.currentPara, 1);
-    expect(model.ayahs.length, 3);
-
-    model.addAyahs([
-      Ayat("", [0], ayahIdx: 1041),
-    ]);
+  test('ParaAyatModel test add invalid ayah', () async {
     expect(model.ayahs.length, 3);
 
     model.addAyahs([

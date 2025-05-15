@@ -9,7 +9,10 @@ import 'package:quran_memorization_helper/widgets/ayat_and_mutashabiha_list_view
 
 class MarkedAyahsPage extends StatefulWidget {
   final ParaAyatModel model;
-  const MarkedAyahsPage(this.model, {super.key});
+  final int para;
+  MarkedAyahsPage(Map<String, dynamic> args, {super.key})
+    : model = args['model'],
+      para = args['para'];
   @override
   State<StatefulWidget> createState() => _MarkedAyahsPageState();
 }
@@ -23,7 +26,7 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
 
   @override
   void initState() {
-    _currentPara = widget.model.currentPara;
+    _currentPara = widget.para;
     onModelChanged();
     widget.model.addListener(onModelChanged);
     super.initState();
@@ -45,7 +48,7 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
     assert(_multipleSelectMode);
     final List<int> ayahsToRemove = _selectionState.selectedAyahs();
     if (ayahsToRemove.isEmpty) return;
-    widget.model.removeAyahsFromPara(_currentPara, ayahsToRemove);
+    widget.model.removeAyahs(ayahsToRemove);
     _onExitMultiSelectMode();
   }
 
@@ -70,10 +73,8 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
   }
 
   void _onGotoAyah(int ayahIndex) {
-    int para = paraForAyah(ayahIndex);
-    int page = getParaPageForAyah(ayahIndex, Settings.instance.mushaf);
-    widget.model.setCurrentPara(para + 1, jumpToPage: page + 1, force: true);
-    Navigator.of(context).pop();
+    int page = getPageForAyah(ayahIndex, Settings.instance.mushaf);
+    Navigator.of(context).pop(page);
   }
 
   Future<void> _load() async {

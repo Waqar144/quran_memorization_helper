@@ -187,3 +187,40 @@ Future<List<Mutashabiha>> importParaMutashabihas(int paraIdx) async {
 
   return mutashabihas;
 }
+
+Future<List<Mutashabiha>> importAllMutashabihas() async {
+  final mutashabihasJsonBytes = await rootBundle.load(
+    "assets/mutashabiha_data.json",
+  );
+  final mutashabihasJson = utf8.decode(
+    mutashabihasJsonBytes.buffer.asUint8List(),
+  );
+  final map = jsonDecode(mutashabihasJson) as Map<String, dynamic>;
+
+  List<Mutashabiha> mutashabihas = [];
+  for (final paraMutashabihas in map.entries) {
+    for (final m in paraMutashabihas.value as List) {
+      if (m == null) continue;
+      try {
+        int ctx = (m["ctx"] as int?) ?? 0;
+        MutashabihaAyat src = ayatFromJsonObj(m["src"], ctx);
+        List<MutashabihaAyat> matches = [];
+        for (final match in m["muts"] as List<dynamic>) {
+          matches.add(ayatFromJsonObj(match, ctx));
+        }
+        mutashabihas.add(Mutashabiha(src, matches));
+      } catch (e) {
+        rethrow;
+      }
+    }
+  }
+
+  mutashabihas.sort((a, b) {
+    if (a.src.surahIdx != b.src.surahIdx) {
+      return (a.src.surahIdx - b.src.surahIdx);
+    }
+    return (a.src.ayahIdx - b.src.ayahIdx);
+  });
+
+  return mutashabihas;
+}

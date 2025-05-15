@@ -39,11 +39,8 @@ class ParaListView extends StatelessWidget {
     return paraScrollTo.toDouble();
   }
 
-  Widget paraListItem(int index, BuildContext context) {
-    int count = model.markedAyahCountForPara(index);
-    // // final paraPageList = paraPageOffsetsList();
+  Widget paraListItem(int index, int count, BuildContext context) {
     final isIndoPk = isIndoPak(Settings.instance.mushaf);
-
     return Directionality(
       textDirection: TextDirection.rtl,
       child: ListTile(
@@ -101,6 +98,7 @@ class ParaListView extends StatelessWidget {
       lastScrollPosition = paraListScrollController.offset;
     });
     lastPara = currentParaIdx;
+    final counts = model.markedAyahCountsByPara();
 
     return ListView.builder(
       key: const PageStorageKey("para_list_view"),
@@ -109,7 +107,7 @@ class ParaListView extends StatelessWidget {
       itemCount: 30,
       itemExtent: 48,
       itemBuilder: (context, index) {
-        return paraListItem(index, context);
+        return paraListItem(index, counts[index], context);
       },
     );
   }

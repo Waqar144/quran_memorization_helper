@@ -44,7 +44,7 @@ class _QuizPageState extends State<QuizPage> {
   List<_QuizAyahQuestion> _quizAyahs = [];
   final ValueNotifier<bool> showNextAyah = ValueNotifier(false);
   final List<_QuizAyahQuestion> _wrongAnswers = [];
-  final Map<int, List<Ayat>> _ayahsToAddToDB = {};
+  final List<Ayat> _ayahsToAddToDB = [];
   late final int _total;
   int _score = 0;
   bool _showResults = false;
@@ -246,16 +246,9 @@ class _QuizPageState extends State<QuizPage> {
     final a = _wrongAnswers[index];
 
     if (a.mode == QuizMode.nextAyah) {
-      _ayahsToAddToDB[a.paraNumber] = [
-        ...(_ayahsToAddToDB[a.paraNumber] ?? <Ayat>[]),
-        a.questionAyah,
-        a.nextAyah,
-      ];
+      _ayahsToAddToDB.addAll([a.questionAyah, a.nextAyah]);
     } else {
-      _ayahsToAddToDB[a.paraNumber] = [
-        ...(_ayahsToAddToDB[a.paraNumber] ?? <Ayat>[]),
-        a.nextAyah,
-      ];
+      _ayahsToAddToDB.add(a.nextAyah);
     }
   }
 
