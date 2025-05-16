@@ -8,10 +8,10 @@ int lastSurah = 0;
 double? lastScrollPosition;
 
 class SurahListView extends StatelessWidget {
-  final int currentParaIdx;
+  final int currentPage;
   final void Function(int) onSurahTapped;
   const SurahListView({
-    required this.currentParaIdx,
+    required this.currentPage,
     required this.onSurahTapped,
     super.key,
   });
@@ -25,7 +25,7 @@ class SurahListView extends StatelessWidget {
       Mushaf.Uthmani15Line => surah15LinePageOffset,
       Mushaf.Indopak15Line => surah15LineIndopakPageOffset,
     };
-    int currentSurah = surahForPage(currentParaIdx, mushaf);
+    int currentSurah = surahForPage(currentPage, mushaf);
     double surahScrollTo =
         lastScrollPosition != null && lastSurah == currentSurah
             ? lastScrollPosition!

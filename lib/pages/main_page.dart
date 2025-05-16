@@ -255,7 +255,7 @@ class _MainPageState extends State<MainPage>
                         },
                       ),
                       SurahListView(
-                        currentParaIdx: currentParaIdx,
+                        currentPage: _pageController.page?.floor() ?? 0,
                         onSurahTapped: _onSurahTapped,
                       ),
                     ],
