@@ -338,14 +338,7 @@ List<int> surahAyahOffsetsForPara(int paraIdx) {
 }
 
 int surahForPage(int page, Mushaf mushaf) {
-  int extra = switch (mushaf) {
-    Mushaf.Indopak16Line => 1,
-    Mushaf.Uthmani15Line => 0,
-    Mushaf.Indopak15Line => 1,
-  };
-  page += extra;
-
-  if (mushaf == Mushaf.Indopak16Line && (page < 1 || page > 549)) {
+  if (mushaf == Mushaf.Indopak16Line && (page < 0 || page > 548)) {
     throw "Invalid page number: $page";
   } else if (mushaf == Mushaf.Uthmani15Line && (page < 0 || page > 604)) {
     throw "Invalid page number: $page";
