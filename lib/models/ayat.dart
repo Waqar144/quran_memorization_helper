@@ -26,6 +26,7 @@ class ParaAyatModel extends ChangeNotifier {
   // ignore: constant_identifier_names
   static const int VERSION = 1;
   List<Ayat> _ayats = [];
+  List<int> _bookmarks = [];
   Timer? timer;
 
   ParaAyatModel();
@@ -46,6 +47,26 @@ class ParaAyatModel extends ChangeNotifier {
 
   // Only for testing,
   List<Ayat> get ayahs => _ayats;
+
+  List<int> get bookmarks => _bookmarks;
+
+  void addBookmark(int page) {
+    if (_bookmarks.contains(page)) {
+      return;
+    }
+    _bookmarks.add(page);
+    _bookmarks.sort();
+    notifyListeners();
+    persist();
+  }
+
+  void removeBookmark(int page) {
+    if (!_bookmarks.remove(page)) {
+      return;
+    }
+    notifyListeners();
+    persist();
+  }
 
   List<AyatOrMutashabiha> ayahsAndMutashabihasList(
     int paraNumber,
@@ -227,6 +248,7 @@ class ParaAyatModel extends ChangeNotifier {
           ];
           _ayats.add(Ayat("", wordIdxes, ayahIdx: idx));
         }
+        _bookmarks = [for (final b in json["bookmarks"] ?? []) b];
       }
     } catch (e) {
       rethrow;
@@ -263,6 +285,7 @@ class ParaAyatModel extends ChangeNotifier {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> json = {};
     json["ayats"] = _ayats;
+    json["bookmarks"] = _bookmarks;
     json["version"] = VERSION;
     return json;
   }

@@ -18,6 +18,7 @@ import 'package:quran_memorization_helper/quran_data/fifteen_line_uthmani_layout
 import 'package:quran_memorization_helper/quran_data/fifteen_line_indopak_layout.dart';
 import 'package:quran_memorization_helper/quran_data/page_layout_types.dart'
     as layout;
+import 'package:quran_memorization_helper/utils/colors.dart';
 import 'package:quran_memorization_helper/utils/utils.dart';
 import 'package:quran_memorization_helper/widgets/mutashabiha_ayat_list_item.dart';
 import 'package:quran_memorization_helper/widgets/tap_and_longpress_gesture_recognizer.dart';
@@ -682,6 +683,15 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
                       onAyahTapped: _onAyahTapped,
                       isMutashabihaAyat: _isMutashabihaAyat,
                       repaintStream: _repaintNotifier.stream,
+                      isBookmarked:
+                          () => widget.model.bookmarks.contains(index),
+                      onToggleBookmark: () {
+                        if (widget.model.bookmarks.contains(index)) {
+                          widget.model.removeBookmark(index);
+                        } else {
+                          widget.model.addBookmark(index);
+                        }
+                      },
                     ),
                   );
                 },
@@ -702,6 +712,8 @@ class PageWidget extends StatefulWidget {
   final Ayat? Function(int ayahIdx) getAyatInDB;
   final void Function(int ayahIdx, int wordIdx, bool longPress) onAyahTapped;
   final Stream<int> repaintStream;
+  final bool Function() isBookmarked;
+  final void Function() onToggleBookmark;
 
   const PageWidget(
     this.pageIndex,
@@ -711,6 +723,8 @@ class PageWidget extends StatefulWidget {
     required this.getAyatInDB,
     required this.onAyahTapped,
     required this.repaintStream,
+    required this.isBookmarked,
+    required this.onToggleBookmark,
     super.key,
   });
 
@@ -1068,11 +1082,23 @@ class _PageWidgetState extends State<PageWidget> {
               letterSpacing: 0,
             ),
           ),
-          const Spacer(),
-          Text(
-            (widget.pageNumber + 1).toString(),
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 12),
+          Expanded(
+            child:
+                widget.isBookmarked()
+                    ? const Icon(
+                      Icons.bookmark_added,
+                      size: 24,
+                      color: Colors.orange,
+                    )
+                    : Container(),
+          ),
+          InkWell(
+            onTap: widget.onToggleBookmark,
+            child: Text(
+              (widget.pageNumber + 1).toString(),
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 12),
+            ),
           ),
           const Spacer(),
           Text(

@@ -134,10 +134,20 @@ class _MainPageState extends State<MainPage>
     }
   }
 
+  void _openBookmarksPage() async {
+    final res =
+        await Navigator.pushNamed(context, bookmarksPage, arguments: _paraModel)
+            as int?;
+    if (res != null) {
+      _pageController.jumpToPage(res);
+    }
+  }
+
   Widget buildThreeDotMenu() {
     final Map<String, VoidCallback> actions = {
       'Take Quiz': _openQuizParaSelectionPage,
       'Show Marked Ayahs': _openMarkedAyahsPage,
+      'Bookmarks': _openBookmarksPage,
       'Mutashabihas': _openMutashabihas,
       'Settings': _openSettings,
     };
@@ -316,6 +326,18 @@ class _MainPageState extends State<MainPage>
           tooltip: "Previous ${paraText()}",
           icon: const Icon(Icons.arrow_forward),
           onPressed: _previousPara,
+        ),
+        IconButton(
+          tooltip: "Add Bookmark",
+          icon: const Icon(Icons.bookmark),
+          onPressed: () {
+            final page = _pageController.page!.floor();
+            if (_paraModel.bookmarks.contains(page)) {
+              _paraModel.removeBookmark(page);
+            } else {
+              _paraModel.addBookmark(page);
+            }
+          },
         ),
         IconButton(
           onPressed: () {

@@ -9,6 +9,7 @@ import 'package:quran_memorization_helper/pages/quiz_para_selection_page.dart';
 import 'package:quran_memorization_helper/pages/quiz_page.dart';
 import 'package:quran_memorization_helper/pages/mutashabihas_page.dart';
 import 'package:quran_memorization_helper/pages/marked_ayahs_page.dart';
+import 'package:quran_memorization_helper/pages/bookmarks_page.dart';
 
 MaterialPageRoute handleRoute(RouteSettings settings) {
   return MaterialPageRoute(
@@ -26,6 +27,10 @@ MaterialPageRoute handleRoute(RouteSettings settings) {
         paraMutashabihasPage => ParaMutashabihas(settings.arguments as int),
         markedAyahsPage => MarkedAyahsPage(
           settings.arguments as Map<String, dynamic>,
+        ),
+        // Bookmarks Page
+        bookmarksPage => BookmarksPage(
+          model: settings.arguments as ParaAyatModel,
         ),
         // MainPage is the default
         _ => const MainPage(),

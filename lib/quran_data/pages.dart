@@ -1,6 +1,9 @@
 import 'dart:typed_data';
 
 import 'package:quran_memorization_helper/models/settings.dart';
+import 'fifteen_line_uthmani_layout.dart';
+import 'sixteen_line_indopak_layout.dart';
+import 'fifteen_line_indopak_layout.dart';
 
 int pageCount(Mushaf m) {
   return switch (m) {
@@ -161,6 +164,19 @@ int paraForPage(int page, Mushaf mushaf) {
     return i - 1;
   }
   return 30 - 1;
+}
+
+int? firstAyahOfPage(int pageIdx, Mushaf mushaf) {
+  final pages = switch (mushaf) {
+    Mushaf.Indopak16Line => pages16Indopak,
+    Mushaf.Uthmani15Line => pages15Uthmani,
+    Mushaf.Indopak15Line => pages15Indopak,
+  };
+  if (pageIdx < pages.length) {
+    final page = pages[pageIdx];
+    return page.lines.firstWhere((l) => l.ayahIdx >= 0).ayahIdx;
+  }
+  return null;
 }
 
 final Uint16List surah16LinePageOffset = Uint16List.fromList(<int>[
