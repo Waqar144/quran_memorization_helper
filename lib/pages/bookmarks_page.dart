@@ -49,8 +49,8 @@ class _BookmarksPageState extends State<BookmarksPage> {
     return Scaffold(
       appBar: AppBar(title: const Text("Bookmarks")),
       body: ListView.separated(
-        separatorBuilder:
-            (context, _) => const Divider(height: 1, indent: 8, endIndent: 8),
+        padding: EdgeInsets.only(left: 8, right: 8),
+        separatorBuilder: (context, _) => const Divider(height: 1),
         itemCount: widget.model.bookmarks.length,
         itemBuilder: (context, index) {
           final bookmarkPage = widget.model.bookmarks[index];
@@ -62,19 +62,18 @@ class _BookmarksPageState extends State<BookmarksPage> {
             fontFamily: getQuranFont(),
             fontSize: 20,
             letterSpacing: 0,
-            wordSpacing: Settings.wordSpacing,
+            wordSpacing: 2,
           );
 
           return ListTile(
             title: Text(page),
             isThreeLine: true,
             subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 8,
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(
-                  "$surah - $para",
-                  style: style.copyWith(decoration: TextDecoration.underline),
-                ),
+                Text(para, style: style),
+                Text("Surah: $surah", style: style.copyWith(fontSize: 18)),
                 Text(
                   firstAyahText,
                   textDirection: TextDirection.rtl,
