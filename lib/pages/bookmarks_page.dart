@@ -17,6 +17,15 @@ class BookmarksPage extends StatefulWidget {
 }
 
 class _BookmarksPageState extends State<BookmarksPage> {
+  bool _selectionMode = false;
+  List<bool> _selectionState = [];
+
+  @override
+  void initState() {
+    _selectionState = List.filled(widget.model.bookmarks.length, false);
+    super.initState();
+  }
+
   int _toVisiblePage(int page) {
     if (isIndoPak(Settings.instance.mushaf)) {
       return page + 2;
@@ -44,31 +53,77 @@ class _BookmarksPageState extends State<BookmarksPage> {
     );
   }
 
+  void _onDeletePress() {
+    final bookmarks = widget.model.bookmarks;
+    List<int> toDelete = [];
+    for (final (i, isSelected) in _selectionState.reversed.indexed) {
+      if (isSelected) {
+        toDelete.add(bookmarks[i]);
+      }
+    }
+    setState(() {
+      widget.model.removeBookmarks(toDelete);
+      if (widget.model.bookmarks.isEmpty) {
+        _selectionMode = false;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Bookmarks")),
-      body: ListView.separated(
-        padding: EdgeInsets.only(left: 8, right: 8),
-        separatorBuilder: (context, _) => const Divider(height: 1),
-        itemCount: widget.model.bookmarks.length,
-        itemBuilder: (context, index) {
-          final bookmarkPage = widget.model.bookmarks[index];
-          final (page, surah, para, firstAyahText) = _bookmarkStringify(
-            bookmarkPage,
-          );
-          final style = TextStyle(
-            color: Theme.of(context).textTheme.bodyMedium?.color,
-            fontFamily: getQuranFont(),
-            fontSize: 20,
-            letterSpacing: 0,
-            wordSpacing: 2,
-          );
+    return PopScope(
+      canPop: _selectionMode == false,
+      onPopInvokedWithResult: (_, _) {
+        if (_selectionMode) {
+          setState(() => _selectionMode = false);
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("Bookmarks"),
+          actions: [
+            if (_selectionMode)
+              IconButton(
+                icon: const Icon(Icons.delete),
+                onPressed: _onDeletePress,
+              ),
+            IconButton(
+              icon: const Icon(Icons.select_all),
+              onPressed:
+                  widget.model.bookmarks.isEmpty
+                      ? null
+                      : () {
+                        setState(() {
+                          if (!_selectionMode) {
+                            _selectionMode = true;
+                            return;
+                          }
+                          for (int i = 0; i < _selectionState.length; ++i) {
+                            _selectionState[i] = true;
+                          }
+                        });
+                      },
+            ),
+          ],
+        ),
+        body: ListView.separated(
+          padding: EdgeInsets.only(left: 8, right: 8),
+          separatorBuilder: (context, _) => const Divider(height: 1),
+          itemCount: widget.model.bookmarks.length,
+          itemBuilder: (context, index) {
+            final bookmarkPage = widget.model.bookmarks[index];
+            final (page, surah, para, firstAyahText) = _bookmarkStringify(
+              bookmarkPage,
+            );
+            final style = TextStyle(
+              color: Theme.of(context).textTheme.bodyMedium?.color,
+              fontFamily: getQuranFont(),
+              fontSize: 20,
+              letterSpacing: 0,
+              wordSpacing: 2,
+            );
 
-          return ListTile(
-            title: Text(page),
-            isThreeLine: true,
-            subtitle: Column(
+            final column = Column(
               spacing: 8,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -83,12 +138,41 @@ class _BookmarksPageState extends State<BookmarksPage> {
                   style: style,
                 ),
               ],
-            ),
-            onTap: () {
-              Navigator.of(context).pop(bookmarkPage);
-            },
-          );
-        },
+            );
+            final title = Text(page);
+
+            if (_selectionMode) {
+              return CheckboxListTile(
+                title: title,
+                subtitle: column,
+                isThreeLine: true,
+                value: _selectionState[index],
+                onChanged: (bool? newVal) {
+                  if (newVal == null) return;
+                  setState(() {
+                    _selectionState[index] = newVal;
+                  });
+                },
+              );
+            }
+
+            return ListTile(
+              title: title,
+              isThreeLine: true,
+              subtitle: column,
+              onTap: () {
+                if (!_selectionMode) {
+                  Navigator.of(context).pop(bookmarkPage);
+                }
+              },
+              onLongPress: () {
+                setState(() {
+                  _selectionMode = true;
+                });
+              },
+            );
+          },
+        ),
       ),
     );
   }

@@ -68,6 +68,15 @@ class ParaAyatModel extends ChangeNotifier {
     persist();
   }
 
+  void removeBookmarks(List<int> pages) {
+    if (pages.isEmpty) return;
+    for (final page in pages) {
+      _bookmarks.remove(page);
+    }
+    notifyListeners();
+    persist();
+  }
+
   List<AyatOrMutashabiha> ayahsAndMutashabihasList(
     int paraNumber,
     List<Mutashabiha> allParaMutashabihas,
