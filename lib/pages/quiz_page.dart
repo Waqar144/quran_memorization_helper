@@ -84,7 +84,7 @@ class _QuizPageState extends State<QuizPage> {
     }
 
     _QuizAyahQuestion endAyahQuestion() {
-      List<String> words = ayah.split('\u200c');
+      List<String> words = ayah.split(' ');
       int replaceStart = min((words.length / 2).ceil(), 6);
       final question =
           "${words.sublist(0, words.length - replaceStart).join(' ')}...";
