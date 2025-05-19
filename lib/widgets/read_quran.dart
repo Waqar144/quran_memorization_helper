@@ -994,7 +994,13 @@ class _PageWidgetState extends State<PageWidget> {
     );
   }
 
-  double _getWordSpacing(List<TextSpan> spans, double width, TextStyle style) {
+  double _getWordSpacing(
+    int lineIdx,
+    List<TextSpan> spans,
+    double width,
+    TextStyle style,
+    Mushaf mushaf,
+  ) {
     final textPainter = TextPainter(
       text: TextSpan(children: spans, style: style),
       textDirection: TextDirection.rtl,
@@ -1005,7 +1011,8 @@ class _PageWidgetState extends State<PageWidget> {
     textPainter.dispose();
 
     if (diffW > 10) {
-      if (diffW >= min(width, 700) / 3) {
+      if (isSurahLastLine(widget.pageIndex, lineIdx, mushaf) &&
+          diffW >= min(width, 700) / 3) {
         return 2;
       }
       int spaces = 0;
@@ -1032,6 +1039,7 @@ class _PageWidgetState extends State<PageWidget> {
     double width,
     TextStyle style,
     ThemeData themeData,
+    Mushaf mushaf,
   ) {
     final spans = _buildLineSpans(
       line,
@@ -1045,7 +1053,7 @@ class _PageWidgetState extends State<PageWidget> {
     final wordSpacing =
         widget.pageNumber < firstTwo
             ? 1.0
-            : _getWordSpacing(spans, width, style);
+            : _getWordSpacing(lineIdx, spans, width, style, mushaf);
 
     return Text.rich(
       TextSpan(children: spans),
@@ -1254,7 +1262,8 @@ class _PageWidgetState extends State<PageWidget> {
     final bigScreen = isBigScreen();
     final defaultTextStyle = _getQuranTextStyle(_textFontSize());
 
-    final isIndoPk = isIndoPak(Settings.instance.mushaf);
+    final mushaf = Settings.instance.mushaf;
+    final isIndoPk = isIndoPak(mushaf);
     final fontSize = _textFontSize();
     final boxFit = bigScreen ? BoxFit.contain : BoxFit.scaleDown;
     final leftRightBorder = BoxDecoration(
@@ -1291,6 +1300,7 @@ class _PageWidgetState extends State<PageWidget> {
               rowWidth,
               defaultTextStyle,
               themeData,
+              mushaf,
             ),
           ),
         ),
@@ -1306,6 +1316,7 @@ class _PageWidgetState extends State<PageWidget> {
     final numPageLines = switch (Settings.instance.mushaf) {
       Mushaf.Indopak16Line => 16,
       Mushaf.Indopak15Line || Mushaf.Uthmani15Line => 15,
+      Mushaf.Indopak13Line => 13,
     };
 
     final double height =
