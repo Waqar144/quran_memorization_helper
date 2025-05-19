@@ -393,6 +393,17 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  Widget _mutashabihaColoringTile() {
+    return SwitchListTile(
+      title: const Text("Color mutashabiha ayats"),
+      subtitle: const Text("Whether mutashabiha ayat is colored or not"),
+      value: Settings.instance.colorMutashabihat,
+      onChanged: (bool newValue) {
+        Settings.instance.colorMutashabihat = newValue;
+      },
+    );
+  }
+
   Widget _customTranslationTile() {
     return ListTile(
       title: const Text("Change Translation"),
@@ -500,6 +511,7 @@ class _SettingsPageState extends State<SettingsPage> {
           _createReflowModeTile(),
           _createFontSizeTile(),
           _tapToShowTranslationTile(),
+          _mutashabihaColoringTile(),
           _customTranslationTile(),
           _createBackupWidget(),
           _restoreBackupWidget(),

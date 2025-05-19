@@ -1216,6 +1216,8 @@ class _PageWidgetState extends State<PageWidget> {
     int lastAyah = -1;
     List<(int, int, int, Ayat?, bool, String)> ayahData = [];
     ayahData.length = 0;
+    final colorMutashabihat = Settings.instance.colorMutashabihat;
+
     for (final l in widget._pageLines) {
       if (l.lineAyahs.first.ayahIndex < 0) {
         continue; // bismillah
@@ -1229,10 +1231,10 @@ class _PageWidgetState extends State<PageWidget> {
           final int surahAyahIdx = toSurahAyahOffset(surahIdx, a.ayahIndex);
           final Ayat? ayahInDb = widget.getAyatInDB(a.ayahIndex);
           final text = QuranText.instance.ayahText(a.ayahIndex);
-          final bool isMutashabihaAyat = widget.isMutashabihaAyat(
-            surahAyahIdx,
-            surahIdx,
-          );
+          final bool isMutashabihaAyat =
+              colorMutashabihat
+                  ? widget.isMutashabihaAyat(surahAyahIdx, surahIdx)
+                  : false;
 
           ayahData.add((
             a.ayahIndex,

@@ -28,6 +28,7 @@ class Settings extends ChangeNotifier {
   Mushaf _mushaf = Mushaf.Indopak16Line;
   String _translationFile = "";
   bool _tapToShowTranslation = false;
+  bool _colorMutashabihat = true;
   bool _reflowMode = false;
 
   // constants
@@ -75,6 +76,15 @@ class Settings extends ChangeNotifier {
   set tapToShowTranslation(bool newValue) {
     if (newValue != _tapToShowTranslation) {
       _tapToShowTranslation = newValue;
+      notifyListeners();
+      persist();
+    }
+  }
+
+  bool get colorMutashabihat => _colorMutashabihat;
+  set colorMutashabihat(bool newValue) {
+    if (newValue != _colorMutashabihat) {
+      _colorMutashabihat = newValue;
       notifyListeners();
       persist();
     }
