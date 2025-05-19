@@ -1,11 +1,11 @@
 class Line {
   final int ayahIdx;
   final int wordStartInAyahIdx;
-  // String text;
+
   const Line(this.ayahIdx, this.wordStartInAyahIdx);
 
   @override
-  toString() {
+  String toString() {
     return "Line($ayahIdx, $wordStartInAyahIdx)";
   }
 }
@@ -16,7 +16,7 @@ class Page {
   const Page(this.pageNum, this.lines);
 
   @override
-  toString() {
+  String toString() {
     return "Page($pageNum, $lines)";
   }
 }

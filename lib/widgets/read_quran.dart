@@ -19,7 +19,6 @@ import 'package:quran_memorization_helper/quran_data/fifteen_line_indopak_layout
 import 'package:quran_memorization_helper/quran_data/thirteen_line_indopak_layout.dart';
 import 'package:quran_memorization_helper/quran_data/page_layout_types.dart'
     as layout;
-import 'package:quran_memorization_helper/utils/colors.dart';
 import 'package:quran_memorization_helper/utils/utils.dart';
 import 'package:quran_memorization_helper/widgets/mutashabiha_ayat_list_item.dart';
 import 'package:quran_memorization_helper/widgets/tap_and_longpress_gesture_recognizer.dart';
