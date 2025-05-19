@@ -5,9 +5,9 @@ import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'package:quran_memorization_helper/widgets/mutashabiha_ayat_list_item.dart';
 import 'package:quran_memorization_helper/utils/utils.dart';
 
-/// The page where you select the para for which the mutashabihas will be displayed
-class MutashabihasPage extends StatelessWidget {
-  const MutashabihasPage({super.key});
+/// The page where you select the para for which the mutashabihat will be displayed
+class MutashabihatPage extends StatelessWidget {
+  const MutashabihatPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -16,8 +16,8 @@ class MutashabihasPage extends StatelessWidget {
       appBar: AppBar(
         title:
             isIndoPk
-                ? const Text("Mutashabihas By Para")
-                : const Text("Mutashabihas By Juz"),
+                ? const Text("Mutashabihat By Para")
+                : const Text("Mutashabihat By Juz"),
       ),
       body: ListView.separated(
         separatorBuilder: (context, index) => const Divider(height: 1),
@@ -29,7 +29,7 @@ class MutashabihasPage extends StatelessWidget {
             onTap: () {
               Navigator.of(
                 context,
-              ).pushNamed(paraMutashabihasPage, arguments: index);
+              ).pushNamed(paraMutashabihatPage, arguments: index);
             },
           );
         },
@@ -38,27 +38,27 @@ class MutashabihasPage extends StatelessWidget {
   }
 }
 
-/// This is the page that shows the mutashabihas list
-class ParaMutashabihas extends StatelessWidget {
+/// This is the page that shows the mutashabihat list
+class ParaMutashabihat extends StatelessWidget {
   final int _para;
-  final List<Mutashabiha> _mutashabihas = [];
-  ParaMutashabihas(this._para, {super.key});
+  final List<Mutashabiha> _mutashabihat = [];
+  ParaMutashabihat(this._para, {super.key});
 
-  /// Import the mutashabihas from assets
-  Future<List<Mutashabiha>> _importParaMutashabihas() async {
-    _mutashabihas.clear();
-    _mutashabihas.addAll(await importParaMutashabihas(_para));
-    return _mutashabihas;
+  /// Import the mutashabihat from assets
+  Future<List<Mutashabiha>> _importParaMutashabihat() async {
+    _mutashabihat.clear();
+    _mutashabihat.addAll(await importParaMutashabihat(_para));
+    return _mutashabihat;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Mutashabihas for ${paraText()} ${_para + 1}"),
+        title: Text("Mutashabihat for ${paraText()} ${_para + 1}"),
       ),
       body: FutureBuilder(
-        future: _importParaMutashabihas(),
+        future: _importParaMutashabihat(),
         builder: (context, snapshot) {
           final data = snapshot.data;
           // No data => nothing to show

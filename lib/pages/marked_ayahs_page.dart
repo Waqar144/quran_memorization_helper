@@ -20,7 +20,7 @@ class MarkedAyahsPage extends StatefulWidget {
 class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
   int _currentPara = 1;
   bool _multipleSelectMode = false;
-  List<AyatOrMutashabiha> ayahAndMutashabihas = [];
+  List<AyatOrMutashabiha> ayahAndMutashabihat = [];
   AyahSelectionState _selectionState = AyahSelectionState.fromAyahs([]);
   late Future<void> _loadDataFuture;
 
@@ -78,18 +78,18 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
   }
 
   Future<void> _load() async {
-    final List<Mutashabiha> mutashabihat = await importParaMutashabihas(
+    final List<Mutashabiha> mutashabihat = await importParaMutashabihat(
       _currentPara - 1,
     );
 
-    ayahAndMutashabihas = widget.model.ayahsAndMutashabihasList(
+    ayahAndMutashabihat = widget.model.ayahsAndMutashabihatList(
       _currentPara,
       mutashabihat,
     );
-    for (final a in ayahAndMutashabihas) {
+    for (final a in ayahAndMutashabihat) {
       a.ensureTextIsLoaded();
     }
-    _selectionState = AyahSelectionState.fromAyahs(ayahAndMutashabihas);
+    _selectionState = AyahSelectionState.fromAyahs(ayahAndMutashabihat);
   }
 
   AppBar buildAppbar() {
@@ -155,7 +155,7 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
               return const SizedBox.shrink();
             }
             return AyatAndMutashabihaListView(
-              ayahAndMutashabihas,
+              ayahAndMutashabihat,
               selectionState: _selectionState,
               selectionMode: _multipleSelectMode,
               onLongPress: _enterMultiselectMode,

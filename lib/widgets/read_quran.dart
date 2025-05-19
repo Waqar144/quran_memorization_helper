@@ -143,13 +143,13 @@ class Translation {
 class TranslationTile extends StatefulWidget {
   final String translation;
   final bool isUrduTranslation;
-  final bool hasNoMutashabihas;
+  final bool hasNoMutashabihat;
   final int ayahIndex;
 
   const TranslationTile(
     this.translation,
     this.isUrduTranslation, {
-    required this.hasNoMutashabihas,
+    required this.hasNoMutashabihat,
     required this.ayahIndex,
     super.key,
   });
@@ -177,7 +177,7 @@ class _TranslationTileState extends State<TranslationTile> {
       ),
     ];
 
-    if (widget.hasNoMutashabihas) {
+    if (widget.hasNoMutashabihat) {
       return ListTile(
         title: Column(
           children: [...children, const Divider(indent: 10, endIndent: 10)],
@@ -270,7 +270,7 @@ class _LongPressActionSheetState extends State<LongPressActionSheet> {
           translation,
           widget.translation.isUrdu,
           ayahIndex: ayah,
-          hasNoMutashabihas: dontShowMutashabih,
+          hasNoMutashabihat: dontShowMutashabih,
         );
 
         final openOnQuranCom = TextButton.icon(
@@ -440,7 +440,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
   Future<List<layout.Page>> doload() async {
     // we lazy load the mutashabiha ayat text
     _pages = _getPageLayoutList();
-    _mutashabihat = await importAllMutashabihas();
+    _mutashabihat = await importAllMutashabihat();
     return _pages;
   }
 

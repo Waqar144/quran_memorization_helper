@@ -21,10 +21,10 @@ MaterialPageRoute handleRoute(RouteSettings settings) {
         quizSelectionPage => QuizParaSelectionPage(),
         // QuizPage
         quizPage => QuizPage(settings.arguments as QuizCreationArgs),
-        // MutashabihasPage
-        mutashabihasPage => const MutashabihasPage(),
-        // ParaMutashabihas
-        paraMutashabihasPage => ParaMutashabihas(settings.arguments as int),
+        // MutashabihatPage
+        mutashabihatPage => const MutashabihatPage(),
+        // ParaMutashabihat
+        paraMutashabihatPage => ParaMutashabihat(settings.arguments as int),
         markedAyahsPage => MarkedAyahsPage(
           settings.arguments as Map<String, dynamic>,
         ),

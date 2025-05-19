@@ -8,5 +8,5 @@ You can use this app to:
 - Read quran
 - Mark ayahs that you want to revise more often or that have mistakes
 - Take quiz
-- See list of mutashabihas (similar ayats) for each para/juz while reading
+- See list of mutashabihat (similar ayats) for each para/juz while reading
 - Bookmark a page

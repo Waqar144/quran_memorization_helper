@@ -148,18 +148,18 @@ MutashabihaAyat ayatFromJsonObj(dynamic m, int ctx) {
   }
 }
 
-Future<List<Mutashabiha>> importParaMutashabihas(int paraIdx) async {
-  final mutashabihasJsonBytes = await rootBundle.load(
+Future<List<Mutashabiha>> importParaMutashabihat(int paraIdx) async {
+  final mutashabihatJsonBytes = await rootBundle.load(
     "assets/mutashabiha_data.json",
   );
-  final mutashabihasJson = utf8.decode(
-    mutashabihasJsonBytes.buffer.asUint8List(),
+  final mutashabihatJson = utf8.decode(
+    mutashabihatJsonBytes.buffer.asUint8List(),
   );
-  final map = jsonDecode(mutashabihasJson) as Map<String, dynamic>;
+  final map = jsonDecode(mutashabihatJson) as Map<String, dynamic>;
   int paraNum = paraIdx + 1;
   final list = map[paraNum.toString()] as List<dynamic>;
 
-  List<Mutashabiha> mutashabihas = [];
+  List<Mutashabiha> mutashabihat = [];
   for (final m in list) {
     if (m == null) continue;
     try {
@@ -169,34 +169,34 @@ Future<List<Mutashabiha>> importParaMutashabihas(int paraIdx) async {
       for (final match in m["muts"] as List<dynamic>) {
         matches.add(ayatFromJsonObj(match, ctx));
       }
-      mutashabihas.add(Mutashabiha(src, matches));
+      mutashabihat.add(Mutashabiha(src, matches));
     } catch (e) {
       rethrow;
     }
   }
 
-  mutashabihas.sort((a, b) {
+  mutashabihat.sort((a, b) {
     if (a.src.surahIdx != b.src.surahIdx) {
       return (a.src.surahIdx - b.src.surahIdx);
     }
     return (a.src.ayahIdx - b.src.ayahIdx);
   });
 
-  return mutashabihas;
+  return mutashabihat;
 }
 
-Future<List<Mutashabiha>> importAllMutashabihas() async {
-  final mutashabihasJsonBytes = await rootBundle.load(
+Future<List<Mutashabiha>> importAllMutashabihat() async {
+  final mutashabihatJsonBytes = await rootBundle.load(
     "assets/mutashabiha_data.json",
   );
-  final mutashabihasJson = utf8.decode(
-    mutashabihasJsonBytes.buffer.asUint8List(),
+  final mutashabihatJson = utf8.decode(
+    mutashabihatJsonBytes.buffer.asUint8List(),
   );
-  final map = jsonDecode(mutashabihasJson) as Map<String, dynamic>;
+  final map = jsonDecode(mutashabihatJson) as Map<String, dynamic>;
 
-  List<Mutashabiha> mutashabihas = [];
-  for (final paraMutashabihas in map.entries) {
-    for (final m in paraMutashabihas.value as List) {
+  List<Mutashabiha> mutashabihat = [];
+  for (final paraMutashabihat in map.entries) {
+    for (final m in paraMutashabihat.value as List) {
       if (m == null) continue;
       try {
         int ctx = (m["ctx"] as int?) ?? 0;
@@ -205,19 +205,19 @@ Future<List<Mutashabiha>> importAllMutashabihas() async {
         for (final match in m["muts"] as List<dynamic>) {
           matches.add(ayatFromJsonObj(match, ctx));
         }
-        mutashabihas.add(Mutashabiha(src, matches));
+        mutashabihat.add(Mutashabiha(src, matches));
       } catch (e) {
         rethrow;
       }
     }
   }
 
-  mutashabihas.sort((a, b) {
+  mutashabihat.sort((a, b) {
     if (a.src.surahIdx != b.src.surahIdx) {
       return (a.src.surahIdx - b.src.surahIdx);
     }
     return (a.src.ayahIdx - b.src.ayahIdx);
   });
 
-  return mutashabihas;
+  return mutashabihat;
 }

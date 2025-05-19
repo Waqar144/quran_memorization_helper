@@ -77,9 +77,9 @@ class ParaAyatModel extends ChangeNotifier {
     persist();
   }
 
-  List<AyatOrMutashabiha> ayahsAndMutashabihasList(
+  List<AyatOrMutashabiha> ayahsAndMutashabihatList(
     int paraNumber,
-    List<Mutashabiha> allParaMutashabihas,
+    List<Mutashabiha> allParaMutashabihat,
   ) {
     if (paraNumber < 1 || paraNumber > 30) {
       return [];
@@ -94,7 +94,7 @@ class ParaAyatModel extends ChangeNotifier {
 
     for (final Ayat a in paraAyahs) {
       bool wasMutashabiha = false;
-      for (final Mutashabiha m in allParaMutashabihas) {
+      for (final Mutashabiha m in allParaMutashabihat) {
         // can load multiple for same ayah
         if (m.src.ayahIdx == a.ayahIdx) {
           m.src.markedWords = [...a.markedWords];

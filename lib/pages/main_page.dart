@@ -115,8 +115,8 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  void _openMutashabihas() {
-    Navigator.pushNamed(context, mutashabihasPage, arguments: _paraModel);
+  void _openMutashabihat() {
+    Navigator.pushNamed(context, mutashabihatPage, arguments: _paraModel);
   }
 
   void _openMarkedAyahsPage() async {
@@ -148,7 +148,7 @@ class _MainPageState extends State<MainPage>
       'Take Quiz': _openQuizParaSelectionPage,
       'Show Marked Ayahs': _openMarkedAyahsPage,
       'Bookmarks': _openBookmarksPage,
-      'Mutashabihas': _openMutashabihas,
+      'Mutashabihat': _openMutashabihat,
       'Settings': _openSettings,
     };
     return PopupMenuButton<String>(
