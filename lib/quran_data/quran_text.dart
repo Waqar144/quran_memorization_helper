@@ -10,7 +10,9 @@ class QuranText {
 
   void loadData(Mushaf mushaf) async {
     _ayahs = switch (mushaf) {
-      Mushaf.Indopak16Line || Mushaf.Indopak15Line => ayahs16Line,
+      Mushaf.Indopak13Line ||
+      Mushaf.Indopak16Line ||
+      Mushaf.Indopak15Line => ayahs16Line,
       Mushaf.Uthmani15Line => ayahs15Line,
     };
     assert(_ayahs.length == 6236, "Ayahs are ${_ayahs.length}");

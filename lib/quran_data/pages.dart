@@ -4,12 +4,14 @@ import 'package:quran_memorization_helper/models/settings.dart';
 import 'fifteen_line_uthmani_layout.dart';
 import 'sixteen_line_indopak_layout.dart';
 import 'fifteen_line_indopak_layout.dart';
+import 'thirteen_line_indopak_layout.dart';
 
 int pageCount(Mushaf m) {
   return switch (m) {
     Mushaf.Indopak16Line => 548,
     Mushaf.Uthmani15Line => 604,
     Mushaf.Indopak15Line => 610,
+    Mushaf.Indopak13Line => 847,
   };
 }
 
@@ -112,6 +114,39 @@ final Uint16List _para15LineIndoPakPageOffsets = Uint16List.fromList([
   585, // 30
 ]);
 
+final Uint16List _para13LinePageOffsets = Uint16List.fromList([
+  0, // 1
+  27, // 2
+  55, // 3
+  83, // 4
+  111, // 5
+  139, // 6
+  167, // 7
+  195, // 8
+  223, // 9
+  251, // 10
+  279, // 11
+  307, // 12
+  335, // 13
+  363, // 14
+  391, // 15
+  419, // 16
+  447, // 17
+  475, // 18
+  503, // 19
+  531, // 20
+  557, // 21
+  585, // 22
+  611, // 23
+  639, // 24
+  665, // 25
+  695, // 26
+  725, // 27
+  755, // 28
+  785, // 29
+  817, // 30
+]);
+
 int paraStartPage(int paraIdx, Mushaf mushaf) {
   final list = paraPageOffsetsList(mushaf);
   return list[paraIdx];
@@ -122,6 +157,7 @@ Uint16List paraPageOffsetsList(Mushaf mushaf) {
     Mushaf.Indopak16Line => _para16LinePageOffsets,
     Mushaf.Uthmani15Line => _para15LinePageOffsets,
     Mushaf.Indopak15Line => _para15LineIndoPakPageOffsets,
+    Mushaf.Indopak13Line => _para13LinePageOffsets,
   };
 }
 
@@ -130,6 +166,7 @@ int surahStartPage(int surahIdx, Mushaf mushaf) {
     Mushaf.Indopak16Line => surah16LinePageOffset,
     Mushaf.Uthmani15Line => surah15LinePageOffset,
     Mushaf.Indopak15Line => surah15LineIndopakPageOffset,
+    Mushaf.Indopak13Line => surah13LinePageOffset,
   };
   return surahList[surahIdx];
 }
@@ -140,6 +177,7 @@ int pageCountForPara(int paraIdx, Mushaf mushaf) {
       Mushaf.Indopak16Line => 22,
       Mushaf.Uthmani15Line => 23,
       Mushaf.Indopak15Line => 25,
+      Mushaf.Indopak13Line => 30,
     };
   }
 
@@ -171,6 +209,7 @@ int? firstAyahOfPage(int pageIdx, Mushaf mushaf) {
     Mushaf.Indopak16Line => pages16Indopak,
     Mushaf.Uthmani15Line => pages15Uthmani,
     Mushaf.Indopak15Line => pages15Indopak,
+    Mushaf.Indopak13Line => pages13Indopak,
   };
   if (pageIdx < pages.length) {
     final page = pages[pageIdx];
@@ -528,4 +567,121 @@ final Uint16List surah15LineIndopakPageOffset = Uint16List.fromList(<int>[
   608, // 112
   609, // 113
   609, // 114
+]);
+
+final Uint16List surah13LinePageOffset = Uint16List.fromList(<int>[
+  0, // 1
+  1, // 2
+  66, // 3
+  104, // 4
+  145, // 5
+  175, // 6
+  207, // 7
+  244, // 8
+  258, // 9
+  286, // 10
+  306, // 11
+  326, // 12
+  344, // 13
+  353, // 14
+  362, // 15
+  370, // 16
+  391, // 17
+  406, // 18
+  423, // 19
+  433, // 20
+  447, // 21
+  460, // 22
+  475, // 23
+  485, // 24
+  499, // 25
+  509, // 26
+  523, // 27
+  535, // 28
+  550, // 29
+  560, // 30
+  569, // 31
+  575, // 32
+  579, // 33
+  593, // 34
+  601, // 35
+  609, // 36
+  616, // 37
+  626, // 38
+  633, // 39
+  645, // 40
+  657, // 41
+  666, // 42
+  675, // 43
+  684, // 44
+  689, // 45
+  695, // 46
+  702, // 47
+  708, // 48
+  714, // 49
+  719, // 50
+  723, // 51
+  727, // 52
+  730, // 53
+  734, // 54
+  738, // 55
+  743, // 56
+  748, // 57
+  755, // 58
+  759, // 59
+  764, // 60
+  768, // 61
+  771, // 62
+  773, // 63
+  775, // 64
+  778, // 65
+  781, // 66
+  785, // 67
+  788, // 68
+  792, // 69
+  795, // 70
+  798, // 71
+  801, // 72
+  804, // 73
+  806, // 74
+  809, // 75
+  811, // 76
+  814, // 77
+  817, // 78
+  818, // 79
+  820, // 80
+  822, // 81
+  823, // 82
+  824, // 83
+  826, // 84
+  827, // 85
+  828, // 86
+  829, // 87
+  830, // 88
+  831, // 89
+  833, // 90
+  834, // 91
+  835, // 92
+  836, // 93
+  836, // 94
+  837, // 95
+  837, // 96
+  838, // 97
+  838, // 98
+  839, // 99
+  840, // 100
+  841, // 101
+  841, // 102
+  842, // 103
+  842, // 104
+  842, // 105
+  843, // 106
+  843, // 107
+  844, // 108
+  844, // 109
+  844, // 110
+  845, // 111
+  845, // 112
+  845, // 113
+  846, // 114
 ]);

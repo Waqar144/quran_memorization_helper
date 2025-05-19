@@ -5,6 +5,7 @@ An app that serves as a companion for Quran revision. The intended user of the a
 - 16 Line Mushaf (IndoPak font)
 - 15 Line Mushaf (Uthmani font)
 - 15 Line Mushaf (IndoPak font)
+- 13 Line Mushaf (IndoPak font)
 - Take quiz
 - View mutashabihat (similar ayat) for each para/juz.
 - View translation for each ayat

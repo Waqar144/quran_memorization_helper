@@ -16,6 +16,7 @@ import 'package:quran_memorization_helper/quran_data/rukus.dart';
 import 'package:quran_memorization_helper/quran_data/sixteen_line_indopak_layout.dart';
 import 'package:quran_memorization_helper/quran_data/fifteen_line_uthmani_layout.dart';
 import 'package:quran_memorization_helper/quran_data/fifteen_line_indopak_layout.dart';
+import 'package:quran_memorization_helper/quran_data/thirteen_line_indopak_layout.dart';
 import 'package:quran_memorization_helper/quran_data/page_layout_types.dart'
     as layout;
 import 'package:quran_memorization_helper/utils/colors.dart';
@@ -432,6 +433,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
       Mushaf.Indopak16Line => pages16Indopak,
       Mushaf.Uthmani15Line => pages15Uthmani,
       Mushaf.Indopak15Line => pages15Indopak,
+      Mushaf.Indopak13Line => pages13Indopak,
     };
   }
 

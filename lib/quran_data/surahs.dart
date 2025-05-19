@@ -348,6 +348,7 @@ int surahForPage(int page, Mushaf mushaf) {
     Mushaf.Indopak16Line => surah16LinePageOffset,
     Mushaf.Uthmani15Line => surah15LinePageOffset,
     Mushaf.Indopak15Line => surah15LineIndopakPageOffset,
+    Mushaf.Indopak13Line => surah13LinePageOffset,
   };
 
   for (int i = 0; i < 114; ++i) {

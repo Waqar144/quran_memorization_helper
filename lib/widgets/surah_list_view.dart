@@ -24,6 +24,7 @@ class SurahListView extends StatelessWidget {
       Mushaf.Indopak16Line => surah16LinePageOffset,
       Mushaf.Uthmani15Line => surah15LinePageOffset,
       Mushaf.Indopak15Line => surah15LineIndopakPageOffset,
+      Mushaf.Indopak13Line => surah13LinePageOffset,
     };
     int currentSurah = surahForPage(currentPage, mushaf);
     double surahScrollTo =

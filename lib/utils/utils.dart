@@ -131,14 +131,18 @@ const String urduKhatma = "\u06D4";
 
 String getQuranFont() {
   return switch (Settings.instance.mushaf) {
-    Mushaf.Indopak16Line || Mushaf.Indopak15Line => "Al Mushaf",
+    Mushaf.Indopak16Line ||
+    Mushaf.Indopak15Line ||
+    Mushaf.Indopak13Line => "Al Mushaf",
     Mushaf.Uthmani15Line => "Uthmanic",
   };
 }
 
 String paraText() {
   return switch (Settings.instance.mushaf) {
-    Mushaf.Indopak16Line || Mushaf.Indopak15Line => "Para",
+    Mushaf.Indopak16Line ||
+    Mushaf.Indopak15Line ||
+    Mushaf.Indopak13Line => "Para",
     Mushaf.Uthmani15Line => "Juz",
   };
 }

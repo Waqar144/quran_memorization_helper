@@ -5,6 +5,7 @@ import 'package:quran_memorization_helper/models/settings.dart';
 import 'fifteen_line_uthmani_layout.dart';
 import 'sixteen_line_indopak_layout.dart';
 import 'fifteen_line_indopak_layout.dart';
+import 'thirteen_line_indopak_layout.dart';
 
 const String ayahSeparator = " ۞ ";
 
@@ -35,6 +36,7 @@ int getPageForAyah(int ayahIndex, Mushaf mushaf) {
     Mushaf.Indopak16Line => pages16Indopak,
     Mushaf.Uthmani15Line => pages15Uthmani,
     Mushaf.Indopak15Line => pages15Indopak,
+    Mushaf.Indopak13Line => pages13Indopak,
   };
 
   int resultPage = -1;

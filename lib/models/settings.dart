@@ -6,13 +6,14 @@ import 'package:quran_memorization_helper/utils/utils.dart' as utils;
 import 'package:quran_memorization_helper/quran_data/pages.dart';
 
 // ignore: constant_identifier_names
-enum Mushaf { Indopak16Line, Uthmani15Line, Indopak15Line }
+enum Mushaf { Indopak16Line, Uthmani15Line, Indopak15Line, Indopak13Line }
 
 bool isIndoPak(Mushaf m) {
   return switch (m) {
+    Mushaf.Indopak13Line ||
+    Mushaf.Indopak15Line ||
     Mushaf.Indopak16Line => true,
     Mushaf.Uthmani15Line => false,
-    Mushaf.Indopak15Line => true,
   };
 }
 
