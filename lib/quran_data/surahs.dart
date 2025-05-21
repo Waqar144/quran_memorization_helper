@@ -787,8 +787,8 @@ const Map<int, List<int>> surahLastLine16 = {
   543: [5, 11],
   544: [1, 6, 9, 15],
   545: [3, 7, 12, 15],
-  546: [3, 7, 12, 9],
-  547: [4],
+  546: [3, 7, 12, 9, 15],
+  547: [4, 9],
 };
 
 const Map<int, List<int>> surahLastLine15Uthmani = {
