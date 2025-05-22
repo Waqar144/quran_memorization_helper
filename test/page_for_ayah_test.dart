@@ -11,6 +11,7 @@ void main() {
         Mushaf.Indopak16Line => data16Line,
         Mushaf.Uthmani15Line => data15Uthmani,
         Mushaf.Indopak15Line => data15Indo,
+        Mushaf.Indopak13Line => throw UnimplementedError(), // TODO
       };
 
       for (int i = 0; i < 6236; i += 50) {
