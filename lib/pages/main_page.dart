@@ -28,10 +28,12 @@ class _MainPageState extends State<MainPage>
   PageController _pageController = PageController(keepPage: false);
   Mushaf _currentFontStyle = Mushaf.Indopak16Line;
   bool _inLongPress = false;
+  late final Future<void> _initialLoadFuture;
 
   @override
   void initState() {
     _drawerTabController = TabController(length: 2, vsync: this);
+    _initialLoadFuture = _load();
 
     _currentFontStyle = Settings.instance.mushaf;
     QuranText.instance.loadData(_currentFontStyle);
@@ -407,7 +409,7 @@ class _MainPageState extends State<MainPage>
           Theme.of(context).brightness == Brightness.dark ? Colors.black : null,
       appBar: Settings.instance.bottomAppBar ? null : _buildAppBar(),
       body: FutureBuilder<void>(
-        future: _load(),
+        future: _initialLoadFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
             return Center(child: const CircularProgressIndicator());
