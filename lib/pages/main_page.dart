@@ -27,6 +27,7 @@ class _MainPageState extends State<MainPage>
   late final TabController _drawerTabController;
   PageController _pageController = PageController(keepPage: false);
   Mushaf _currentFontStyle = Mushaf.Indopak16Line;
+  bool _inLongPress = false;
 
   @override
   void initState() {
@@ -229,6 +230,24 @@ class _MainPageState extends State<MainPage>
     }
   }
 
+  void _longPressFwdBackButton(bool fwd) async {
+    _inLongPress = true;
+    int currentPage = _pageController.page?.floor() ?? 0;
+    final mushaf = Settings.instance.mushaf;
+    int totalPages = pageCount(mushaf);
+    final func = fwd ? _pageController.nextPage : _pageController.previousPage;
+    final offset = fwd ? 1 : -1;
+
+    while (currentPage < totalPages) {
+      if (_inLongPress == false) break;
+      await func(
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.easeInOut,
+      );
+      currentPage += offset;
+    }
+  }
+
   Widget _buildDrawer() {
     return Builder(
       builder: (context) {
@@ -317,15 +336,25 @@ class _MainPageState extends State<MainPage>
       snap: true,
       pinned: false,
       actions: [
-        IconButton(
-          tooltip: "Next ${paraText()}",
-          icon: const Icon(Icons.arrow_back),
-          onPressed: _nextPara,
+        TapRegion(
+          onTapUpOutside: (_) => _inLongPress = false,
+          onTapUpInside: (_) => _inLongPress = false,
+          child: IconButton(
+            tooltip: "Next ${paraText()}",
+            icon: const Icon(Icons.arrow_back),
+            onPressed: _nextPara,
+            onLongPress: () => _longPressFwdBackButton(true),
+          ),
         ),
-        IconButton(
-          tooltip: "Previous ${paraText()}",
-          icon: const Icon(Icons.arrow_forward),
-          onPressed: _previousPara,
+        TapRegion(
+          onTapUpOutside: (_) => _inLongPress = false,
+          onTapUpInside: (_) => _inLongPress = false,
+          child: IconButton(
+            tooltip: "Previous ${paraText()}",
+            icon: const Icon(Icons.arrow_forward),
+            onPressed: _previousPara,
+            onLongPress: () => _longPressFwdBackButton(false),
+          ),
         ),
         IconButton(
           tooltip: "Add Bookmark",
