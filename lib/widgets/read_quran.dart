@@ -576,127 +576,124 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
       builder: (context, snapshot) {
         if (_pages.isEmpty ||
             snapshot.connectionState != ConnectionState.done) {
-          return const SliverToBoxAdapter(child: SizedBox.shrink());
+          return SizedBox.shrink();
         }
-        return SliverToBoxAdapter(
-          child: SizedBox(
-            height: _availableHeight(context) * _heightMultiplier(),
-            child: NotificationListener<OverscrollNotification>(
-              onNotification: (noti) {
-                if (noti.depth == 0) {
-                  int dir = noti.overscroll >= 0 ? 1 : -1;
-                  bool lastpage = dir < 0;
-                  if (lastpage) {
-                    widget.pageController.jumpToPage(_pages.length - 1);
-                  } else {
-                    widget.pageController.jumpToPage(0);
-                  }
+        return SizedBox(
+          height: _availableHeight(context) * _heightMultiplier(),
+          child: NotificationListener<OverscrollNotification>(
+            onNotification: (noti) {
+              if (noti.depth == 0) {
+                int dir = noti.overscroll >= 0 ? 1 : -1;
+                bool lastpage = dir < 0;
+                if (lastpage) {
+                  widget.pageController.jumpToPage(_pages.length - 1);
+                } else {
+                  widget.pageController.jumpToPage(0);
                 }
-                return false;
+              }
+              return false;
+            },
+            child: PageView.builder(
+              onPageChanged: (newPage) {
+                // reset vertical scroll only if in reflow mode
+                // because otherwise its annoying as we usually
+                // have vertical scroll of 1 line and the user
+                // keeps scrolling that 1 line again and again
+                if (Settings.instance.reflowMode) {
+                  widget.verticalScrollResetFn();
+                }
+                widget.pageChangedCallback(newPage);
               },
-              child: PageView.builder(
-                onPageChanged: (newPage) {
-                  // reset vertical scroll only if in reflow mode
-                  // because otherwise its annoying as we usually
-                  // have vertical scroll of 1 line and the user
-                  // keeps scrolling that 1 line again and again
-                  if (Settings.instance.reflowMode) {
-                    widget.verticalScrollResetFn();
-                  }
-                  widget.pageChangedCallback(newPage);
-                },
-                controller: widget.pageController,
-                reverse: true,
-                itemCount: _pages.length,
-                scrollBehavior:
-                    const ScrollBehavior()..copyWith(overscroll: false),
-                physics: const CustomPageViewScrollPhysics(),
-                itemBuilder: (ctx, index) {
-                  final page = _pages[index];
-                  List<Line> pageLines = [];
+              controller: widget.pageController,
+              reverse: true,
+              itemCount: _pages.length,
+              scrollBehavior:
+                  const ScrollBehavior()..copyWith(overscroll: false),
+              physics: const CustomPageViewScrollPhysics(),
+              itemBuilder: (ctx, index) {
+                final page = _pages[index];
+                List<Line> pageLines = [];
 
-                  for (int i = 0; i < page.lines.length; ++i) {
-                    final l = page.lines[i];
-                    final ayah = l.ayahIdx;
-                    final start = l.wordStartInAyahIdx;
-                    List<LineAyah> lineAyahs = [];
+                for (int i = 0; i < page.lines.length; ++i) {
+                  final l = page.lines[i];
+                  final ayah = l.ayahIdx;
+                  final start = l.wordStartInAyahIdx;
+                  List<LineAyah> lineAyahs = [];
 
-                    if (ayah < 0) {
-                      pageLines.add(
-                        Line([LineAyah(start == -999 ? start : start - 1, "")]),
-                      );
-                      continue;
-                    }
-
-                    int? nextAyah;
-                    int? nextAyahStart;
-                    if (i + 1 < page.lines.length) {
-                      if (page.lines[i + 1].ayahIdx >= 0) {
-                        final nextLine = page.lines[i + 1];
-                        nextAyah = nextLine.ayahIdx;
-                        nextAyahStart = nextLine.wordStartInAyahIdx;
-                      } else {
-                        // find next valid ayah
-                        for (int j = i + 1; j < page.lines.length; ++j) {
-                          if (page.lines[j].ayahIdx >= 0) {
-                            nextAyah = page.lines[j].ayahIdx;
-                            nextAyahStart = 0;
-                            break;
-                          }
-                        }
-                      }
-                    } else if (index + 1 < _pages.length) {
-                      final nextPage = _pages[index + 1];
-                      if (nextPage.lines.first.ayahIdx >= 0) {
-                        final nextPageFirstLine = nextPage.lines.first;
-                        nextAyah = nextPageFirstLine.ayahIdx;
-                        nextAyahStart = nextPageFirstLine.wordStartInAyahIdx;
-                      } else {
-                        // find next valid ayah
-                        for (int j = 0; j < nextPage.lines.length; ++j) {
-                          if (nextPage.lines[j].ayahIdx >= 0) {
-                            nextAyah = nextPage.lines[j].ayahIdx;
-                            nextAyahStart = 0;
-                            break;
-                          }
-                        }
-                      }
-                    }
-
-                    final d = QuranText.instance.ayahsForRanges(
-                      ayah,
-                      start,
-                      nextAyah,
-                      nextAyahStart,
+                  if (ayah < 0) {
+                    pageLines.add(
+                      Line([LineAyah(start == -999 ? start : start - 1, "")]),
                     );
-                    for (final line in d) {
-                      lineAyahs.add(LineAyah(line.$1, line.$2));
-                    }
-                    pageLines.add(Line(lineAyahs));
+                    continue;
                   }
 
-                  return ExcludeSemantics(
-                    child: PageWidget(
-                      index,
-                      _pages[index].pageNum,
-                      pageLines,
-                      getAyatInDB: _getAyatInDB,
-                      onAyahTapped: _onAyahTapped,
-                      isMutashabihaAyat: _isMutashabihaAyat,
-                      repaintStream: _repaintNotifier.stream,
-                      isBookmarked:
-                          () => widget.model.bookmarks.contains(index),
-                      onToggleBookmark: () {
-                        if (widget.model.bookmarks.contains(index)) {
-                          widget.model.removeBookmark(index);
-                        } else {
-                          widget.model.addBookmark(index);
+                  int? nextAyah;
+                  int? nextAyahStart;
+                  if (i + 1 < page.lines.length) {
+                    if (page.lines[i + 1].ayahIdx >= 0) {
+                      final nextLine = page.lines[i + 1];
+                      nextAyah = nextLine.ayahIdx;
+                      nextAyahStart = nextLine.wordStartInAyahIdx;
+                    } else {
+                      // find next valid ayah
+                      for (int j = i + 1; j < page.lines.length; ++j) {
+                        if (page.lines[j].ayahIdx >= 0) {
+                          nextAyah = page.lines[j].ayahIdx;
+                          nextAyahStart = 0;
+                          break;
                         }
-                      },
-                    ),
+                      }
+                    }
+                  } else if (index + 1 < _pages.length) {
+                    final nextPage = _pages[index + 1];
+                    if (nextPage.lines.first.ayahIdx >= 0) {
+                      final nextPageFirstLine = nextPage.lines.first;
+                      nextAyah = nextPageFirstLine.ayahIdx;
+                      nextAyahStart = nextPageFirstLine.wordStartInAyahIdx;
+                    } else {
+                      // find next valid ayah
+                      for (int j = 0; j < nextPage.lines.length; ++j) {
+                        if (nextPage.lines[j].ayahIdx >= 0) {
+                          nextAyah = nextPage.lines[j].ayahIdx;
+                          nextAyahStart = 0;
+                          break;
+                        }
+                      }
+                    }
+                  }
+
+                  final d = QuranText.instance.ayahsForRanges(
+                    ayah,
+                    start,
+                    nextAyah,
+                    nextAyahStart,
                   );
-                },
-              ),
+                  for (final line in d) {
+                    lineAyahs.add(LineAyah(line.$1, line.$2));
+                  }
+                  pageLines.add(Line(lineAyahs));
+                }
+
+                return ExcludeSemantics(
+                  child: PageWidget(
+                    index,
+                    _pages[index].pageNum,
+                    pageLines,
+                    getAyatInDB: _getAyatInDB,
+                    onAyahTapped: _onAyahTapped,
+                    isMutashabihaAyat: _isMutashabihaAyat,
+                    repaintStream: _repaintNotifier.stream,
+                    isBookmarked: () => widget.model.bookmarks.contains(index),
+                    onToggleBookmark: () {
+                      if (widget.model.bookmarks.contains(index)) {
+                        widget.model.removeBookmark(index);
+                      } else {
+                        widget.model.addBookmark(index);
+                      }
+                    },
+                  ),
+                );
+              },
             ),
           ),
         );

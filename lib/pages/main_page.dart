@@ -153,6 +153,9 @@ class _MainPageState extends State<MainPage>
       'Settings': _openSettings,
     };
     return PopupMenuButton<String>(
+      popUpAnimationStyle: AnimationStyle(
+        duration: const Duration(milliseconds: 150),
+      ),
       onSelected: (String value) {
         final VoidCallback? actionCallback = actions[value];
         if (actionCallback == null) throw "Unknown action: $value";
@@ -329,65 +332,71 @@ class _MainPageState extends State<MainPage>
     };
   }
 
-  SliverAppBar _buildAppBar() {
-    return SliverAppBar(
-      floating: true,
-      forceElevated: false,
-      snap: true,
-      pinned: false,
-      actions: [
-        TapRegion(
-          onTapUpOutside: (_) => _inLongPress = false,
-          onTapUpInside: (_) => _inLongPress = false,
-          child: IconButton(
-            tooltip: "Next ${paraText()}",
-            icon: const Icon(Icons.arrow_back),
-            onPressed: _nextPara,
-            onLongPress: () => _longPressFwdBackButton(true),
-          ),
+  List<Widget> _appBarActions() {
+    return [
+      TapRegion(
+        onTapUpOutside: (_) => _inLongPress = false,
+        onTapUpInside: (_) => _inLongPress = false,
+        child: IconButton(
+          tooltip: "Next ${paraText()}",
+          icon: const Icon(Icons.arrow_back),
+          onPressed: _nextPara,
+          onLongPress: () => _longPressFwdBackButton(true),
         ),
-        TapRegion(
-          onTapUpOutside: (_) => _inLongPress = false,
-          onTapUpInside: (_) => _inLongPress = false,
-          child: IconButton(
-            tooltip: "Previous ${paraText()}",
-            icon: const Icon(Icons.arrow_forward),
-            onPressed: _previousPara,
-            onLongPress: () => _longPressFwdBackButton(false),
-          ),
+      ),
+      TapRegion(
+        onTapUpOutside: (_) => _inLongPress = false,
+        onTapUpInside: (_) => _inLongPress = false,
+        child: IconButton(
+          tooltip: "Previous ${paraText()}",
+          icon: const Icon(Icons.arrow_forward),
+          onPressed: _previousPara,
+          onLongPress: () => _longPressFwdBackButton(false),
         ),
-        IconButton(
-          tooltip: "Add Bookmark",
-          icon: const Icon(Icons.bookmark),
-          onPressed: () {
-            final page = _pageController.page!.floor();
-            if (_paraModel.bookmarks.contains(page)) {
-              _paraModel.removeBookmark(page);
-            } else {
-              _paraModel.addBookmark(page);
-            }
-          },
+      ),
+      IconButton(
+        tooltip: "Add Bookmark",
+        icon: const Icon(Icons.bookmark),
+        onPressed: () {
+          final page = _pageController.page!.floor();
+          if (_paraModel.bookmarks.contains(page)) {
+            _paraModel.removeBookmark(page);
+          } else {
+            _paraModel.addBookmark(page);
+          }
+        },
+      ),
+      IconButton(
+        onPressed: () {
+          if (Theme.of(context).brightness == Brightness.dark) {
+            Settings.instance.themeMode = ThemeMode.light;
+          } else {
+            Settings.instance.themeMode = ThemeMode.dark;
+          }
+        },
+        icon: Icon(
+          Theme.of(context).brightness == Brightness.light
+              ? Icons.mode_night
+              : Icons.light_mode,
         ),
-        IconButton(
-          onPressed: () {
-            if (Theme.of(context).brightness == Brightness.dark) {
-              Settings.instance.themeMode = ThemeMode.light;
-            } else {
-              Settings.instance.themeMode = ThemeMode.dark;
-            }
-          },
-          icon: Icon(
+        tooltip:
             Theme.of(context).brightness == Brightness.light
-                ? Icons.mode_night
-                : Icons.light_mode,
-          ),
-          tooltip:
-              Theme.of(context).brightness == Brightness.light
-                  ? "Switch to night mode"
-                  : "Switch to light mode",
-        ),
-        buildThreeDotMenu(),
-      ],
+                ? "Switch to night mode"
+                : "Switch to light mode",
+      ),
+      buildThreeDotMenu(),
+    ];
+  }
+
+  AppBar _buildAppBar() {
+    return AppBar(actions: _appBarActions());
+  }
+
+  BottomAppBar _bottomAppBar() {
+    return BottomAppBar(
+      padding: EdgeInsets.zero,
+      height: kToolbarHeight,
+      child: _buildAppBar(),
     );
   }
 
@@ -396,10 +405,7 @@ class _MainPageState extends State<MainPage>
     return Scaffold(
       backgroundColor:
           Theme.of(context).brightness == Brightness.dark ? Colors.black : null,
-      appBar: PreferredSize(
-        preferredSize: const Size(double.infinity, 0),
-        child: AppBar(bottom: null, shadowColor: Colors.transparent),
-      ),
+      appBar: Settings.instance.bottomAppBar ? null : _buildAppBar(),
       body: FutureBuilder<void>(
         future: _load(),
         builder: (context, snapshot) {
@@ -410,25 +416,18 @@ class _MainPageState extends State<MainPage>
             bindings: _shortcutBindings(),
             child: Focus(
               autofocus: true,
-              child: CustomScrollView(
-                controller: _scrollController,
-                scrollBehavior:
-                    const ScrollBehavior()..copyWith(overscroll: false),
-                slivers: [
-                  _buildAppBar(),
-                  // The actual quran reading widget
-                  ReadQuranWidget(
-                    _paraModel,
-                    pageController: _pageController,
-                    verticalScrollResetFn: _resetVerticalScrollToZero,
-                    pageChangedCallback: _saveScrollPosition,
-                  ),
-                ],
+              child: ReadQuranWidget(
+                _paraModel,
+                pageController: _pageController,
+                verticalScrollResetFn: _resetVerticalScrollToZero,
+                pageChangedCallback: _saveScrollPosition,
               ),
             ),
           );
         },
       ),
+      bottomNavigationBar:
+          Settings.instance.bottomAppBar ? _bottomAppBar() : null,
       drawer: _buildDrawer(),
     );
   }

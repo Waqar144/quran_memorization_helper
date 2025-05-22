@@ -30,6 +30,7 @@ class Settings extends ChangeNotifier {
   bool _tapToShowTranslation = false;
   bool _colorMutashabihat = true;
   bool _reflowMode = false;
+  bool _bottomAppBar = false;
 
   // constants
   static const double wordSpacing = 1.0;
@@ -99,6 +100,15 @@ class Settings extends ChangeNotifier {
     }
   }
 
+  bool get bottomAppBar => _bottomAppBar;
+  set bottomAppBar(bool s) {
+    if (s != _bottomAppBar) {
+      _bottomAppBar = s;
+      notifyListeners();
+      persist();
+    }
+  }
+
   factory Settings() {
     return _instance;
   }
@@ -112,6 +122,7 @@ class Settings extends ChangeNotifier {
       'mushaf': _mushaf.index,
       'reflowMode': _reflowMode,
       'fontSize': _fontSize,
+      'bottomAppBar': _bottomAppBar,
     };
     String json = const JsonEncoder.withIndent("  ").convert(map);
     await utils.saveJsonToDisk(json, "settings");
@@ -130,6 +141,7 @@ class Settings extends ChangeNotifier {
       _mushaf = Mushaf.values[json["mushaf"] ?? Mushaf.Indopak16Line.index];
       _reflowMode = json["reflowMode"] ?? false;
       _fontSize = json["fontSize"] ?? _minFontSize;
+      _bottomAppBar = json["bottomAppBar"] ?? _bottomAppBar;
       if (_fontSize < _minFontSize) {
         _fontSize = _minFontSize;
       }

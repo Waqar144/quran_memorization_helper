@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
             colorSchemeSeed: Colors.blue,
           ),
           themeMode: Settings.instance.themeMode,
-          home: const MainPage(),
+          home: MainPage(),
           onGenerateRoute: handleRoute,
         );
       },
