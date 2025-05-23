@@ -968,7 +968,7 @@ class _PageWidgetState extends State<PageWidget> {
         // word
         spans.add(TextSpan(recognizer: tapHandler, text: w, style: style));
         // space
-        if (idx != lastWordInLineIndex) {
+        if (reflowMode || idx != lastWordInLineIndex) {
           spans.add(TextSpan(text: ' ', style: style));
         }
 
