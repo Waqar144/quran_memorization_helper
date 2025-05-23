@@ -394,6 +394,7 @@ class _MainPageState extends State<MainPage>
     return AppBar(actions: _appBarActions());
   }
 
+  // ignore: unused_element
   BottomAppBar _bottomAppBar() {
     return BottomAppBar(
       padding: EdgeInsets.zero,
@@ -407,7 +408,7 @@ class _MainPageState extends State<MainPage>
     return Scaffold(
       backgroundColor:
           Theme.of(context).brightness == Brightness.dark ? Colors.black : null,
-      // appBar: Settings.instance.bottomAppBar ? null : _buildAppBar(),
+      appBar: _buildAppBar(),
       body: FutureBuilder<void>(
         future: _initialLoadFuture,
         builder: (context, snapshot) {
@@ -428,7 +429,7 @@ class _MainPageState extends State<MainPage>
           );
         },
       ),
-      bottomNavigationBar: _bottomAppBar(),
+      // bottomNavigationBar: _bottomAppBar(),
       drawer: _buildDrawer(),
     );
   }
