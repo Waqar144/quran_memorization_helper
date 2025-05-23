@@ -1319,13 +1319,14 @@ class _PageWidgetState extends State<PageWidget> {
 
     final double height =
         _availableHeight(context) -
-        ( /*divider between lines(1px)*/ 24 +
+        ( /*divider between lines(1px)*/ numPageLines +
+            1 +
             /*topborder=*/ 24);
     final double rowHeight = max((height / numPageLines).floorToDouble(), 38.0);
     final double rowWidth = MediaQuery.sizeOf(context).width;
     return Padding(
       padding: const EdgeInsets.only(left: 4, right: 4),
-      child: Column(
+      child: ListView(
         children: [
           // Top border
           _pageTopBorder(),
