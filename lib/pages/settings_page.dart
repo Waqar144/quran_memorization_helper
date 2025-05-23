@@ -431,17 +431,6 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  Widget _bottomAppBarTile() {
-    return SwitchListTile(
-      title: const Text("Bottom Appbar"),
-      subtitle: const Text("Whether to show Appbar at bottom or top"),
-      value: Settings.instance.bottomAppBar,
-      onChanged: (bool newValue) {
-        Settings.instance.bottomAppBar = newValue;
-      },
-    );
-  }
-
   Widget _customTranslationTile() {
     return ListTile(
       title: const Text("Change Translation"),
@@ -550,7 +539,6 @@ class _SettingsPageState extends State<SettingsPage> {
           _createFontSizeTile(),
           _tapToShowTranslationTile(),
           _mutashabihaColoringTile(),
-          _bottomAppBarTile(),
           _customTranslationTile(),
           _createBackupWidget(),
           _restoreBackupWidget(),
