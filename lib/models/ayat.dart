@@ -204,7 +204,7 @@ class ParaAyatModel extends ChangeNotifier {
     addAyahs(ayahs);
   }
 
-  Future<void> _resetfromJson(Map<String, dynamic> json) async {
+  void resetfromJson(Map<String, dynamic> json) {
     final Map<int, List<Ayat>> paraAyats = {};
     _ayats = [];
     try {
@@ -273,7 +273,7 @@ class ParaAyatModel extends ChangeNotifier {
           path == null
               ? await utils.readJsonFile("ayatsdb")
               : await utils.readJsonFromFilePath(path);
-      await _resetfromJson(json);
+      resetfromJson(json);
       return (true, null);
     } catch (e) {
       return (false, e);

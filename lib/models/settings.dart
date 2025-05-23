@@ -113,8 +113,8 @@ class Settings extends ChangeNotifier {
     return _instance;
   }
 
-  Future<void> saveToDisk() async {
-    Map<String, dynamic> map = {
+  Map<String, dynamic> toJson() {
+    return {
       'currentReadingPage': _currentReadingPage,
       'themeMode': _themeMode.index,
       'translationFile': _translationFile,
@@ -124,35 +124,41 @@ class Settings extends ChangeNotifier {
       'fontSize': _fontSize,
       'bottomAppBar': _bottomAppBar,
     };
-    String json = const JsonEncoder.withIndent("  ").convert(map);
+  }
+
+  void initFromJson(Map<String, dynamic> json) {
+    int? currentReadingPara = json["currentReadingPara"];
+    int? oldCurrentReadingPage = json["currentReadingScrollOffset"];
+
+    _themeMode = ThemeMode.values[json["themeMode"] ?? ThemeMode.system.index];
+    _translationFile = json["translationFile"] ?? "";
+    _tapToShowTranslation = json["tapToShowTranslation"] ?? false;
+    _mushaf = Mushaf.values[json["mushaf"] ?? Mushaf.Indopak16Line.index];
+    _reflowMode = json["reflowMode"] ?? false;
+    _fontSize = json["fontSize"] ?? _minFontSize;
+    _bottomAppBar = json["bottomAppBar"] ?? _bottomAppBar;
+    if (_fontSize < _minFontSize) {
+      _fontSize = _minFontSize;
+    }
+
+    if (currentReadingPara != null && oldCurrentReadingPage != null) {
+      int start = paraStartPage(currentReadingPara - 1, _mushaf);
+      int page = start + oldCurrentReadingPage;
+      _currentReadingPage = page;
+    } else {
+      _currentReadingPage = json["currentReadingPage"] ?? 0;
+    }
+  }
+
+  Future<void> saveToDisk() async {
+    String json = const JsonEncoder.withIndent("  ").convert(toJson());
     await utils.saveJsonToDisk(json, "settings");
   }
 
   Future<void> readSettings() async {
     try {
       final Map<String, dynamic> json = await utils.readJsonFile("settings");
-      int? currentReadingPara = json["currentReadingPara"];
-      int? oldCurrentReadingPage = json["currentReadingScrollOffset"];
-
-      _themeMode =
-          ThemeMode.values[json["themeMode"] ?? ThemeMode.system.index];
-      _translationFile = json["translationFile"] ?? "";
-      _tapToShowTranslation = json["tapToShowTranslation"] ?? false;
-      _mushaf = Mushaf.values[json["mushaf"] ?? Mushaf.Indopak16Line.index];
-      _reflowMode = json["reflowMode"] ?? false;
-      _fontSize = json["fontSize"] ?? _minFontSize;
-      _bottomAppBar = json["bottomAppBar"] ?? _bottomAppBar;
-      if (_fontSize < _minFontSize) {
-        _fontSize = _minFontSize;
-      }
-
-      if (currentReadingPara != null && oldCurrentReadingPage != null) {
-        int start = paraStartPage(currentReadingPara - 1, _mushaf);
-        int page = start + oldCurrentReadingPage;
-        _currentReadingPage = page;
-      } else {
-        _currentReadingPage = json["currentReadingPage"] ?? 0;
-      }
+      initFromJson(json);
     } catch (e) {
       // nothing for now
     }

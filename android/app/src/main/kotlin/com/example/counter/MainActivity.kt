@@ -44,7 +44,7 @@ class MainActivity : FlutterActivity() {
         val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
         intent.addCategory(Intent.CATEGORY_OPENABLE)
         intent.type = "application/json"
-        intent.putExtra(Intent.EXTRA_TITLE, "ayatsdb.json")
+        intent.putExtra(Intent.EXTRA_TITLE, "quran_memorization_backup.json")
         startActivityForResult(intent, WRITE_REQUEST_CODE)
     }
 

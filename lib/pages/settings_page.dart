@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -218,8 +219,15 @@ class _SettingsPageState extends State<SettingsPage> {
               ? ElevatedButton(
                 onPressed: () async {
                   try {
+                    Map<String, dynamic> json = {};
+                    json['db'] = widget.paraModel.toJson();
+                    json['settings'] = Settings.instance.toJson();
+                    final jsonString = const JsonEncoder.withIndent(
+                      "  ",
+                    ).convert(json);
+
                     final res = await platform.invokeMethod('backupDB', {
-                      'data': widget.paraModel.jsonStringify(),
+                      'data': jsonString,
                     });
                     if (res == "CANCELED") {
                       return;
@@ -247,7 +255,11 @@ class _SettingsPageState extends State<SettingsPage> {
         onPressed: () async {
           try {
             // get the file
-            await FilePicker.platform.clearTemporaryFiles();
+            try {
+              await FilePicker.platform.clearTemporaryFiles();
+            } catch (_) {
+              // ignore
+            }
             FilePickerResult? result = await FilePicker.platform.pickFiles(
               dialogTitle: "Select JSON File",
               type: FileType.any,
@@ -259,7 +271,22 @@ class _SettingsPageState extends State<SettingsPage> {
             String? path = result.paths.first;
             if (path == null) return;
             // ask the para model to load this db
-            final (ok, error) = await widget.paraModel.readJsonDB(path: path);
+            final json = await readJsonFromFilePath(path);
+            bool ok = true;
+            String error = "";
+
+            try {
+              if (json.containsKey("db")) {
+                widget.paraModel.resetfromJson(json["db"]);
+                Settings.instance.initFromJson(json["settings"]);
+              } else {
+                widget.paraModel.resetfromJson(json);
+              }
+            } catch (e) {
+              ok = false;
+              error = e.toString();
+            }
+
             if (ok) {
               if (mounted) {
                 // success message
