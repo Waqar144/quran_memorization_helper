@@ -115,7 +115,7 @@ class Settings extends ChangeNotifier {
     };
   }
 
-  void initFromJson(Map<String, dynamic> json) {
+  void initFromJson(Map<String, dynamic> json, {bool notify = false}) {
     int? currentReadingPara = json["currentReadingPara"];
     int? oldCurrentReadingPage = json["currentReadingScrollOffset"];
 
@@ -135,6 +135,10 @@ class Settings extends ChangeNotifier {
       _currentReadingPage = page;
     } else {
       _currentReadingPage = json["currentReadingPage"] ?? 0;
+    }
+
+    if (notify) {
+      notifyListeners();
     }
   }
 

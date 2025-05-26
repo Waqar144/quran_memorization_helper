@@ -144,9 +144,6 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  ThemeMode themeMode = Settings.instance.themeMode;
-  Mushaf selectedMushaf = Settings.instance.mushaf;
-
   void _showError(String message) async {
     await showDialog<void>(
       context: context,
@@ -259,8 +256,13 @@ class _SettingsPageState extends State<SettingsPage> {
 
             try {
               if (json.containsKey("db")) {
-                widget.paraModel.resetfromJson(json["db"]);
-                Settings.instance.initFromJson(json["settings"]);
+                setState(() {
+                  widget.paraModel.resetfromJson(json["db"]);
+                  Settings.instance.initFromJson(
+                    json["settings"],
+                    notify: true,
+                  );
+                });
               } else {
                 widget.paraModel.resetfromJson(json);
               }
@@ -300,10 +302,9 @@ class _SettingsPageState extends State<SettingsPage> {
         child: DropdownButton<ThemeMode>(
           isExpanded: true,
           borderRadius: const BorderRadius.all(Radius.circular(5)),
-          value: themeMode,
+          value: Settings.instance.themeMode,
           onChanged: (ThemeMode? val) {
             if (val != null) {
-              themeMode = val;
               Settings.instance.themeMode = val;
             }
           },
@@ -329,10 +330,9 @@ class _SettingsPageState extends State<SettingsPage> {
         child: DropdownButton<Mushaf>(
           isExpanded: true,
           borderRadius: const BorderRadius.all(Radius.circular(5)),
-          value: selectedMushaf,
+          value: Settings.instance.mushaf,
           onChanged: (Mushaf? val) {
             if (val != null) {
-              selectedMushaf = val;
               Settings.instance.mushaf = val;
             }
           },
