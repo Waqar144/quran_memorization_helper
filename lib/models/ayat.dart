@@ -280,12 +280,8 @@ class ParaAyatModel extends ChangeNotifier {
     }
   }
 
-  Future<String> saveToDisk({String? fileName}) async {
-    String path = await utils.saveJsonToDisk(
-      jsonStringify(),
-      fileName ?? "ayatsdb",
-    );
-    return path;
+  Future<void> saveToDisk({String? fileName}) async {
+    await utils.saveJsonToDisk(jsonStringify(), fileName ?? "ayatsdb");
   }
 
   String jsonStringify() =>

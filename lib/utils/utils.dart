@@ -4,17 +4,41 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:quran_memorization_helper/models/ayat.dart';
 import 'package:quran_memorization_helper/models/settings.dart';
+import 'package:downloadsfolder/downloadsfolder.dart' as df;
 
-Future<String> getDataDir() async {
+const String backupFileName = "quran_memorization_backup";
+
+Future<String> getBackupDir() async {
+  if (Platform.isAndroid) {
+    return (await df.getDownloadDirectory()).path;
+  }
   return (await getApplicationDocumentsDirectory()).path;
 }
 
-Future<String> saveJsonToDisk(String json, String fileName) async {
-  if (json.isEmpty) throw "Empty json";
-  Directory dir = await getApplicationDocumentsDirectory();
+Future<void> backupData(ParaAyatModel model) async {
+  Map<String, dynamic> json = {};
+  json['db'] = model.toJson();
+  json['settings'] = Settings.instance.toJson();
+  final jsonString = const JsonEncoder.withIndent("  ").convert(json);
 
-  final basePath = "${dir.path}${Platform.pathSeparator}";
+  final dir = await getBackupDir();
+  if (Platform.isAndroid) {
+    // On Android 28+, file renaming and other such tricks
+    // dont work so just do a simple file save
+    final basePath = "$dir${Platform.pathSeparator}";
+    File file = File("$basePath$backupFileName.json");
+    await file.writeAsString(jsonString);
+  } else {
+    await _saveJsonToPath(jsonString, dir, backupFileName);
+  }
+}
+
+Future<void> _saveJsonToPath(String json, String dir, String fileName) async {
+  if (json.isEmpty) throw "Empty json";
+
+  final basePath = "$dir${Platform.pathSeparator}";
 
   // 1. Write the file as filename_new
   final String newFilename = "${fileName}_new.json";
@@ -30,9 +54,12 @@ Future<String> saveJsonToDisk(String json, String fileName) async {
 
   // 3. Rename the new file fileName.json
   await f.rename("$basePath$fileName.json");
+}
 
-  // done
-  return path;
+Future<void> saveJsonToDisk(String json, String fileName) async {
+  if (json.isEmpty) throw "Empty json";
+  Directory dir = await getApplicationDocumentsDirectory();
+  _saveJsonToPath(json, dir.path, fileName);
 }
 
 Future<Map<String, dynamic>> readJsonFile(String fileName) async {

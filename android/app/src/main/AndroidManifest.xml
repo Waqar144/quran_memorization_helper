@@ -34,4 +34,5 @@
           android:name="io.flutter.embedding.android.EnableImpeller"
           android:value="false" />
     </application>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28"/>
 </manifest>

@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -147,7 +146,6 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   ThemeMode themeMode = Settings.instance.themeMode;
   Mushaf selectedMushaf = Settings.instance.mushaf;
-  static const platform = MethodChannel('org.quran_rev_helper/backupDB');
 
   void _showError(String message) async {
     await showDialog<void>(
@@ -186,64 +184,48 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Widget _createBackupWidget() {
     return ListTile(
-      title: const Text("Backup"),
-      subtitle:
-          Platform.isAndroid
-              ? const Text("Backup your data")
-              : FutureBuilder(
-                future: getDataDir(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    return Text.rich(
-                      TextSpan(
-                        children: [
-                          TextSpan(
-                            text: "Your data is automatically backed up at ",
-                          ),
-                          TextSpan(
-                            text: snapshot.data,
-                            style: TextStyle(
-                              inherit: true,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                  return const Text("Your data is automatically backed up");
-                },
+      title: const Text("Backup data"),
+      subtitle: FutureBuilder(
+        future: getBackupDir(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(text: "Your data is backed up at "),
+                  TextSpan(
+                    text: "${snapshot.data}/$backupFileName.json",
+                    style: TextStyle(
+                      inherit: true,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ],
               ),
-      trailing:
-          Platform.isAndroid
-              ? ElevatedButton(
-                onPressed: () async {
-                  try {
-                    Map<String, dynamic> json = {};
-                    json['db'] = widget.paraModel.toJson();
-                    json['settings'] = Settings.instance.toJson();
-                    final jsonString = const JsonEncoder.withIndent(
-                      "  ",
-                    ).convert(json);
-
-                    final res = await platform.invokeMethod('backupDB', {
-                      'data': jsonString,
-                    });
-                    if (res == "CANCELED") {
-                      return;
-                    }
-                    // success message
-                    if (mounted) {
-                      showSnackBarMessage(context, "Backup Succesful");
-                    }
-                  } catch (e) {
-                    // do nothing
-                    _showError("Error creating backup: $e");
-                  }
-                },
-                child: const Text("Backup"),
-              )
-              : null,
+            );
+          } else if (snapshot.hasError) {
+            return Text(
+              "Error when fetching backup location: ${snapshot.error}",
+            );
+          }
+          return const Text("Your data is automatically backed up at ...");
+        },
+      ),
+      trailing: ElevatedButton(
+        onPressed: () async {
+          try {
+            await backupData(widget.paraModel);
+            // success message
+            if (mounted) {
+              showSnackBarMessage(context, "Backup Succesful");
+            }
+          } catch (e) {
+            // do nothing
+            _showError("Error creating backup: $e");
+          }
+        },
+        child: const Text("Backup"),
+      ),
     );
   }
 
