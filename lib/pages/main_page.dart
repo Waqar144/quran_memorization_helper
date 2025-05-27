@@ -25,7 +25,7 @@ class _MainPageState extends State<MainPage>
   final ParaAyatModel _paraModel = ParaAyatModel();
   final ScrollController _scrollController = ScrollController();
   late final TabController _drawerTabController;
-  PageController _pageController = PageController(keepPage: false);
+  late PageController _pageController;
   Mushaf _currentFontStyle = Mushaf.Indopak16Line;
   bool _inLongPress = false;
   late final Future<void> _initialLoadFuture;
@@ -401,6 +401,20 @@ class _MainPageState extends State<MainPage>
       height: kToolbarHeight,
       child: _buildAppBar(),
     );
+  }
+
+  @override
+  void didUpdateWidget(covariant MainPage oldWidget) {
+    if (_pageController.initialPage != Settings.instance.currentReadingPage) {
+      // This is called right before build(), e.g., when hot reloading or when the
+      // widget is rebuilt because settings changed. Update the initialPage of the
+      // widget so that we dont end up jumping somewhere else
+      _pageController.dispose();
+      _pageController = PageController(
+        initialPage: Settings.instance.currentReadingPage,
+      );
+    }
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
