@@ -405,32 +405,36 @@ class _MainPageState extends State<MainPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor:
-          Theme.of(context).brightness == Brightness.dark ? Colors.black : null,
-      appBar: _buildAppBar(),
-      body: FutureBuilder<void>(
-        future: _initialLoadFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.done) {
-            return Center(child: const CircularProgressIndicator());
-          }
-          return CallbackShortcuts(
-            bindings: _shortcutBindings(),
-            child: Focus(
-              autofocus: true,
-              child: ReadQuranWidget(
-                _paraModel,
-                pageController: _pageController,
-                verticalScrollResetFn: _resetVerticalScrollToZero,
-                pageChangedCallback: _saveScrollPosition,
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor:
+            Theme.of(context).brightness == Brightness.dark
+                ? Colors.black
+                : null,
+        // appBar: _buildAppBar(),
+        body: FutureBuilder<void>(
+          future: _initialLoadFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              return Center(child: const CircularProgressIndicator());
+            }
+            return CallbackShortcuts(
+              bindings: _shortcutBindings(),
+              child: Focus(
+                autofocus: true,
+                child: ReadQuranWidget(
+                  _paraModel,
+                  pageController: _pageController,
+                  verticalScrollResetFn: _resetVerticalScrollToZero,
+                  pageChangedCallback: _saveScrollPosition,
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
+        bottomNavigationBar: _bottomAppBar(),
+        drawer: _buildDrawer(),
       ),
-      // bottomNavigationBar: _bottomAppBar(),
-      drawer: _buildDrawer(),
     );
   }
 }
