@@ -40,7 +40,6 @@ dependencies:
   file_picker: ^8.1.7
   wakelock_plus: ^1.1.4
   url_launcher: ^6.2.1
-  downloadsfolder: ^1.2.0
 
 dev_dependencies:
   flutter_test:

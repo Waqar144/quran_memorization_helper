@@ -181,37 +181,43 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Widget _createBackupWidget() {
     return ListTile(
-      title: const Text("Backup data"),
-      subtitle: FutureBuilder(
-        future: getBackupDir(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(text: "Your data is backed up at "),
-                  TextSpan(
-                    text: "${snapshot.data}/$backupFileName.json",
-                    style: TextStyle(
-                      inherit: true,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ],
+      title: const Text("Backup your data"),
+      subtitle:
+          Platform.isAndroid
+              ? const Text("Select backup file")
+              : FutureBuilder(
+                future: getBackupDir(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(text: "Your data is backed up at "),
+                          TextSpan(
+                            text: "${snapshot.data}/$backupFileName.json",
+                            style: TextStyle(
+                              inherit: true,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  } else if (snapshot.hasError) {
+                    return Text(
+                      "Error when fetching backup location: ${snapshot.error}",
+                    );
+                  }
+                  return const Text(
+                    "Your data is automatically backed up at ...",
+                  );
+                },
               ),
-            );
-          } else if (snapshot.hasError) {
-            return Text(
-              "Error when fetching backup location: ${snapshot.error}",
-            );
-          }
-          return const Text("Your data is automatically backed up at ...");
-        },
-      ),
       trailing: ElevatedButton(
         onPressed: () async {
           try {
-            await backupData(widget.paraModel);
+            final result = await backupData(widget.paraModel);
+            if (!result) return;
             // success message
             if (mounted) {
               showSnackBarMessage(context, "Backup Succesful");

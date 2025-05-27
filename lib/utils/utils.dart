@@ -3,36 +3,37 @@ import 'dart:convert';
 import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:quran_memorization_helper/models/ayat.dart';
 import 'package:quran_memorization_helper/models/settings.dart';
-import 'package:downloadsfolder/downloadsfolder.dart' as df;
 
 const String backupFileName = "quran_memorization_backup";
+const platform = MethodChannel('org.quran_rev_helper/backupDB');
 
 Future<String> getBackupDir() async {
   if (Platform.isAndroid) {
-    return (await df.getDownloadDirectory()).path;
+    throw "This method is not implemented for android";
   }
   return (await getApplicationDocumentsDirectory()).path;
 }
 
-Future<void> backupData(ParaAyatModel model) async {
+Future<bool> backupData(ParaAyatModel model) async {
   Map<String, dynamic> json = {};
   json['db'] = model.toJson();
   json['settings'] = Settings.instance.toJson();
   final jsonString = const JsonEncoder.withIndent("  ").convert(json);
 
-  final dir = await getBackupDir();
   if (Platform.isAndroid) {
-    // On Android 28+, file renaming and other such tricks
-    // dont work so just do a simple file save
-    final basePath = "$dir${Platform.pathSeparator}";
-    File file = File("$basePath$backupFileName.json");
-    await file.writeAsString(jsonString);
+    final res = await platform.invokeMethod('backupDB', {'data': jsonString});
+    if (res == "CANCELED") {
+      return false;
+    }
   } else {
+    final dir = await getBackupDir();
     await _saveJsonToPath(jsonString, dir, backupFileName);
   }
+  return true;
 }
 
 Future<void> _saveJsonToPath(String json, String dir, String fileName) async {

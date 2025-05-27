@@ -3,7 +3,6 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  downloadsfolder
   url_launcher_windows
 )
 
