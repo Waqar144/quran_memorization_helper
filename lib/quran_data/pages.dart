@@ -147,6 +147,7 @@ final Uint16List _para13LinePageOffsets = Uint16List.fromList([
   817, // 30
 ]);
 
+/// Returns para start page index
 int paraStartPage(int paraIdx, Mushaf mushaf) {
   final list = paraPageOffsetsList(mushaf);
   return list[paraIdx];
@@ -161,6 +162,7 @@ Uint16List paraPageOffsetsList(Mushaf mushaf) {
   };
 }
 
+/// Returns surah start page index
 int surahStartPage(int surahIdx, Mushaf mushaf) {
   final surahList = switch (mushaf) {
     Mushaf.Indopak16Line => surah16LinePageOffset,
@@ -169,6 +171,16 @@ int surahStartPage(int surahIdx, Mushaf mushaf) {
     Mushaf.Indopak13Line => surah13LinePageOffset,
   };
   return surahList[surahIdx];
+}
+
+/// Returns surah start page number for showing in UI
+int surahStartPageNumberUI(int surahIdx, Mushaf mushaf) {
+  final page = surahStartPage(surahIdx, mushaf);
+  final extra = switch (mushaf) {
+    Mushaf.Indopak13Line || Mushaf.Indopak15Line || Mushaf.Indopak16Line => 2,
+    Mushaf.Uthmani15Line => 1,
+  };
+  return page + extra;
 }
 
 int pageCountForPara(int paraIdx, Mushaf mushaf) {

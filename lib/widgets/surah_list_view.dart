@@ -19,13 +19,7 @@ class SurahListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mushaf = Settings.instance.mushaf;
-    final is16line = Settings.instance.mushaf == Mushaf.Indopak16Line;
-    final surahList = switch (Settings.instance.mushaf) {
-      Mushaf.Indopak16Line => surah16LinePageOffset,
-      Mushaf.Uthmani15Line => surah15LinePageOffset,
-      Mushaf.Indopak15Line => surah15LineIndopakPageOffset,
-      Mushaf.Indopak13Line => surah13LinePageOffset,
-    };
+    final isIndoPk = isIndoPak(mushaf);
     int currentSurah = surahForPage(currentPage, mushaf);
     double surahScrollTo =
         lastScrollPosition != null && lastSurah == currentSurah
@@ -46,14 +40,19 @@ class SurahListView extends StatelessWidget {
       itemCount: 114,
       itemExtent: 48,
       itemBuilder: (context, index) {
+        final surahName =
+            isIndoPk
+                ? surahDataForIdx(index, arabic: true).name
+                : String.fromCharCode(surahGlyphCode(index));
         return Directionality(
           textDirection: TextDirection.rtl,
           child: ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 15),
             leading: Text(
-              is16line
+              isIndoPk
                   ? "${toUrduNumber(index + 1)}$urduKhatma"
                   : "${toArabicNumber(index + 1)}$urduKhatma",
+              textDirection: TextDirection.rtl,
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Theme.of(context).textTheme.bodyMedium?.color,
@@ -63,15 +62,16 @@ class SurahListView extends StatelessWidget {
               ),
             ),
             title: Text(
-              String.fromCharCode(surahGlyphCode(index)),
+              surahName,
+              textDirection: TextDirection.rtl,
               style: TextStyle(
                 letterSpacing: 0,
-                fontSize: 28,
-                fontFamily: "SurahNames",
+                fontSize: isIndoPk ? 22 : 28,
+                fontFamily: isIndoPk ? getQuranFont() : "SurahNames",
               ),
             ),
             trailing: Text(
-              "${surahList[index] + 1}",
+              "${surahStartPageNumberUI(index, mushaf)}",
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 16,
