@@ -394,7 +394,6 @@ class _MainPageState extends State<MainPage>
     return AppBar(actions: _appBarActions());
   }
 
-  // ignore: unused_element
   BottomAppBar _bottomAppBar() {
     return BottomAppBar(
       padding: EdgeInsets.zero,
