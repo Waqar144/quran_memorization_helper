@@ -1015,11 +1015,6 @@ class _PageWidgetState extends State<PageWidget> {
         if (s.text == ' ') spaces++;
       }
       return (spaces > 0 ? diffW / (spaces) : 1).roundToDouble();
-    } else if (diffW < -10) {
-      if (diffW <= 20) {
-        return -1;
-      }
-      return -4;
     } else {
       return 2;
     }
