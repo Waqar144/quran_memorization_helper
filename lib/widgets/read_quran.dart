@@ -96,8 +96,8 @@ double _availableHeight(BuildContext context) {
       View.of(context).viewPadding.top / MediaQuery.devicePixelRatioOf(context);
   final padding = top + bottom + appBarHeight;
 
-  // dont go below 700, we will scroll if below
-  return max(700, MediaQuery.sizeOf(context).height - (padding));
+  // dont go below 650, we will scroll if below
+  return max(650, MediaQuery.sizeOf(context).height - (padding));
 }
 
 double _heightMultiplier() {
