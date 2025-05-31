@@ -1007,8 +1007,7 @@ class _PageWidgetState extends State<PageWidget> {
     textPainter.dispose();
 
     if (diffW > 10) {
-      if (isSurahLastLine(widget.pageIndex, lineIdx, mushaf) &&
-          diffW >= min(width, 700) / 3) {
+      if (isSurahLastLine(widget.pageIndex, lineIdx, mushaf)) {
         return 2;
       }
       int spaces = 0;
@@ -1295,7 +1294,7 @@ class _PageWidgetState extends State<PageWidget> {
               rowHeight,
               ayahData,
               fontSize,
-              rowWidth,
+              rowWidth - 8,
               defaultTextStyle,
               themeData,
               mushaf,
@@ -1334,7 +1333,7 @@ class _PageWidgetState extends State<PageWidget> {
           if (Settings.instance.reflowMode)
             const Divider(color: Colors.grey, height: 1),
           // The actual page text
-          ..._pageLines(rowHeight, rowWidth),
+          ..._pageLines(rowHeight, rowWidth - 8),
         ],
       ),
     );
