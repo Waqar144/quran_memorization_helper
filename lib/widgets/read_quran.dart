@@ -475,40 +475,42 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
     return widget.model.getAyahInDB(ayahIdx);
   }
 
+  static Future<Translation> _loadTranslation() async {
+    ByteBuffer transUtf8;
+    final isBundledTranslation = Settings.instance.translationFile.isEmpty;
+    if (isBundledTranslation) {
+      transUtf8 = (await rootBundle.load("assets/ur.jalandhry.txt")).buffer;
+    } else {
+      final data = File(Settings.instance.translationFile).readAsBytesSync();
+      transUtf8 = data.buffer;
+    }
+
+    List<int> transLineOffsets = [];
+    transLineOffsets.add(0);
+    int start = 0;
+    final utf = transUtf8.asUint8List();
+    int next = utf.indexOf(10);
+    while (next != -1) {
+      transLineOffsets.add(next);
+
+      start = next + 1;
+      next = utf.indexOf(10, start);
+    }
+
+    return Translation(
+      fileName: Settings.instance.translationFile,
+      transUtf8: transUtf8,
+      transLineOffsets: transLineOffsets,
+      isBundledTranslation: isBundledTranslation,
+    );
+  }
+
   void _onAyahLongPressed(int ayahIdx) async {
     int surahIdx = surahForAyah(ayahIdx);
     int surahAyah = toSurahAyahOffset(surahIdx, ayahIdx);
     List<Mutashabiha> mutashabihat = _getMutashabihaAyat(surahAyah, surahIdx);
 
-    if (_translation == null) {
-      ByteBuffer transUtf8;
-      final isBundledTranslation = Settings.instance.translationFile.isEmpty;
-      if (isBundledTranslation) {
-        transUtf8 = (await rootBundle.load("assets/ur.jalandhry.txt")).buffer;
-      } else {
-        final data = File(Settings.instance.translationFile).readAsBytesSync();
-        transUtf8 = data.buffer;
-      }
-
-      List<int> transLineOffsets = [];
-      transLineOffsets.add(0);
-      int start = 0;
-      final utf = transUtf8.asUint8List();
-      int next = utf.indexOf(10);
-      while (next != -1) {
-        transLineOffsets.add(next);
-
-        start = next + 1;
-        next = utf.indexOf(10, start);
-      }
-
-      _translation = Translation(
-        fileName: Settings.instance.translationFile,
-        transUtf8: transUtf8,
-        transLineOffsets: transLineOffsets,
-        isBundledTranslation: isBundledTranslation,
-      );
-    }
+    _translation ??= await _loadTranslation();
 
     for (int i = 0; i < mutashabihat.length; ++i) {
       mutashabihat[i].loadText();
