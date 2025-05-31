@@ -1275,11 +1275,12 @@ class _PageWidgetState extends State<PageWidget> {
       // except first line, as its the top border of page
       if (!isIndoPk && idx == 0) widgets.add(divider);
 
+      const double padding = 4;
       widgets.add(
         Container(
           height: rowHeight,
           width: double.infinity,
-          padding: const EdgeInsets.only(left: 4, right: 4),
+          padding: const EdgeInsets.only(left: padding, right: padding),
           decoration: leftRightBorder,
           child: FittedBox(
             fit: boxFit,
@@ -1289,7 +1290,7 @@ class _PageWidgetState extends State<PageWidget> {
               rowHeight,
               ayahData,
               fontSize,
-              rowWidth - 8,
+              rowWidth - (2 * padding),
               defaultTextStyle,
               themeData,
               mushaf,
@@ -1318,8 +1319,9 @@ class _PageWidgetState extends State<PageWidget> {
             /*topborder=*/ 24);
     final double rowHeight = max((height / numPageLines).floorToDouble(), 38.0);
     final double rowWidth = MediaQuery.sizeOf(context).width;
+    const double padding = 4;
     return Padding(
-      padding: const EdgeInsets.only(left: 4, right: 4),
+      padding: const EdgeInsets.only(left: padding, right: padding),
       child: ListView(
         children: [
           // Top border
@@ -1328,7 +1330,7 @@ class _PageWidgetState extends State<PageWidget> {
           if (Settings.instance.reflowMode)
             const Divider(color: Colors.grey, height: 1),
           // The actual page text
-          ..._pageLines(rowHeight, rowWidth - 8),
+          ..._pageLines(rowHeight, rowWidth - (2 * padding)),
         ],
       ),
     );
