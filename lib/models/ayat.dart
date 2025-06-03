@@ -252,9 +252,23 @@ class ParaAyatModel extends ChangeNotifier {
       else if (json['version'] == 1) {
         for (final a in (json['ayats'] as List? ?? [])) {
           final idx = a['idx'] as int;
-          final wordIdxes = <int>[
+          var wordIdxes = <int>[
             for (final w in a['words'] as List<dynamic>) w as int,
           ];
+
+          // Ensure all word indexes are valid
+          for (int i = 0; i < wordIdxes.length; ++i) {
+            if (!QuranText.instance.ayahContainsWordIndex(idx, wordIdxes[i])) {
+              wordIdxes[i] = 0;
+            }
+          }
+
+          // De-duplicate
+          if (wordIdxes.length > 1) {
+            wordIdxes = wordIdxes.toSet().toList();
+            wordIdxes.sort();
+          }
+
           _ayats.add(Ayat("", wordIdxes, ayahIdx: idx));
         }
         _bookmarks = [for (final b in json["bookmarks"] ?? []) b];

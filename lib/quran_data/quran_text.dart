@@ -24,6 +24,18 @@ class QuranText {
 
   int ayahCount() => _ayahs.length;
 
+  bool ayahContainsWordIndex(int ayahIndex, int wordIndex) {
+    if (ayahIndex < ayahCount() && wordIndex >= 0) {
+      final ayah = _ayahs[ayahIndex];
+      try {
+        return _offsetForWordIdx(ayah, wordIndex) >= 0;
+      } catch (_) {
+        return false;
+      }
+    }
+    return false;
+  }
+
   String spaceSplittedAyahText(int i) {
     return _ayahs[i].splitMapJoin("\u200c", onMatch: (_) => " ");
   }
