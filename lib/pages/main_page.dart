@@ -246,7 +246,7 @@ class _MainPageState extends State<MainPage>
     while (currentPage < totalPages) {
       if (_inLongPress == false) break;
       await func(
-        duration: const Duration(milliseconds: 100),
+        duration: const Duration(milliseconds: 120),
         curve: Curves.easeInOut,
       );
       currentPage += offset;
