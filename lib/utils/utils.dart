@@ -60,7 +60,7 @@ Future<void> _saveJsonToPath(String json, String dir, String fileName) async {
 Future<void> saveJsonToDisk(String json, String fileName) async {
   if (json.isEmpty) throw "Empty json";
   Directory dir = await getApplicationDocumentsDirectory();
-  _saveJsonToPath(json, dir.path, fileName);
+  await _saveJsonToPath(json, dir.path, fileName);
 }
 
 Future<Map<String, dynamic>> readJsonFile(String fileName) async {

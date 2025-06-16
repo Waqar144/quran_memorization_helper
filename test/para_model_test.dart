@@ -54,6 +54,7 @@ void main() {
       {"idx": 141, "words": [0]},
       {"idx": 144, "words": [0]}
   ],
+  "bookmarks": [],
   "version": 1
   }''');
     expect(diskJson, equals(expected));
