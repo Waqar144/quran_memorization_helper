@@ -301,19 +301,6 @@ class _LongPressActionSheetState extends State<LongPressActionSheet> {
   }
 }
 
-class CustomPageViewScrollPhysics extends ClampingScrollPhysics {
-  const CustomPageViewScrollPhysics({super.parent});
-
-  @override
-  CustomPageViewScrollPhysics applyTo(ScrollPhysics? ancestor) {
-    return CustomPageViewScrollPhysics(parent: buildParent(ancestor));
-  }
-
-  @override
-  SpringDescription get spring =>
-      const SpringDescription(mass: 100, stiffness: 100, damping: 1.2);
-}
-
 class LineAyah {
   final int ayahIndex;
   final String text;
@@ -675,7 +662,6 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
               itemCount: _pages.length,
               scrollBehavior:
                   const ScrollBehavior()..copyWith(overscroll: false),
-              physics: const CustomPageViewScrollPhysics(),
               itemBuilder: (ctx, index) {
                 return ExcludeSemantics(
                   child: PageWidget(
