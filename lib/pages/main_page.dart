@@ -290,10 +290,9 @@ class _MainPageState extends State<MainPage>
         onTapUpOutside: (_) => _appBarModel.arrowButtonTapUp(),
         onTapUpInside: (_) => _appBarModel.arrowButtonTapUp(),
         child: IconButton(
-          tooltip: "Next ${paraText()}",
+          tooltip: "Next page",
           icon: const Icon(Icons.arrow_back),
-          onPressed:
-              () => _appBarModel.nextPara(_pageController.page?.round() ?? 0),
+          onPressed: () => _appBarModel.nextPage(_pageController.page?.round()),
           onLongPress: () {
             int page = _pageController.page?.round() ?? 0;
             _appBarModel.longPressFwdBackButton(page, true);
@@ -304,11 +303,10 @@ class _MainPageState extends State<MainPage>
         onTapUpOutside: (_) => _appBarModel.arrowButtonTapUp(),
         onTapUpInside: (_) => _appBarModel.arrowButtonTapUp(),
         child: IconButton(
-          tooltip: "Previous ${paraText()}",
+          tooltip: "Previous page",
           icon: const Icon(Icons.arrow_forward),
           onPressed:
-              () =>
-                  _appBarModel.previousPara(_pageController.page?.round() ?? 0),
+              () => _appBarModel.previousPage(_pageController.page?.round()),
           onLongPress: () {
             int page = _pageController.page?.round() ?? 0;
             _appBarModel.longPressFwdBackButton(page, false);
