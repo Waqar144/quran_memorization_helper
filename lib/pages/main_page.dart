@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quran_memorization_helper/models/appbar.dart';
 import 'package:quran_memorization_helper/models/ayat.dart';
 import 'package:quran_memorization_helper/models/settings.dart';
 import 'package:quran_memorization_helper/pages/page_constants.dart';
@@ -25,9 +26,9 @@ class _MainPageState extends State<MainPage>
   final ParaAyatModel _paraModel = ParaAyatModel();
   final ScrollController _scrollController = ScrollController();
   late final TabController _drawerTabController;
+  late final AppBarModel _appBarModel;
   late PageController _pageController;
   Mushaf _currentFontStyle = Mushaf.Indopak16Line;
-  bool _inLongPress = false;
   late final Future<void> _initialLoadFuture;
 
   @override
@@ -67,6 +68,7 @@ class _MainPageState extends State<MainPage>
       int jumpToPage = Settings.instance.currentReadingPage;
       try {
         _pageController = PageController(initialPage: jumpToPage);
+        _appBarModel = AppBarModel(_paraModel, _goToPage);
       } catch (e) {
         showSnackBarMessage(context, error: true, "Error: $e");
       }
@@ -133,7 +135,7 @@ class _MainPageState extends State<MainPage>
             )
             as int?;
     if (page != null) {
-      _pageController.jumpToPage(page);
+      _goToPage(page, false);
     }
   }
 
@@ -142,7 +144,7 @@ class _MainPageState extends State<MainPage>
         await Navigator.pushNamed(context, bookmarksPage, arguments: _paraModel)
             as int?;
     if (res != null) {
-      _pageController.jumpToPage(res);
+      _goToPage(res, false);
     }
   }
 
@@ -172,84 +174,28 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  void _onSurahTapped(int surahIndex, {bool pop = true}) {
-    if (pop) Navigator.of(context).pop();
-    if (surahIndex < 0 || surahIndex > 113) {
-      return;
-    }
-    try {
+  void _onSurahTapped(int surahIndex) {
+    if (surahIndex >= 0 && surahIndex < 114) {
       final mushaf = Settings.instance.mushaf;
       int jumpToPage = surahStartPage(surahIndex, mushaf);
-      _pageController.jumpToPage(jumpToPage);
+      _goToPage(jumpToPage, false);
+    }
+  }
+
+  Future<void> _goToPage(int page, bool animate) async {
+    try {
+      if (animate) {
+        await _pageController.animateToPage(
+          page,
+          duration: const Duration(milliseconds: 130),
+          curve: Curves.easeInOut,
+        );
+      } else {
+        _pageController.jumpToPage(page);
+      }
     } catch (e) {
+      if (!mounted) return;
       showSnackBarMessage(context, error: true, "Error: $e");
-    }
-  }
-
-  void _nextPage() {
-    int? currentPage = _pageController.page?.floor();
-    final mushaf = Settings.instance.mushaf;
-    int totalPages = pageCount(mushaf);
-    int nextPage = (currentPage ?? -1) + 1;
-    if (nextPage >= totalPages) {
-      _pageController.jumpToPage(0);
-    } else {
-      _pageController.nextPage(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeInOut,
-      );
-    }
-  }
-
-  void _previousPage() {
-    int? currentPage = _pageController.page?.floor();
-    int previousPage = (currentPage ?? 1) - 1;
-    if (previousPage < 0) {
-      final mushaf = Settings.instance.mushaf;
-      _pageController.jumpToPage(pageCount(mushaf));
-    } else {
-      _pageController.previousPage(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeInOut,
-      );
-    }
-  }
-
-  void _nextPara() {
-    final mushaf = Settings.instance.mushaf;
-    final current = paraForPage(_pageController.page!.toInt(), mushaf);
-    if (current == 29) {
-      _pageController.jumpToPage(0);
-    } else {
-      _pageController.jumpToPage(paraStartPage(current + 1, mushaf));
-    }
-  }
-
-  void _previousPara() {
-    final mushaf = Settings.instance.mushaf;
-    final current = paraForPage(_pageController.page!.toInt(), mushaf);
-    if (current == 0) {
-      _pageController.jumpToPage(paraStartPage(29, mushaf));
-    } else {
-      _pageController.jumpToPage(paraStartPage(current - 1, mushaf));
-    }
-  }
-
-  void _longPressFwdBackButton(bool fwd) async {
-    _inLongPress = true;
-    int currentPage = _pageController.page?.floor() ?? 0;
-    final mushaf = Settings.instance.mushaf;
-    int totalPages = pageCount(mushaf);
-    final func = fwd ? _pageController.nextPage : _pageController.previousPage;
-    final offset = fwd ? 1 : -1;
-
-    while (currentPage < totalPages) {
-      if (_inLongPress == false) break;
-      await func(
-        duration: const Duration(milliseconds: 120),
-        curve: Curves.easeInOut,
-      );
-      currentPage += offset;
     }
   }
 
@@ -282,15 +228,16 @@ class _MainPageState extends State<MainPage>
                         currentParaIdx: currentParaIdx,
                         onParaTapped: (int idx) {
                           final mushaf = Settings.instance.mushaf;
-                          _pageController.jumpToPage(
-                            paraStartPage(idx, mushaf),
-                          );
+                          _goToPage(paraStartPage(idx, mushaf), false);
                           Navigator.of(context).pop();
                         },
                       ),
                       SurahListView(
                         currentPage: _pageController.page?.floor() ?? 0,
-                        onSurahTapped: _onSurahTapped,
+                        onSurahTapped: (int idx) {
+                          _onSurahTapped(idx);
+                          Navigator.of(context).pop();
+                        },
                       ),
                     ],
                   ),
@@ -305,31 +252,34 @@ class _MainPageState extends State<MainPage>
 
   Map<ShortcutActivator, VoidCallback> _shortcutBindings() {
     return <ShortcutActivator, VoidCallback>{
-      const SingleActivator(LogicalKeyboardKey.arrowLeft): _nextPage,
-      const SingleActivator(LogicalKeyboardKey.arrowRight): _previousPage,
-      const SingleActivator(LogicalKeyboardKey.pageDown): _nextPage,
-      const SingleActivator(LogicalKeyboardKey.pageUp): _previousPage,
-      const SingleActivator(LogicalKeyboardKey.home):
-          () => _pageController.jumpToPage(0),
+      const SingleActivator(LogicalKeyboardKey.arrowLeft):
+          () => _appBarModel.nextPage,
+      const SingleActivator(LogicalKeyboardKey.arrowRight):
+          () => _appBarModel.previousPage,
+      const SingleActivator(LogicalKeyboardKey.pageDown):
+          () => _appBarModel.nextPage,
+      const SingleActivator(LogicalKeyboardKey.pageUp):
+          () => _appBarModel.previousPage,
+      const SingleActivator(LogicalKeyboardKey.home): () => _goToPage(0, false),
       const SingleActivator(LogicalKeyboardKey.end): () {
-        _nextPara();
-        _previousPage();
+        _appBarModel.nextPara(_pageController.page?.round() ?? 0);
+        _appBarModel.previousPage(_pageController.page?.round());
       },
       const SingleActivator(LogicalKeyboardKey.arrowLeft, control: true):
-          _nextPara,
+          () => _appBarModel.nextPara,
       const SingleActivator(LogicalKeyboardKey.arrowRight, control: true):
-          _previousPara,
+          () => _appBarModel.previousPara,
       const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): () {
         final mushaf = Settings.instance.mushaf;
-        int currentPage = _pageController.page?.floor() ?? 0;
+        int currentPage = _pageController.page?.round() ?? 0;
         int currentSurah = surahForPage(currentPage, mushaf);
-        _onSurahTapped(currentSurah == 113 ? 0 : currentSurah + 1, pop: false);
+        _onSurahTapped(currentSurah == 113 ? 0 : currentSurah + 1);
       },
       const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): () {
         final mushaf = Settings.instance.mushaf;
-        int currentPage = _pageController.page?.floor() ?? 0;
+        int currentPage = _pageController.page?.round() ?? 0;
         int currentSurah = surahForPage(currentPage, mushaf);
-        _onSurahTapped(currentSurah == 0 ? 113 : currentSurah - 1, pop: false);
+        _onSurahTapped(currentSurah == 0 ? 113 : currentSurah - 1);
       },
     };
   }
@@ -337,45 +287,43 @@ class _MainPageState extends State<MainPage>
   List<Widget> _appBarActions() {
     return [
       TapRegion(
-        onTapUpOutside: (_) => _inLongPress = false,
-        onTapUpInside: (_) => _inLongPress = false,
+        onTapUpOutside: (_) => _appBarModel.arrowButtonTapUp(),
+        onTapUpInside: (_) => _appBarModel.arrowButtonTapUp(),
         child: IconButton(
           tooltip: "Next ${paraText()}",
           icon: const Icon(Icons.arrow_back),
-          onPressed: _nextPara,
-          onLongPress: () => _longPressFwdBackButton(true),
+          onPressed:
+              () => _appBarModel.nextPara(_pageController.page?.round() ?? 0),
+          onLongPress: () {
+            int page = _pageController.page?.round() ?? 0;
+            _appBarModel.longPressFwdBackButton(page, true);
+          },
         ),
       ),
       TapRegion(
-        onTapUpOutside: (_) => _inLongPress = false,
-        onTapUpInside: (_) => _inLongPress = false,
+        onTapUpOutside: (_) => _appBarModel.arrowButtonTapUp(),
+        onTapUpInside: (_) => _appBarModel.arrowButtonTapUp(),
         child: IconButton(
           tooltip: "Previous ${paraText()}",
           icon: const Icon(Icons.arrow_forward),
-          onPressed: _previousPara,
-          onLongPress: () => _longPressFwdBackButton(false),
+          onPressed:
+              () =>
+                  _appBarModel.previousPara(_pageController.page?.round() ?? 0),
+          onLongPress: () {
+            int page = _pageController.page?.round() ?? 0;
+            _appBarModel.longPressFwdBackButton(page, false);
+          },
         ),
       ),
       IconButton(
         tooltip: "Add Bookmark",
         icon: const Icon(Icons.bookmark),
-        onPressed: () {
-          final page = _pageController.page!.floor();
-          if (_paraModel.bookmarks.contains(page)) {
-            _paraModel.removeBookmark(page);
-          } else {
-            _paraModel.addBookmark(page);
-          }
-        },
+        onPressed:
+            () =>
+                _appBarModel.toggleBookmark(_pageController.page?.round() ?? 0),
       ),
       IconButton(
-        onPressed: () {
-          if (Theme.of(context).brightness == Brightness.dark) {
-            Settings.instance.themeMode = ThemeMode.light;
-          } else {
-            Settings.instance.themeMode = ThemeMode.dark;
-          }
-        },
+        onPressed: () => _appBarModel.changeTheme(context),
         icon: Icon(
           Theme.of(context).brightness == Brightness.light
               ? Icons.mode_night
@@ -390,15 +338,11 @@ class _MainPageState extends State<MainPage>
     ];
   }
 
-  AppBar _buildAppBar() {
-    return AppBar(actions: _appBarActions());
-  }
-
   BottomAppBar _bottomAppBar() {
     return BottomAppBar(
       padding: EdgeInsets.zero,
       height: kToolbarHeight,
-      child: _buildAppBar(),
+      child: AppBar(actions: _appBarActions()),
     );
   }
 
@@ -424,7 +368,6 @@ class _MainPageState extends State<MainPage>
             Theme.of(context).brightness == Brightness.dark
                 ? Colors.black
                 : null,
-        // appBar: _buildAppBar(),
         body: FutureBuilder<void>(
           future: _initialLoadFuture,
           builder: (context, snapshot) {
