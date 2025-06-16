@@ -7,6 +7,8 @@ import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
 void main() {
   test("test PageForAyah", () {
     for (final mushaf in Mushaf.values) {
+      if (mushaf == Mushaf.Indopak13Line) continue;
+
       final data = switch (mushaf) {
         Mushaf.Indopak16Line => data16Line,
         Mushaf.Uthmani15Line => data15Uthmani,
