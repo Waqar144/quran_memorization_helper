@@ -284,18 +284,46 @@ class _LongPressActionSheetState extends State<LongPressActionSheet> {
           label: Text("$metadata on Quran.com"),
         );
 
+        const animDuration = Duration(milliseconds: 150);
+        const curve = Curves.easeIn;
+        final nextPageButton = FilledButton(
+          child: const Icon(Icons.arrow_back),
+          onPressed: () {
+            _controller.nextPage(duration: animDuration, curve: curve);
+          },
+        );
+        final prevPageButton = FilledButton(
+          child: const Icon(Icons.arrow_forward),
+          onPressed: () {
+            _controller.previousPage(duration: animDuration, curve: curve);
+          },
+        );
+
+        List<Widget> listChildren;
+
         if (widget.tappedAyahIdx == ayah && widget.mutashabihaList != null) {
-          return ListView(
-            children: [
-              openOnQuranCom,
-              translationWidget,
-              const Divider(),
-              widget.mutashabihaList!,
-            ],
-          );
+          listChildren = [
+            openOnQuranCom,
+            translationWidget,
+            const Divider(),
+            widget.mutashabihaList!,
+          ];
+        } else {
+          listChildren = [openOnQuranCom, translationWidget];
         }
 
-        return ListView(children: [openOnQuranCom, translationWidget]);
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Expanded(child: ListView(children: listChildren)),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [nextPageButton, const Spacer(), prevPageButton],
+              ),
+            ),
+          ],
+        );
       },
     );
   }
