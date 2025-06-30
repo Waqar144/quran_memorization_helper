@@ -18,10 +18,11 @@ class MainPage extends StatefulWidget {
   const MainPage({super.key});
 
   @override
-  State<MainPage> createState() => _MainPageState();
+  State<MainPage> createState() => MainPageState();
 }
 
-class _MainPageState extends State<MainPage>
+@visibleForTesting
+class MainPageState extends State<MainPage>
     with WidgetsBindingObserver, TickerProviderStateMixin {
   final ParaAyatModel _paraModel = ParaAyatModel();
   final ScrollController _scrollController = ScrollController();
@@ -30,6 +31,9 @@ class _MainPageState extends State<MainPage>
   late PageController _pageController;
   Mushaf _currentFontStyle = Mushaf.Indopak16Line;
   late final Future<void> _initialLoadFuture;
+
+  ParaAyatModel get model => _paraModel;
+  Future<void> get initialLoadFuture => _initialLoadFuture;
 
   @override
   void initState() {
