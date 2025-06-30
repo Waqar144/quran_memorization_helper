@@ -1214,7 +1214,7 @@ class _PageWidgetState extends State<PageWidget> {
       }
       return 34.0;
     } else if (Settings.instance.mushaf == Mushaf.Uthmani15Line) {
-      return 30.0;
+      return 28.0;
     } else {
       return 26.0;
     }
