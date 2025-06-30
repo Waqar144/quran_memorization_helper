@@ -1033,7 +1033,14 @@ class _PageWidgetState extends State<PageWidget> {
       }
       return (spaces > 0 ? diffW / (spaces) : 1).roundToDouble();
     } else {
-      return 2;
+      diffW = diffW.abs();
+      if (diffW < 10) {
+        return 2;
+      } else if (diffW < 20) {
+        return 1;
+      } else {
+        return 0;
+      }
     }
   }
 
