@@ -441,7 +441,7 @@ class _SettingsPageState extends State<SettingsPage> {
     return const ListTile(
       leading: Icon(Icons.translate),
       title: Text("Default Translation"),
-      subtitle: Text("Fateh Muhammad Jalandhari (Urdu)"),
+      subtitle: Text("Muhammad Junagarhi (Urdu)"),
     );
   }
 

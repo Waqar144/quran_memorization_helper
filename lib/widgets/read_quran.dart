@@ -494,7 +494,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
     ByteBuffer transUtf8;
     final isBundledTranslation = Settings.instance.translationFile.isEmpty;
     if (isBundledTranslation) {
-      transUtf8 = (await rootBundle.load("assets/ur.jalandhry.txt")).buffer;
+      transUtf8 = (await rootBundle.load("assets/ur.junagarhi.txt")).buffer;
     } else {
       final data = File(Settings.instance.translationFile).readAsBytesSync();
       transUtf8 = data.buffer;

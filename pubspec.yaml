@@ -70,7 +70,7 @@ flutter:
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
   assets:
-    - assets/ur.jalandhry.txt
+    - assets/ur.junagarhi.txt
     - assets/mutashabiha_data.json
     - android/app/src/main/res/mipmap-hdpi/ic_launcher.png
 
