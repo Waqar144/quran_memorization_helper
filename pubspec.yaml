@@ -92,9 +92,6 @@ flutter:
     - family: Uthmanic
       fonts:
         - asset: fonts/Digital Khatt V2 Font.otf
-    - family: AyahNumber
-      fonts:
-        - asset: fonts/ayahNumFont.ttf
     - family: Urdu
       fonts:
         - asset: fonts/Mehr_Nastaliq_Web v. 2.0.ttf
