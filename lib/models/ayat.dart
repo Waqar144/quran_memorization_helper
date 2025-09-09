@@ -73,6 +73,7 @@ class ParaAyatModel extends ChangeNotifier {
     for (final page in pages) {
       _bookmarks.remove(page);
     }
+    _bookmarks.sort();
     notifyListeners();
     persist();
   }

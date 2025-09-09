@@ -56,12 +56,19 @@ class _BookmarksPageState extends State<BookmarksPage> {
   void _onDeletePress() {
     final bookmarks = widget.model.bookmarks;
     List<int> toDelete = [];
-    for (final (i, isSelected) in _selectionState.reversed.indexed) {
+    for (final (i, isSelected) in _selectionState.indexed) {
       if (isSelected) {
         toDelete.add(bookmarks[i]);
       }
     }
+
+    if (toDelete.isEmpty) return;
+
     setState(() {
+      // clear selection
+      for (int i = 0; i < _selectionState.length; ++i) {
+        _selectionState[i] = false;
+      }
       widget.model.removeBookmarks(toDelete);
       if (widget.model.bookmarks.isEmpty) {
         _selectionMode = false;
