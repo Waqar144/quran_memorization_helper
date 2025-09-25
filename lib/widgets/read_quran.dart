@@ -9,6 +9,7 @@ import 'package:quran_memorization_helper/models/settings.dart';
 import 'package:quran_memorization_helper/models/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/pages.dart';
 import 'package:quran_memorization_helper/quran_data/quran_text.dart';
+import 'package:quran_memorization_helper/quran_data/salasa_nisf_ruba_data.dart';
 import 'package:quran_memorization_helper/quran_data/surahs.dart';
 import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
@@ -942,6 +943,24 @@ class _PageWidgetState extends State<PageWidget> {
         TextStyle? style;
 
         if (w.contains("\u06dd")) {
+          if (isIndoPk) {
+            final kind = isPortion(a.ayahIndex);
+            if (kind != PortionKind.none) {
+              glyphForPortionKind(kind);
+              spans.add(
+                TextSpan(
+                  text: glyphForPortionKind(kind),
+                  style: TextStyle(
+                    backgroundColor:
+                        (darkMode
+                            ? Colors.lightGreen.withAlpha(180)
+                            : Colors.lightGreen),
+                  ),
+                ),
+              );
+            }
+          }
+
           final ruku = isIndoPk ? getRukuData(a.ayahIndex) : null;
           final hasRukuMarker = ruku != null;
           spans.add(
