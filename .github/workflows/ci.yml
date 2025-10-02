@@ -1,0 +1,31 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  CI_Build:
+    name: CI_Build
+    runs-on: ubuntu-latest
+    env:
+      # Setup env variables that will be used throughout the workflow
+      JAVA_VERSION: 21.0
+      # FLUTTER_VERSION: 3.29.2
+    steps:
+      # Checkout repository codebase
+      - name: Checkout the code
+        uses: actions/checkout@v3
+
+      # Setup Java in the VM
+      - name: Setup Java to compile the Android project
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: ${{ env.JAVA_VERSION }}
+
+      # Setup Flutter in the VM
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - name: 📦 Install dependencies
+        run: flutter pub get
+      - name: 📉 Run all app tests
+        run: flutter test
