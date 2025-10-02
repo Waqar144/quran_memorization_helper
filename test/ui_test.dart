@@ -13,6 +13,11 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 void main() {
   setUpAll(() async {
     PathProviderPlatform.instance = FakePath();
+    FakePath.deleteFiles();
+  });
+
+  tearDownAll(() {
+    FakePath.deleteFiles();
   });
 
   testWidgets('Ui_Unit_Test', (tester) async {
@@ -111,6 +116,8 @@ void main() {
       print("Ui_Unit_Test Ok");
     });
   });
+
+  FakePath.deleteFiles();
 }
 
 class FakePath extends Fake
@@ -119,5 +126,19 @@ class FakePath extends Fake
   @override
   Future<String> getApplicationDocumentsPath() async {
     return Directory.current.path;
+  }
+
+  static void deleteFiles() {
+    final basePath = "${Directory.current.path}${Platform.pathSeparator}";
+    void deleteFile(String path) {
+      if (File(path).existsSync()) {
+        File(path).deleteSync();
+      }
+    }
+
+    print(basePath);
+    deleteFile("${basePath}ayatsdb.json");
+    deleteFile("${basePath}ayatsdb_new.json");
+    deleteFile("${basePath}ayatsdb_bck.json");
   }
 }
