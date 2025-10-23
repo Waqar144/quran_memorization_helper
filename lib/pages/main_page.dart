@@ -364,13 +364,11 @@ class MainPageState extends State<MainPage>
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor:
-            Theme.of(context).brightness == Brightness.dark
-                ? Colors.black
-                : null,
-        body: FutureBuilder<void>(
+    return Scaffold(
+      backgroundColor:
+          Theme.of(context).brightness == Brightness.dark ? Colors.black : null,
+      body: SafeArea(
+        child: FutureBuilder<void>(
           future: _initialLoadFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState != ConnectionState.done) {
@@ -390,9 +388,9 @@ class MainPageState extends State<MainPage>
             );
           },
         ),
-        bottomNavigationBar: _bottomAppBar(),
-        drawer: _buildDrawer(),
       ),
+      bottomNavigationBar: _bottomAppBar(),
+      drawer: _buildDrawer(),
     );
   }
 }
