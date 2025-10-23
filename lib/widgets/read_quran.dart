@@ -89,12 +89,12 @@ TextStyle _mutStyle(bool dark) {
 double _availableHeight(BuildContext context) {
   // top,bottom padding, will include notch and stuff
   final mqPadding = MediaQuery.paddingOf(context);
-  final double top = mqPadding.top;
-  final double bottom = mqPadding.bottom;
+  final viewPadding = View.of(context).viewPadding;
+  final dpr = MediaQuery.devicePixelRatioOf(context);
+  final double top = (viewPadding.top / dpr) + mqPadding.top;
+  final double bottom = (viewPadding.bottom / dpr) + mqPadding.bottom;
 
-  final appBarHeight =
-      56 +
-      View.of(context).viewPadding.top / MediaQuery.devicePixelRatioOf(context);
+  final appBarHeight = kToolbarHeight;
   final padding = top + bottom + appBarHeight;
 
   // dont go below 650, we will scroll if below
