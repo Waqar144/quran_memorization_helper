@@ -1366,6 +1366,7 @@ class _PageWidgetState extends State<PageWidget> {
     return Padding(
       padding: const EdgeInsets.only(left: padding, right: padding),
       child: ListView(
+        physics: const ClampingScrollPhysics(),
         children: [
           // Top border
           _pageTopBorder(),
