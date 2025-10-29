@@ -14,6 +14,31 @@ import 'package:quran_memorization_helper/widgets/para_list_view.dart';
 import 'package:quran_memorization_helper/utils/utils.dart';
 import 'package:flutter/services.dart' show LogicalKeyboardKey;
 
+class MyOrientationBuilder extends StatelessWidget {
+  const MyOrientationBuilder({super.key, required this.builder});
+
+  final OrientationWidgetBuilder builder;
+
+  Widget _buildWithConstraints(
+    BuildContext context,
+    BoxConstraints constraints,
+  ) {
+    // If the constraints are fully unbounded (i.e., maxWidth and maxHeight are
+    // both infinite), we prefer Orientation.portrait because its more common to
+    // scroll vertically then horizontally.
+    final Orientation orientation =
+        constraints.maxWidth > (constraints.maxHeight * 1.2)
+        ? Orientation.landscape
+        : Orientation.portrait;
+    return builder(context, orientation);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: _buildWithConstraints);
+  }
+}
+
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
 
@@ -187,6 +212,9 @@ class MainPageState extends State<MainPage>
   }
 
   Future<void> _goToPage(int page, bool animate) async {
+    int x = page;
+    page = mapToDualModePage(page);
+    print("mapped to : $x => $page");
     try {
       if (animate) {
         await _pageController.animateToPage(
@@ -220,7 +248,10 @@ class MainPageState extends State<MainPage>
                   height: 50,
                   child: TabBar(
                     controller: _drawerTabController,
-                    tabs: [Tab(text: paraText()), Tab(text: "Surah")],
+                    tabs: [
+                      Tab(text: paraText()),
+                      Tab(text: "Surah"),
+                    ],
                   ),
                 ),
                 Expanded(
@@ -256,23 +287,23 @@ class MainPageState extends State<MainPage>
 
   Map<ShortcutActivator, VoidCallback> _shortcutBindings() {
     return <ShortcutActivator, VoidCallback>{
-      const SingleActivator(LogicalKeyboardKey.arrowLeft):
-          () => _appBarModel.nextPage,
-      const SingleActivator(LogicalKeyboardKey.arrowRight):
-          () => _appBarModel.previousPage,
-      const SingleActivator(LogicalKeyboardKey.pageDown):
-          () => _appBarModel.nextPage,
-      const SingleActivator(LogicalKeyboardKey.pageUp):
-          () => _appBarModel.previousPage,
+      const SingleActivator(LogicalKeyboardKey.arrowLeft): () =>
+          _appBarModel.nextPage,
+      const SingleActivator(LogicalKeyboardKey.arrowRight): () =>
+          _appBarModel.previousPage,
+      const SingleActivator(LogicalKeyboardKey.pageDown): () =>
+          _appBarModel.nextPage,
+      const SingleActivator(LogicalKeyboardKey.pageUp): () =>
+          _appBarModel.previousPage,
       const SingleActivator(LogicalKeyboardKey.home): () => _goToPage(0, false),
       const SingleActivator(LogicalKeyboardKey.end): () {
         _appBarModel.nextPara(_pageController.page?.round() ?? 0);
         _appBarModel.previousPage(_pageController.page?.round());
       },
-      const SingleActivator(LogicalKeyboardKey.arrowLeft, control: true):
-          () => _appBarModel.nextPara,
-      const SingleActivator(LogicalKeyboardKey.arrowRight, control: true):
-          () => _appBarModel.previousPara,
+      const SingleActivator(LogicalKeyboardKey.arrowLeft, control: true): () =>
+          _appBarModel.nextPara,
+      const SingleActivator(LogicalKeyboardKey.arrowRight, control: true): () =>
+          _appBarModel.previousPara,
       const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): () {
         final mushaf = Settings.instance.mushaf;
         int currentPage = _pageController.page?.round() ?? 0;
@@ -309,8 +340,8 @@ class MainPageState extends State<MainPage>
         child: IconButton(
           tooltip: "Previous page",
           icon: const Icon(Icons.arrow_forward),
-          onPressed:
-              () => _appBarModel.previousPage(_pageController.page?.round()),
+          onPressed: () =>
+              _appBarModel.previousPage(_pageController.page?.round()),
           onLongPress: () {
             int page = _pageController.page?.round() ?? 0;
             _appBarModel.longPressFwdBackButton(page, false);
@@ -320,9 +351,8 @@ class MainPageState extends State<MainPage>
       IconButton(
         tooltip: "Add Bookmark",
         icon: const Icon(Icons.bookmark),
-        onPressed:
-            () =>
-                _appBarModel.toggleBookmark(_pageController.page?.round() ?? 0),
+        onPressed: () =>
+            _appBarModel.toggleBookmark(_pageController.page?.round() ?? 0),
       ),
       IconButton(
         onPressed: () => _appBarModel.changeTheme(context),
@@ -331,10 +361,9 @@ class MainPageState extends State<MainPage>
               ? Icons.mode_night
               : Icons.light_mode,
         ),
-        tooltip:
-            Theme.of(context).brightness == Brightness.light
-                ? "Switch to night mode"
-                : "Switch to light mode",
+        tooltip: Theme.of(context).brightness == Brightness.light
+            ? "Switch to night mode"
+            : "Switch to light mode",
       ),
       buildThreeDotMenu(),
     ];
@@ -365,8 +394,9 @@ class MainPageState extends State<MainPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:
-          Theme.of(context).brightness == Brightness.dark ? Colors.black : null,
+      backgroundColor: Theme.of(context).brightness == Brightness.dark
+          ? Colors.black
+          : null,
       body: SafeArea(
         child: FutureBuilder<void>(
           future: _initialLoadFuture,
@@ -378,11 +408,19 @@ class MainPageState extends State<MainPage>
               bindings: _shortcutBindings(),
               child: Focus(
                 autofocus: true,
-                child: ReadQuranWidget(
-                  _paraModel,
-                  pageController: _pageController,
-                  verticalScrollResetFn: _resetVerticalScrollToZero,
-                  pageChangedCallback: _saveScrollPosition,
+                child: MyOrientationBuilder(
+                  builder: (context, orientation) {
+                    Settings.instance.temporaryState.dualPage =
+                        orientation == Orientation.landscape;
+
+                    return ReadQuranWidget(
+                      _paraModel,
+                      pageController: _pageController,
+                      verticalScrollResetFn: _resetVerticalScrollToZero,
+                      pageChangedCallback: _saveScrollPosition,
+                      orientation: orientation,
+                    );
+                  },
                 ),
               ),
             );

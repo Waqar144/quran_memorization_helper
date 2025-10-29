@@ -165,15 +165,14 @@ class _TranslationTileState extends State<TranslationTile> {
       Text(
         widget.translation.trim(),
         textDirection: widget.isUrduTranslation ? TextDirection.rtl : null,
-        style:
-            widget.isUrduTranslation
-                ? const TextStyle(
-                  fontFamily: "Urdu",
-                  fontSize: 22,
-                  letterSpacing: 0.0,
-                  height: 1.8,
-                )
-                : null,
+        style: widget.isUrduTranslation
+            ? const TextStyle(
+                fontFamily: "Urdu",
+                fontSize: 22,
+                letterSpacing: 0.0,
+                height: 1.8,
+              )
+            : null,
       ),
     ];
 
@@ -352,6 +351,7 @@ class ReadQuranWidget extends StatefulWidget {
   final PageController pageController;
   final VoidCallback verticalScrollResetFn;
   final Function(int) pageChangedCallback;
+  final Orientation orientation;
 
   const ReadQuranWidget(
     this.model, {
@@ -359,6 +359,7 @@ class ReadQuranWidget extends StatefulWidget {
     super.key,
     required this.verticalScrollResetFn,
     required this.pageChangedCallback,
+    required this.orientation,
   });
 
   @override
@@ -368,6 +369,7 @@ class ReadQuranWidget extends StatefulWidget {
 class _ReadQuranWidget extends State<ReadQuranWidget>
     with SingleTickerProviderStateMixin {
   List<layout.Page> _pages = [];
+  List<(int, int)> _dualPages = [];
   List<Mutashabiha> _mutashabihat = [];
   Translation? _translation;
   final _repaintNotifier = StreamController<int>.broadcast();
@@ -434,10 +436,24 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
     };
   }
 
-  Future<List<layout.Page>> doload() async {
+  Future<Object> doload() async {
     // we lazy load the mutashabiha ayat text
     _pages = _getPageLayoutList();
     _mutashabihat = await importAllMutashabihat();
+
+    _dualPages = [];
+    if (Settings.instance.temporaryState.dualPage) {
+      int i = 0;
+      for (; i + 2 < _pages.length; i += 2) {
+        _dualPages.add((i + 1, i));
+      }
+
+      if (i < _pages.length) {
+        _dualPages.add((i + 1, i));
+      }
+      return _dualPages;
+    }
+
     return _pages;
   }
 
@@ -663,6 +679,29 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
     return pageLines;
   }
 
+  Widget _getPageWidget(int index) {
+    if (index >= _pages.length || index < 0) {
+      return const SizedBox.shrink();
+    }
+    return PageWidget(
+      index,
+      _pages[index].pageNum,
+      _linesForPage(_pages, index),
+      getAyatInDB: _getAyatInDB,
+      onAyahTapped: _onAyahTapped,
+      isMutashabihaAyat: _isMutashabihaAyat,
+      repaintStream: _repaintNotifier.stream,
+      isBookmarked: () => widget.model.bookmarks.contains(index),
+      onToggleBookmark: () {
+        if (widget.model.bookmarks.contains(index)) {
+          widget.model.removeBookmark(index);
+        } else {
+          widget.model.addBookmark(index);
+        }
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // set to true when swiping to load next para
@@ -673,6 +712,8 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
             snapshot.connectionState != ConnectionState.done) {
           return SizedBox.shrink();
         }
+        final bool isDualPage = snapshot.data is List<(int, int)>;
+
         return SizedBox(
           height: _availableHeight(context) * _heightMultiplier(),
           child: NotificationListener<OverscrollNotification>(
@@ -701,29 +742,24 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
               },
               controller: widget.pageController,
               reverse: true,
-              itemCount: _pages.length,
-              scrollBehavior:
-                  const ScrollBehavior()..copyWith(overscroll: false),
+              itemCount: isDualPage ? _dualPages.length : _pages.length,
+              scrollBehavior: const ScrollBehavior()
+                ..copyWith(overscroll: false),
               itemBuilder: (ctx, index) {
-                return ExcludeSemantics(
-                  child: PageWidget(
-                    index,
-                    _pages[index].pageNum,
-                    _linesForPage(_pages, index),
-                    getAyatInDB: _getAyatInDB,
-                    onAyahTapped: _onAyahTapped,
-                    isMutashabihaAyat: _isMutashabihaAyat,
-                    repaintStream: _repaintNotifier.stream,
-                    isBookmarked: () => widget.model.bookmarks.contains(index),
-                    onToggleBookmark: () {
-                      if (widget.model.bookmarks.contains(index)) {
-                        widget.model.removeBookmark(index);
-                      } else {
-                        widget.model.addBookmark(index);
-                      }
-                    },
-                  ),
-                );
+                if (isDualPage) {
+                  final (first, second) = _dualPages[index];
+                  return SizedBox(
+                    width: MediaQuery.widthOf(context),
+                    child: Row(
+                      children: [
+                        Expanded(child: _getPageWidget(first)),
+                        Expanded(child: _getPageWidget(second)),
+                      ],
+                    ),
+                  );
+                } else {
+                  return ExcludeSemantics(child: _getPageWidget(index));
+                }
               },
             ),
           ),
@@ -964,10 +1000,9 @@ class _PageWidgetState extends State<PageWidget> {
                 TextSpan(
                   text: glyphForPortionKind(kind),
                   style: TextStyle(
-                    backgroundColor:
-                        (darkMode
-                            ? Colors.lightGreen.withAlpha(180)
-                            : Colors.lightGreen),
+                    backgroundColor: (darkMode
+                        ? Colors.lightGreen.withAlpha(180)
+                        : Colors.lightGreen),
                   ),
                 ),
               );
@@ -979,23 +1014,20 @@ class _PageWidgetState extends State<PageWidget> {
           spans.add(
             TextSpan(
               text: hasRukuMarker ? " $w" : w,
-              recognizer:
-                  hasRukuMarker
-                      ? (TapGestureRecognizer()
-                        ..onTap = () => _onRukuTapped(a.ayahIndex))
-                      : null,
+              recognizer: hasRukuMarker
+                  ? (TapGestureRecognizer()
+                      ..onTap = () => _onRukuTapped(a.ayahIndex))
+                  : null,
               style: TextStyle(
                 inherit: true,
-                color:
-                    isIndoPk
-                        ? themeData.textTheme.bodyMedium?.color
-                        : Colors.black,
-                backgroundColor:
-                    hasRukuMarker
-                        ? (darkMode
-                            ? Colors.amber.shade700.withAlpha(125)
-                            : Colors.amber.shade100)
-                        : null,
+                color: isIndoPk
+                    ? themeData.textTheme.bodyMedium?.color
+                    : Colors.black,
+                backgroundColor: hasRukuMarker
+                    ? (darkMode
+                          ? Colors.amber.shade700.withAlpha(125)
+                          : Colors.amber.shade100)
+                    : null,
               ),
             ),
           );
@@ -1095,10 +1127,9 @@ class _PageWidgetState extends State<PageWidget> {
     );
     // dont try to space first two pages
     int firstTwo = Settings.instance.mushaf == Mushaf.Indopak16Line ? 3 : 2;
-    final wordSpacing =
-        widget.pageNumber < firstTwo
-            ? 1.0
-            : _getWordSpacing(lineIdx, spans, width, style, mushaf);
+    final wordSpacing = widget.pageNumber < firstTwo
+        ? 1.0
+        : _getWordSpacing(lineIdx, spans, width, style, mushaf);
 
     return Text.rich(
       TextSpan(children: spans),
@@ -1138,14 +1169,13 @@ class _PageWidgetState extends State<PageWidget> {
             ),
           ),
           Expanded(
-            child:
-                widget.isBookmarked()
-                    ? const Icon(
-                      Icons.bookmark_added,
-                      size: 24,
-                      color: Colors.orange,
-                    )
-                    : Container(),
+            child: widget.isBookmarked()
+                ? const Icon(
+                    Icons.bookmark_added,
+                    size: 24,
+                    color: Colors.orange,
+                  )
+                : Container(),
           ),
           InkWell(
             onTap: widget.onToggleBookmark,
@@ -1277,10 +1307,9 @@ class _PageWidgetState extends State<PageWidget> {
           final int surahAyahIdx = toSurahAyahOffset(surahIdx, a.ayahIndex);
           final Ayat? ayahInDb = widget.getAyatInDB(a.ayahIndex);
           final text = QuranText.instance.ayahText(a.ayahIndex);
-          final bool isMutashabihaAyat =
-              colorMutashabihat
-                  ? widget.isMutashabihaAyat(surahAyahIdx, surahIdx)
-                  : false;
+          final bool isMutashabihaAyat = colorMutashabihat
+              ? widget.isMutashabihaAyat(surahAyahIdx, surahIdx)
+              : false;
 
           ayahData.add((
             a.ayahIndex,
