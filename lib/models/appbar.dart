@@ -19,6 +19,10 @@ class AppBarModel {
   }
 
   void toggleBookmark(int page) {
+    if (Settings.instance.temporaryState.dualPage) {
+      page *= 2;
+    }
+
     if (model.bookmarks.contains(page)) {
       model.removeBookmark(page);
     } else {
@@ -28,8 +32,15 @@ class AppBarModel {
 
   void nextPage(int? currentPage) {
     final mushaf = Settings.instance.mushaf;
+    final dualPageMode = Settings.instance.temporaryState.dualPage;
+
     int totalPages = pageCount(mushaf);
     int nextPage = (currentPage ?? -1) + 1;
+
+    if (dualPageMode) {
+      nextPage *= 2;
+    }
+
     bool animate = true;
     if (nextPage >= totalPages) {
       nextPage = 0;
@@ -39,7 +50,13 @@ class AppBarModel {
   }
 
   void previousPage(int? currentPage) {
+    final dualPageMode = Settings.instance.temporaryState.dualPage;
     int previousPage = (currentPage ?? 1) - 1;
+
+    if (dualPageMode) {
+      previousPage *= 2;
+    }
+
     bool animate = true;
     if (previousPage < 0) {
       animate = false;
@@ -69,10 +86,12 @@ class AppBarModel {
     final mushaf = Settings.instance.mushaf;
     int totalPages = pageCount(mushaf);
     final offset = fwd ? 1 : -1;
+    final dualPageMode = Settings.instance.temporaryState.dualPage;
+    final multiplier = dualPageMode ? 2 : 1;
 
     while (currentPage < totalPages && currentPage >= 0) {
       if (_inLongPress == false) break;
-      await goToPage(currentPage, true);
+      await goToPage(currentPage * multiplier, true);
       currentPage += offset;
     }
   }

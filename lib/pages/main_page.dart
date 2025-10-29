@@ -15,6 +15,31 @@ import 'package:quran_memorization_helper/widgets/para_list_view.dart';
 import 'package:quran_memorization_helper/utils/utils.dart';
 import 'package:flutter/services.dart' show LogicalKeyboardKey;
 
+class MyOrientationBuilder extends StatelessWidget {
+  const MyOrientationBuilder({super.key, required this.builder});
+
+  final OrientationWidgetBuilder builder;
+
+  Widget _buildWithConstraints(
+    BuildContext context,
+    BoxConstraints constraints,
+  ) {
+    // If the constraints are fully unbounded (i.e., maxWidth and maxHeight are
+    // both infinite), we prefer Orientation.portrait because its more common to
+    // scroll vertically then horizontally.
+    final Orientation orientation =
+        constraints.maxWidth > (constraints.maxHeight * 1.2)
+            ? Orientation.landscape
+            : Orientation.portrait;
+    return builder(context, orientation);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: _buildWithConstraints);
+  }
+}
+
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
 
@@ -245,6 +270,9 @@ class MainPageState extends State<MainPage>
   }
 
   Future<void> _goToPage(int page, bool animate) async {
+    int x = page;
+    page = mapToDualModePage(page);
+    print("mapped to : $x => $page");
     try {
       if (animate) {
         await _pageController.animateToPage(
@@ -446,11 +474,19 @@ class MainPageState extends State<MainPage>
               bindings: _shortcutBindings(),
               child: Focus(
                 autofocus: true,
-                child: ReadQuranWidget(
-                  _paraModel,
-                  pageController: _pageController,
-                  verticalScrollResetFn: _resetVerticalScrollToZero,
-                  pageChangedCallback: _saveScrollPosition,
+                child: MyOrientationBuilder(
+                  builder: (context, orientation) {
+                    Settings.instance.temporaryState.dualPage =
+                        orientation == Orientation.landscape;
+
+                    return ReadQuranWidget(
+                      _paraModel,
+                      pageController: _pageController,
+                      verticalScrollResetFn: _resetVerticalScrollToZero,
+                      pageChangedCallback: _saveScrollPosition,
+                      orientation: orientation,
+                    );
+                  },
                 ),
               ),
             );
