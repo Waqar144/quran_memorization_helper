@@ -573,11 +573,10 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
     final page = pages[pageIndex];
     List<Line> pageLines = [];
 
-    for (int i = 0; i < page.lines.length; ++i) {
-      final l = page.lines[i];
+    for (int lineIdx = 0; lineIdx < page.lines.length; ++lineIdx) {
+      final l = page.lines[lineIdx];
       final ayah = l.ayahIdx;
       final start = l.wordStartInAyahIdx;
-      List<LineAyah> lineAyahs = [];
 
       if (ayah < 0) {
         pageLines.add(Line([LineAyah(start == -999 ? start : start - 1, "")]));
@@ -586,14 +585,14 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
 
       int? nextAyah;
       int? nextAyahStart;
-      if (i + 1 < page.lines.length) {
-        if (page.lines[i + 1].ayahIdx >= 0) {
-          final nextLine = page.lines[i + 1];
+      if (lineIdx + 1 < page.lines.length) {
+        if (page.lines[lineIdx + 1].ayahIdx >= 0) {
+          final nextLine = page.lines[lineIdx + 1];
           nextAyah = nextLine.ayahIdx;
           nextAyahStart = nextLine.wordStartInAyahIdx;
         } else {
           // find next valid ayah
-          for (int j = i + 1; j < page.lines.length; ++j) {
+          for (int j = lineIdx + 1; j < page.lines.length; ++j) {
             if (page.lines[j].ayahIdx >= 0) {
               nextAyah = page.lines[j].ayahIdx;
               nextAyahStart = 0;
@@ -621,7 +620,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
       // last page, second last ayah
       else if (pageIndex + 1 == pages.length &&
           ayah == 6234 &&
-          i + 1 >= page.lines.length) {
+          lineIdx + 1 >= page.lines.length) {
         // Do a +1 so that it adds the whole last ayah
         // ayahsForRanges adds all ayahs (ayah, nextAyah]
         // and for the nextAyah it adds upto nextAyahStart
@@ -629,15 +628,15 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
         nextAyahStart = 0;
       }
 
-      final d = QuranText.instance.ayahsForRanges(
+      final ayahsForRanges = QuranText.instance.ayahsForRanges(
         ayah,
         start,
         nextAyah,
         nextAyahStart,
       );
-      for (final line in d) {
-        lineAyahs.add(LineAyah(line.$1, line.$2));
-      }
+      List<LineAyah> lineAyahs = ayahsForRanges
+          .map((a) => LineAyah(a.$1, a.$2))
+          .toList(growable: false);
       pageLines.add(Line(lineAyahs));
     }
     return pageLines;
