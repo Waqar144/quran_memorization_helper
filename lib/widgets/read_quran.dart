@@ -570,15 +570,26 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
 
   static List<Line> _linesForPage(List<layout.Page> pages, int pageIndex) {
     final page = pages[pageIndex];
-    List<Line> pageLines = [];
+    final List<Line> pageLines = List.filled(
+      page.lines.length,
+      Line(const []),
+      growable: false,
+    );
+    int currentLine = 0;
 
-    for (int lineIdx = 0; lineIdx < page.lines.length; ++lineIdx) {
+    for (
+      int lineIdx = 0;
+      lineIdx < page.lines.length;
+      ++lineIdx, ++currentLine
+    ) {
       final l = page.lines[lineIdx];
       final ayah = l.ayahIdx;
       final start = l.wordStartInAyahIdx;
 
       if (ayah < 0) {
-        pageLines.add(Line([LineAyah(start == -999 ? start : start - 1, "")]));
+        pageLines[currentLine] = Line([
+          LineAyah(start == -999 ? start : start - 1, ""),
+        ]);
         continue;
       }
 
@@ -636,7 +647,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
       List<LineAyah> lineAyahs = ayahsForRanges
           .map((a) => LineAyah(a.$1, a.$2))
           .toList(growable: false);
-      pageLines.add(Line(lineAyahs));
+      pageLines[currentLine] = Line(lineAyahs);
     }
     return pageLines;
   }

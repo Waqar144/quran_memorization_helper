@@ -65,7 +65,7 @@ class QuranText {
         int s = _offsetForWordIdx(text, startWord);
         int e = _offsetForWordIdx(text, nextAyahWord!);
         // print("return 0 -> ${text.substring(s, e)}");
-        return List.from([(startAyah, text.substring(s, e))], growable: false);
+        return List.of([(startAyah, text.substring(s, e))], growable: false);
       }
 
       List<(int, String)> ret = [];
@@ -94,7 +94,7 @@ class QuranText {
       final text = ayahText(startAyah);
       int s = _offsetForWordIdx(text, startWord);
       // print("Final ---> ${text.substring(s)}");
-      return List.from([(startAyah, text.substring(s))], growable: false);
+      return List.of([(startAyah, text.substring(s))], growable: false);
     }
   }
 
