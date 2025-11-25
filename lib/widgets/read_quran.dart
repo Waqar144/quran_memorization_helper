@@ -345,23 +345,6 @@ class Page {
   final int pageNum;
   final List<Line> lines;
   const Page(this.pageNum, this.lines);
-
-  static Page fromJson(dynamic json) {
-    int pageNum = json["pageNum"] as int;
-    List<dynamic> lineDatas = json["lines"] as List<dynamic>;
-    List<Line> lines = [];
-    for (final lineData in lineDatas) {
-      final lineArray = lineData as List<dynamic>;
-      List<LineAyah> lineAyahs = [];
-      for (final lineArrayItem in lineArray) {
-        int ayahIdx = lineArrayItem['idx'] as int;
-        final ayahText = lineArrayItem['text'] as String;
-        lineAyahs.add(LineAyah(ayahIdx, ayahText));
-      }
-      lines.add(Line(lineAyahs));
-    }
-    return Page(pageNum, lines);
-  }
 }
 
 class ReadQuranWidget extends StatefulWidget {
