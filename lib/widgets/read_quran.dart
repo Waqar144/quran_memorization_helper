@@ -367,7 +367,6 @@ class ReadQuranWidget extends StatefulWidget {
 
 class _ReadQuranWidget extends State<ReadQuranWidget>
     with SingleTickerProviderStateMixin {
-  List<Line> lines = [];
   List<layout.Page> _pages = [];
   List<Mutashabiha> _mutashabihat = [];
   Translation? _translation;
