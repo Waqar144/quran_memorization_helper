@@ -618,6 +618,16 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
           }
         }
       }
+      // last page, second last ayah
+      else if (pageIndex + 1 == pages.length &&
+          ayah == 6234 &&
+          i + 1 >= page.lines.length) {
+        // Do a +1 so that it adds the whole last ayah
+        // ayahsForRanges adds all ayahs (ayah, nextAyah]
+        // and for the nextAyah it adds upto nextAyahStart
+        nextAyah = 6235 + 1;
+        nextAyahStart = 0;
+      }
 
       final d = QuranText.instance.ayahsForRanges(
         ayah,
