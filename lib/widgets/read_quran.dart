@@ -607,6 +607,17 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
               nextAyah = page.lines[j].ayahIdx;
               nextAyahStart = 0;
               break;
+            } else if (page.lines[j].ayahIdx < 0) {
+              // we are at the end of surah. Check if there are any ayahs left
+              int surah = surahForAyah(ayah);
+              assert(surah >= 0);
+              int surahAyah = toSurahAyahOffset(surah, ayah);
+              final surahData = surahDataForIdx(surah);
+              if (surahAyah + 1 < surahData.ayahCount) {
+                // go to the end of surah
+                nextAyah = toAbsoluteAyahOffset(surah, surahData.ayahCount);
+                nextAyahStart = 0;
+              }
             }
           }
         }
