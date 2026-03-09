@@ -1079,7 +1079,6 @@ class _PageWidgetState extends State<PageWidget> {
   Widget _buildLine(
     Line line,
     int lineIdx,
-    double rowHeight,
     List<(int, int, int, Ayat?, bool, String)> ayahData,
     double fontSize,
     double width,
@@ -1343,7 +1342,6 @@ class _PageWidgetState extends State<PageWidget> {
             child: _buildLine(
               l,
               idx,
-              rowHeight,
               ayahData,
               fontSize,
               rowWidth - (2 * padding),
