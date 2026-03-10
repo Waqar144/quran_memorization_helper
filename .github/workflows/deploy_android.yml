@@ -75,4 +75,4 @@ jobs:
           packageName: com.wqar.quran_mem_helper
           releaseFiles: ${{ env.AAB_PATH }}
           track: production
-          status: draft
+          status: completed
