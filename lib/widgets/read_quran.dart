@@ -97,8 +97,8 @@ double _availableHeight(BuildContext context) {
   final appBarHeight = kToolbarHeight;
   final padding = top + bottom + appBarHeight;
 
-  // dont go below 650, we will scroll if below
-  return max(650, MediaQuery.sizeOf(context).height - (padding));
+  // dont go below 200, we will scroll if below
+  return max(200, MediaQuery.sizeOf(context).height - (padding));
 }
 
 double _heightMultiplier() {
@@ -352,6 +352,7 @@ class ReadQuranWidget extends StatefulWidget {
   final PageController pageController;
   final VoidCallback verticalScrollResetFn;
   final Function(int) pageChangedCallback;
+  final Orientation orientation;
 
   const ReadQuranWidget(
     this.model, {
@@ -359,6 +360,7 @@ class ReadQuranWidget extends StatefulWidget {
     super.key,
     required this.verticalScrollResetFn,
     required this.pageChangedCallback,
+    required this.orientation,
   });
 
   @override
@@ -368,6 +370,7 @@ class ReadQuranWidget extends StatefulWidget {
 class _ReadQuranWidget extends State<ReadQuranWidget>
     with SingleTickerProviderStateMixin {
   List<layout.Page> _pages = [];
+  List<(int, int)> _dualPages = [];
   List<Mutashabiha> _mutashabihat = [];
   Translation? _translation;
   final _repaintNotifier = StreamController<int>.broadcast();
@@ -434,10 +437,24 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
     };
   }
 
-  Future<List<layout.Page>> doload() async {
+  Future<Object> doload() async {
     // we lazy load the mutashabiha ayat text
     _pages = _getPageLayoutList();
     _mutashabihat = await importAllMutashabihat();
+
+    _dualPages = [];
+    if (Settings.instance.temporaryState.dualPage) {
+      int i = 0;
+      for (; i + 2 < _pages.length; i += 2) {
+        _dualPages.add((i + 1, i));
+      }
+
+      if (i < _pages.length) {
+        _dualPages.add((i + 1, i));
+      }
+      return _dualPages;
+    }
+
     return _pages;
   }
 
@@ -663,6 +680,29 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
     return pageLines;
   }
 
+  Widget _getPageWidget(int index) {
+    if (index >= _pages.length || index < 0) {
+      return const SizedBox.shrink();
+    }
+    return PageWidget(
+      index,
+      _pages[index].pageNum,
+      _linesForPage(_pages, index),
+      getAyatInDB: _getAyatInDB,
+      onAyahTapped: _onAyahTapped,
+      isMutashabihaAyat: _isMutashabihaAyat,
+      repaintStream: _repaintNotifier.stream,
+      isBookmarked: () => widget.model.bookmarks.contains(index),
+      onToggleBookmark: () {
+        if (widget.model.bookmarks.contains(index)) {
+          widget.model.removeBookmark(index);
+        } else {
+          widget.model.addBookmark(index);
+        }
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // set to true when swiping to load next para
@@ -673,6 +713,8 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
             snapshot.connectionState != ConnectionState.done) {
           return SizedBox.shrink();
         }
+        final bool isDualPage = snapshot.data is List<(int, int)>;
+
         return SizedBox(
           height: _availableHeight(context) * _heightMultiplier(),
           child: NotificationListener<OverscrollNotification>(
@@ -701,29 +743,24 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
               },
               controller: widget.pageController,
               reverse: true,
-              itemCount: _pages.length,
+              itemCount: isDualPage ? _dualPages.length : _pages.length,
               scrollBehavior:
                   const ScrollBehavior()..copyWith(overscroll: false),
               itemBuilder: (ctx, index) {
-                return ExcludeSemantics(
-                  child: PageWidget(
-                    index,
-                    _pages[index].pageNum,
-                    _linesForPage(_pages, index),
-                    getAyatInDB: _getAyatInDB,
-                    onAyahTapped: _onAyahTapped,
-                    isMutashabihaAyat: _isMutashabihaAyat,
-                    repaintStream: _repaintNotifier.stream,
-                    isBookmarked: () => widget.model.bookmarks.contains(index),
-                    onToggleBookmark: () {
-                      if (widget.model.bookmarks.contains(index)) {
-                        widget.model.removeBookmark(index);
-                      } else {
-                        widget.model.addBookmark(index);
-                      }
-                    },
-                  ),
-                );
+                if (isDualPage) {
+                  final (first, second) = _dualPages[index];
+                  return SizedBox(
+                    width: MediaQuery.widthOf(context),
+                    child: Row(
+                      children: [
+                        Expanded(child: _getPageWidget(first)),
+                        Expanded(child: _getPageWidget(second)),
+                      ],
+                    ),
+                  );
+                } else {
+                  return ExcludeSemantics(child: _getPageWidget(index));
+                }
               },
             ),
           ),
@@ -822,33 +859,45 @@ class _PageWidgetState extends State<PageWidget> {
       ),
       child: Row(
         children: [
-          Text(
-            " ${toArabicNumber(surahData.ayahCount)}",
-            textDirection: TextDirection.rtl,
-            textAlign: TextAlign.center,
-            style: style.copyWith(fontFamily: "Urdu"),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              " ${toArabicNumber(surahData.ayahCount)}",
+              textDirection: TextDirection.rtl,
+              textAlign: TextAlign.center,
+              style: style.copyWith(fontFamily: "Urdu"),
+            ),
           ),
-          Text(
-            "آياتها",
-            textDirection: TextDirection.rtl,
-            textAlign: TextAlign.center,
-            style: style.copyWith(fontFamily: "Al Mushaf"),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              "آياتها",
+              textDirection: TextDirection.rtl,
+              textAlign: TextAlign.center,
+              style: style.copyWith(fontFamily: "Al Mushaf"),
+            ),
           ),
           if (includeBismillah && !isSurahTawba) const Spacer(),
           if (includeBismillah && !isSurahTawba)
-            Text(
-              isSurahTawba ? "-" : String.fromCharCode(0xFDFD),
-              textDirection: TextDirection.rtl,
-              style: style.copyWith(
-                fontFamily: "Bismillah",
-                fontSize: Theme.of(context).textTheme.headlineLarge?.fontSize,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                isSurahTawba ? "-" : String.fromCharCode(0xFDFD),
+                textDirection: TextDirection.rtl,
+                style: style.copyWith(
+                  fontFamily: "Bismillah",
+                  fontSize: Theme.of(context).textTheme.headlineLarge?.fontSize,
+                ),
               ),
             ),
           const Spacer(),
-          Text(
-            String.fromCharCodes([surahGlyphCode(surahIdx), 0xe903]),
-            textDirection: TextDirection.rtl,
-            style: style.copyWith(fontFamily: "SurahNames"),
+          FittedBox(
+            fit: BoxFit.contain,
+            child: Text(
+              String.fromCharCodes([surahGlyphCode(surahIdx), 0xe903]),
+              textDirection: TextDirection.rtl,
+              style: style.copyWith(fontFamily: "SurahNames"),
+            ),
           ),
         ],
       ),
@@ -1371,7 +1420,7 @@ class _PageWidgetState extends State<PageWidget> {
         ( /*divider between lines(1px)*/ numPageLines +
             2 + // some extra space
             /*topborder=*/ 24);
-    final double rowHeight = max((height / numPageLines).floorToDouble(), 38.0);
+    final double rowHeight = max((height / numPageLines).floorToDouble(), 0);
     final double rowWidth = MediaQuery.sizeOf(context).width;
     const double padding = 4;
     return Padding(

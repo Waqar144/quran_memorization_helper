@@ -147,6 +147,13 @@ final Uint16List _para13LinePageOffsets = Uint16List.fromList([
   817, // 30
 ]);
 
+int mapToDualModePage(int page) {
+  if (Settings.instance.temporaryState.dualPage) {
+    return (page / 2).floor();
+  }
+  return page;
+}
+
 /// Returns para start page index
 int paraStartPage(int paraIdx, Mushaf mushaf) {
   final list = paraPageOffsetsList(mushaf);

@@ -19,6 +19,10 @@ bool isIndoPak(Mushaf m) {
 
 const _minFontSize = 24;
 
+class TemporaryState {
+  bool dualPage = false;
+}
+
 class Settings extends ChangeNotifier {
   static final Settings _instance = Settings._private();
   static Settings get instance => _instance;
@@ -30,6 +34,7 @@ class Settings extends ChangeNotifier {
   bool _tapToShowTranslation = false;
   bool _colorMutashabihat = true;
   bool _reflowMode = false;
+  TemporaryState temporaryState = TemporaryState();
 
   // constants
   static const double wordSpacing = 1.0;
