@@ -99,8 +99,8 @@ double _availableHeight(BuildContext context) {
   final appBarHeight = kToolbarHeight;
   final padding = top + bottom + appBarHeight;
 
-  // dont go below 650, we will scroll if below
-  return max(450, MediaQuery.sizeOf(context).height - (padding));
+  // dont go below 200, we will scroll if below
+  return max(200, MediaQuery.sizeOf(context).height - (padding));
 }
 
 double _heightMultiplier() {
@@ -870,33 +870,45 @@ class _PageWidgetState extends State<PageWidget> {
       ),
       child: Row(
         children: [
-          Text(
-            " ${toArabicNumber(surahData.ayahCount)}",
-            textDirection: TextDirection.rtl,
-            textAlign: TextAlign.center,
-            style: style.copyWith(fontFamily: "Urdu"),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              " ${toArabicNumber(surahData.ayahCount)}",
+              textDirection: TextDirection.rtl,
+              textAlign: TextAlign.center,
+              style: style.copyWith(fontFamily: "Urdu"),
+            ),
           ),
-          Text(
-            "آياتها",
-            textDirection: TextDirection.rtl,
-            textAlign: TextAlign.center,
-            style: style.copyWith(fontFamily: "Al Mushaf"),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              "آياتها",
+              textDirection: TextDirection.rtl,
+              textAlign: TextAlign.center,
+              style: style.copyWith(fontFamily: "Al Mushaf"),
+            ),
           ),
           if (includeBismillah && !isSurahTawba) const Spacer(),
           if (includeBismillah && !isSurahTawba)
-            Text(
-              isSurahTawba ? "-" : String.fromCharCode(0xFDFD),
-              textDirection: TextDirection.rtl,
-              style: style.copyWith(
-                fontFamily: "Bismillah",
-                fontSize: Theme.of(context).textTheme.headlineLarge?.fontSize,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                isSurahTawba ? "-" : String.fromCharCode(0xFDFD),
+                textDirection: TextDirection.rtl,
+                style: style.copyWith(
+                  fontFamily: "Bismillah",
+                  fontSize: Theme.of(context).textTheme.headlineLarge?.fontSize,
+                ),
               ),
             ),
           const Spacer(),
-          Text(
-            String.fromCharCodes([surahGlyphCode(surahIdx), 0xe903]),
-            textDirection: TextDirection.rtl,
-            style: style.copyWith(fontFamily: "SurahNames"),
+          FittedBox(
+            fit: BoxFit.contain,
+            child: Text(
+              String.fromCharCodes([surahGlyphCode(surahIdx), 0xe903]),
+              textDirection: TextDirection.rtl,
+              style: style.copyWith(fontFamily: "SurahNames"),
+            ),
           ),
         ],
       ),
