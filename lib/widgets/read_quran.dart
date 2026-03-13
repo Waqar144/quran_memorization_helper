@@ -97,8 +97,8 @@ double _availableHeight(BuildContext context) {
   final appBarHeight = kToolbarHeight;
   final padding = top + bottom + appBarHeight;
 
-  // dont go below 650, we will scroll if below
-  return max(650, MediaQuery.sizeOf(context).height - (padding));
+  // dont go below 200, we will scroll if below
+  return max(200, MediaQuery.sizeOf(context).height - (padding));
 }
 
 double _heightMultiplier() {
@@ -165,14 +165,15 @@ class _TranslationTileState extends State<TranslationTile> {
       Text(
         widget.translation.trim(),
         textDirection: widget.isUrduTranslation ? TextDirection.rtl : null,
-        style: widget.isUrduTranslation
-            ? const TextStyle(
-                fontFamily: "Urdu",
-                fontSize: 22,
-                letterSpacing: 0.0,
-                height: 1.8,
-              )
-            : null,
+        style:
+            widget.isUrduTranslation
+                ? const TextStyle(
+                  fontFamily: "Urdu",
+                  fontSize: 22,
+                  letterSpacing: 0.0,
+                  height: 1.8,
+                )
+                : null,
       ),
     ];
 
@@ -743,8 +744,8 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
               controller: widget.pageController,
               reverse: true,
               itemCount: isDualPage ? _dualPages.length : _pages.length,
-              scrollBehavior: const ScrollBehavior()
-                ..copyWith(overscroll: false),
+              scrollBehavior:
+                  const ScrollBehavior()..copyWith(overscroll: false),
               itemBuilder: (ctx, index) {
                 if (isDualPage) {
                   final (first, second) = _dualPages[index];
@@ -858,33 +859,45 @@ class _PageWidgetState extends State<PageWidget> {
       ),
       child: Row(
         children: [
-          Text(
-            " ${toArabicNumber(surahData.ayahCount)}",
-            textDirection: TextDirection.rtl,
-            textAlign: TextAlign.center,
-            style: style.copyWith(fontFamily: "Urdu"),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              " ${toArabicNumber(surahData.ayahCount)}",
+              textDirection: TextDirection.rtl,
+              textAlign: TextAlign.center,
+              style: style.copyWith(fontFamily: "Urdu"),
+            ),
           ),
-          Text(
-            "آياتها",
-            textDirection: TextDirection.rtl,
-            textAlign: TextAlign.center,
-            style: style.copyWith(fontFamily: "Al Mushaf"),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              "آياتها",
+              textDirection: TextDirection.rtl,
+              textAlign: TextAlign.center,
+              style: style.copyWith(fontFamily: "Al Mushaf"),
+            ),
           ),
           if (includeBismillah && !isSurahTawba) const Spacer(),
           if (includeBismillah && !isSurahTawba)
-            Text(
-              isSurahTawba ? "-" : String.fromCharCode(0xFDFD),
-              textDirection: TextDirection.rtl,
-              style: style.copyWith(
-                fontFamily: "Bismillah",
-                fontSize: Theme.of(context).textTheme.headlineLarge?.fontSize,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                isSurahTawba ? "-" : String.fromCharCode(0xFDFD),
+                textDirection: TextDirection.rtl,
+                style: style.copyWith(
+                  fontFamily: "Bismillah",
+                  fontSize: Theme.of(context).textTheme.headlineLarge?.fontSize,
+                ),
               ),
             ),
           const Spacer(),
-          Text(
-            String.fromCharCodes([surahGlyphCode(surahIdx), 0xe903]),
-            textDirection: TextDirection.rtl,
-            style: style.copyWith(fontFamily: "SurahNames"),
+          FittedBox(
+            fit: BoxFit.contain,
+            child: Text(
+              String.fromCharCodes([surahGlyphCode(surahIdx), 0xe903]),
+              textDirection: TextDirection.rtl,
+              style: style.copyWith(fontFamily: "SurahNames"),
+            ),
           ),
         ],
       ),
@@ -1000,9 +1013,10 @@ class _PageWidgetState extends State<PageWidget> {
                 TextSpan(
                   text: glyphForPortionKind(kind),
                   style: TextStyle(
-                    backgroundColor: (darkMode
-                        ? Colors.lightGreen.withAlpha(180)
-                        : Colors.lightGreen),
+                    backgroundColor:
+                        (darkMode
+                            ? Colors.lightGreen.withAlpha(180)
+                            : Colors.lightGreen),
                   ),
                 ),
               );
@@ -1014,20 +1028,23 @@ class _PageWidgetState extends State<PageWidget> {
           spans.add(
             TextSpan(
               text: hasRukuMarker ? " $w" : w,
-              recognizer: hasRukuMarker
-                  ? (TapGestureRecognizer()
-                      ..onTap = () => _onRukuTapped(a.ayahIndex))
-                  : null,
+              recognizer:
+                  hasRukuMarker
+                      ? (TapGestureRecognizer()
+                        ..onTap = () => _onRukuTapped(a.ayahIndex))
+                      : null,
               style: TextStyle(
                 inherit: true,
-                color: isIndoPk
-                    ? themeData.textTheme.bodyMedium?.color
-                    : Colors.black,
-                backgroundColor: hasRukuMarker
-                    ? (darkMode
-                          ? Colors.amber.shade700.withAlpha(125)
-                          : Colors.amber.shade100)
-                    : null,
+                color:
+                    isIndoPk
+                        ? themeData.textTheme.bodyMedium?.color
+                        : Colors.black,
+                backgroundColor:
+                    hasRukuMarker
+                        ? (darkMode
+                            ? Colors.amber.shade700.withAlpha(125)
+                            : Colors.amber.shade100)
+                        : null,
               ),
             ),
           );
@@ -1127,9 +1144,10 @@ class _PageWidgetState extends State<PageWidget> {
     );
     // dont try to space first two pages
     int firstTwo = Settings.instance.mushaf == Mushaf.Indopak16Line ? 3 : 2;
-    final wordSpacing = widget.pageNumber < firstTwo
-        ? 1.0
-        : _getWordSpacing(lineIdx, spans, width, style, mushaf);
+    final wordSpacing =
+        widget.pageNumber < firstTwo
+            ? 1.0
+            : _getWordSpacing(lineIdx, spans, width, style, mushaf);
 
     return Text.rich(
       TextSpan(children: spans),
@@ -1169,13 +1187,14 @@ class _PageWidgetState extends State<PageWidget> {
             ),
           ),
           Expanded(
-            child: widget.isBookmarked()
-                ? const Icon(
-                    Icons.bookmark_added,
-                    size: 24,
-                    color: Colors.orange,
-                  )
-                : Container(),
+            child:
+                widget.isBookmarked()
+                    ? const Icon(
+                      Icons.bookmark_added,
+                      size: 24,
+                      color: Colors.orange,
+                    )
+                    : Container(),
           ),
           InkWell(
             onTap: widget.onToggleBookmark,
@@ -1307,9 +1326,10 @@ class _PageWidgetState extends State<PageWidget> {
           final int surahAyahIdx = toSurahAyahOffset(surahIdx, a.ayahIndex);
           final Ayat? ayahInDb = widget.getAyatInDB(a.ayahIndex);
           final text = QuranText.instance.ayahText(a.ayahIndex);
-          final bool isMutashabihaAyat = colorMutashabihat
-              ? widget.isMutashabihaAyat(surahAyahIdx, surahIdx)
-              : false;
+          final bool isMutashabihaAyat =
+              colorMutashabihat
+                  ? widget.isMutashabihaAyat(surahAyahIdx, surahIdx)
+                  : false;
 
           ayahData.add((
             a.ayahIndex,
@@ -1400,7 +1420,7 @@ class _PageWidgetState extends State<PageWidget> {
         ( /*divider between lines(1px)*/ numPageLines +
             2 + // some extra space
             /*topborder=*/ 24);
-    final double rowHeight = max((height / numPageLines).floorToDouble(), 38.0);
+    final double rowHeight = max((height / numPageLines).floorToDouble(), 0);
     final double rowWidth = MediaQuery.sizeOf(context).width;
     const double padding = 4;
     return Padding(
