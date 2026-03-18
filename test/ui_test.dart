@@ -22,6 +22,8 @@ void main() {
 
   testWidgets('Ui_Unit_Test', (tester) async {
     await tester.runAsync(() async {
+      await tester.binding.setSurfaceSize(Size(600, 800));
+
       await tester.pumpWidget(const MyApp());
 
       final mainPageFinder = find.byType(MainPage);
@@ -41,6 +43,8 @@ void main() {
       expect(Settings.instance.mushaf, equals(Mushaf.Indopak16Line));
 
       await tester.pumpAndSettle();
+
+      expect(Settings.instance.temporaryState.dualPage, equals(false));
 
       final pageViewFinder = find.byType(PageView);
       expect(pageViewFinder, findsOneWidget);
@@ -120,6 +124,10 @@ void main() {
         await tester.pumpAndSettle();
         expect(pageView.controller!.page!.floor(), i);
       }
+
+      await tester.binding.setSurfaceSize(Size(800, 500));
+      await tester.pumpAndSettle();
+      expect(Settings.instance.temporaryState.dualPage, equals(true));
 
       print("Ui_Unit_Test Ok");
     });
