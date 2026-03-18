@@ -477,8 +477,19 @@ class MainPageState extends State<MainPage>
                 autofocus: true,
                 child: MyOrientationBuilder(
                   builder: (context, orientation) {
+                    final oldSetting =
+                        Settings.instance.temporaryState.dualPage;
                     Settings.instance.temporaryState.dualPage =
                         orientation == Orientation.landscape;
+
+                    if (oldSetting !=
+                        Settings.instance.temporaryState.dualPage) {
+                      _pageController.dispose();
+                      final page = mapToDualModePage(
+                        Settings.instance.currentReadingPage,
+                      );
+                      _pageController = PageController(initialPage: page);
+                    }
 
                     return ReadQuranWidget(
                       _paraModel,
