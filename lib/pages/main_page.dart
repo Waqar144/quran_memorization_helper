@@ -451,6 +451,7 @@ class MainPageState extends State<MainPage>
       // widget is rebuilt because settings changed. Update the initialPage of the
       // widget so that we dont end up jumping somewhere else
       _pageController.dispose();
+      print("didUpdateWidget: ${Settings.instance.currentReadingPage}");
       _pageController = PageController(
         initialPage: Settings.instance.currentReadingPage,
       );
