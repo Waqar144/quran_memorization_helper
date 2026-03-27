@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:core';
 import 'package:quran_memorization_helper/utils/utils.dart' as utils;
 import 'package:quran_memorization_helper/quran_data/pages.dart';
+import 'package:quran_memorization_helper/utils/utils.dart';
 
 // ignore: constant_identifier_names
 enum Mushaf { Indopak16Line, Uthmani15Line, Indopak15Line, Indopak13Line }
@@ -39,6 +40,26 @@ class Settings extends ChangeNotifier {
   int get fontSize => _reflowMode ? _fontSize : _minFontSize;
   set fontSize(int val) {
     _fontSize = val;
+    notifyListeners();
+    persist();
+  }
+
+  double _fixedLayoutFontSize = 25.0;
+  double get fixedLayoutFontSize => _fixedLayoutFontSize;
+
+  void changeFixedLayoutFont(int dir) {
+    if (dir > 0) {
+      _fixedLayoutFontSize += 0.4;
+    } else {
+      _fixedLayoutFontSize -= 0.4;
+    }
+
+    notifyListeners();
+    persist();
+  }
+
+  void resetFixedLayoutFont() {
+    _fixedLayoutFontSize = _defaultTextFontSize();
     notifyListeners();
     persist();
   }
@@ -112,6 +133,7 @@ class Settings extends ChangeNotifier {
       'mushaf': _mushaf.index,
       'reflowMode': _reflowMode,
       'fontSize': _fontSize,
+      'fixedLayoutFontSize': _fixedLayoutFontSize,
     };
   }
 
@@ -128,6 +150,9 @@ class Settings extends ChangeNotifier {
     if (_fontSize < _minFontSize) {
       _fontSize = _minFontSize;
     }
+
+    _fixedLayoutFontSize =
+        json["fixedLayoutFontSize"] ?? _defaultTextFontSize();
 
     if (currentReadingPara != null && oldCurrentReadingPage != null) {
       int start = paraStartPage(currentReadingPara - 1, _mushaf);
@@ -176,6 +201,19 @@ class Settings extends ChangeNotifier {
   void persist({int seconds = 1}) {
     timer?.cancel();
     timer = Timer(Duration(seconds: seconds), saveToDisk);
+  }
+
+  static double _defaultTextFontSize() {
+    if (isBigScreen()) {
+      if (Settings.instance.mushaf == Mushaf.Uthmani15Line) {
+        return 36.0;
+      }
+      return 34.0;
+    } else if (Settings.instance.mushaf == Mushaf.Uthmani15Line) {
+      return 28.0;
+    } else {
+      return 25.0;
+    }
   }
 
   Settings._private();

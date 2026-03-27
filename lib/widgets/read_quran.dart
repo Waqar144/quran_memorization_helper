@@ -1246,16 +1246,8 @@ class _PageWidgetState extends State<PageWidget> {
   }
 
   static double _textFontSize() {
-    if (isBigScreen()) {
-      if (Settings.instance.mushaf == Mushaf.Uthmani15Line) {
-        return 36.0;
-      }
-      return 34.0;
-    } else if (Settings.instance.mushaf == Mushaf.Uthmani15Line) {
-      return 28.0;
-    } else {
-      return 26.0;
-    }
+    // print("_textFontSize: ${Settings.instance.fixedLayoutFontSize}");
+    return Settings.instance.fixedLayoutFontSize;
   }
 
   List<Widget> _pageLines(double rowHeight, double rowWidth) {

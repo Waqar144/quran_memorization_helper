@@ -171,9 +171,40 @@ class MainPageState extends State<MainPage>
       },
       icon: const Icon(Icons.more_vert),
       itemBuilder: (BuildContext context) {
-        return actions.keys.map((String choice) {
-          return PopupMenuItem<String>(value: choice, child: Text(choice));
-        }).toList();
+        return [
+          // custom font zoom row
+          PopupMenuItem<String>(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Font'),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.remove_circle_outline),
+                      onPressed:
+                          () => Settings.instance.changeFixedLayoutFont(-1),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.settings_backup_restore),
+                      onPressed: () => Settings.instance.resetFixedLayoutFont(),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.add_circle_outline),
+                      onPressed:
+                          () => Settings.instance.changeFixedLayoutFont(1),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const PopupMenuDivider(),
+          // Rest of the simple one tap actions
+          ...actions.keys.map((String choice) {
+            return PopupMenuItem<String>(value: choice, child: Text(choice));
+          }),
+        ];
       },
     );
   }
