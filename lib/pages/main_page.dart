@@ -234,54 +234,45 @@ class MainPageState extends State<MainPage>
     }
   }
 
-  Widget _buildDrawer() {
-    return Builder(
-      builder: (context) {
-        final int currentPage = (_pageController.page?.floor() ?? 0);
-        final int currentParaIdx = paraForPage(
-          currentPage,
-          Settings.instance.mushaf,
-        );
-        return Drawer(
-          child: SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                SizedBox(
-                  height: 50,
-                  child: TabBar(
-                    controller: _drawerTabController,
-                    tabs: [Tab(text: paraText()), Tab(text: "Surah")],
-                  ),
-                ),
-                Expanded(
-                  child: TabBarView(
-                    controller: _drawerTabController,
-                    children: [
-                      ParaListView(
-                        model: _paraModel,
-                        currentParaIdx: currentParaIdx,
-                        onParaTapped: (int idx) {
-                          final mushaf = Settings.instance.mushaf;
-                          _goToPage(paraStartPage(idx, mushaf), false);
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                      SurahListView(
-                        currentPage: _pageController.page?.floor() ?? 0,
-                        onSurahTapped: (int idx) {
-                          _onSurahTapped(idx);
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+  Widget _buildTOC() {
+    final int currentPage = (_pageController.page?.floor() ?? 0);
+    final int currentParaIdx = paraForPage(
+      currentPage,
+      Settings.instance.mushaf,
+    );
+    return Column(
+      children: [
+        SizedBox(
+          height: 48,
+          child: TabBar(
+            controller: _drawerTabController,
+            tabs: [Tab(text: paraText()), Tab(text: "Surah")],
           ),
-        );
-      },
+        ),
+        Expanded(
+          child: TabBarView(
+            controller: _drawerTabController,
+            children: [
+              ParaListView(
+                model: _paraModel,
+                currentParaIdx: currentParaIdx,
+                onParaTapped: (int idx) {
+                  final mushaf = Settings.instance.mushaf;
+                  _goToPage(paraStartPage(idx, mushaf), false);
+                  Navigator.of(context).pop();
+                },
+              ),
+              SurahListView(
+                currentPage: _pageController.page?.floor() ?? 0,
+                onSurahTapped: (int idx) {
+                  _onSurahTapped(idx);
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -321,6 +312,25 @@ class MainPageState extends State<MainPage>
 
   List<Widget> _appBarActions() {
     return [
+      IconButton(
+        tooltip: "Index",
+        icon: const Icon(Icons.toc),
+        onPressed: () async {
+          return await showModalBottomSheet(
+            context: context,
+            scrollControlDisabledMaxHeightRatio: 0.6,
+            builder: (context) {
+              return SizedBox(
+                width: MediaQuery.sizeOf(context).width - 32.0,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+                  child: _buildTOC(),
+                ),
+              );
+            },
+          );
+        },
+      ),
       TapRegion(
         onTapUpOutside: (_) => _appBarModel.arrowButtonTapUp(),
         onTapUpInside: (_) => _appBarModel.arrowButtonTapUp(),
@@ -421,7 +431,6 @@ class MainPageState extends State<MainPage>
         ),
       ),
       bottomNavigationBar: _bottomAppBar(),
-      drawer: _buildDrawer(),
     );
   }
 }
