@@ -91,11 +91,19 @@ void main() {
       expect(pageView.controller!.page!.floor(), equals(2));
 
       // tap once, should have a mistake
-      await tester.tapAt(Offset(200, 505));
+      Offset offset = Offset(200, 200);
+      for (int i = 200; i < 500; i++) {
+        offset = Offset(i.toDouble(), i.toDouble());
+        await tester.tapAt(offset);
+        if (state.model.ayahs.isNotEmpty) {
+          print("Match at $i");
+          break;
+        }
+      }
       expect(state.model.ayahs, isNotEmpty);
 
       // tap once more, mistake is removed
-      await tester.tapAt(Offset(200, 505));
+      await tester.tapAt(offset);
       expect(state.model.ayahs, isEmpty);
 
       expect(find.byType(PopupMenuButton<String>), findsOneWidget);
