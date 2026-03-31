@@ -98,7 +98,7 @@ double _availableHeight(BuildContext context) {
   final padding = top + bottom + appBarHeight;
 
   // dont go below 650, we will scroll if below
-  return max(650, MediaQuery.sizeOf(context).height - (padding));
+  return max(450, MediaQuery.sizeOf(context).height - (padding));
 }
 
 double _heightMultiplier() {
@@ -1363,7 +1363,7 @@ class _PageWidgetState extends State<PageWidget> {
         ( /*divider between lines(1px)*/ numPageLines +
             2 + // some extra space
             /*topborder=*/ 24);
-    final double rowHeight = max((height / numPageLines).floorToDouble(), 38.0);
+    final double rowHeight = max((height / numPageLines).floorToDouble(), 10);
     final double rowWidth = MediaQuery.sizeOf(context).width;
     const double padding = 4;
     return Padding(
