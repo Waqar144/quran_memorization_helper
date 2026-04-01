@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quran_memorization_helper/models/ayat.dart';
+import 'package:quran_memorization_helper/models/routing.dart';
 import 'package:quran_memorization_helper/models/settings.dart';
 import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
 import 'page_constants.dart';
@@ -31,9 +32,10 @@ class MutashabihatPage extends StatelessWidget {
             visualDensity: VisualDensity.compact,
             title: Text("${paraText()} ${index + 1}"),
             onTap: () {
-              Navigator.of(
-                context,
-              ).pushNamed(paraMutashabihatPage, arguments: [index, _model]);
+              Navigator.of(context).pushNamed(
+                paraMutashabihatPage,
+                arguments: ParaMutashabihatArgs(_model, index),
+              );
             },
           );
         },
@@ -44,15 +46,14 @@ class MutashabihatPage extends StatelessWidget {
 
 /// This is the page that shows the mutashabihat list
 class ParaMutashabihat extends StatelessWidget {
-  final int _para;
   final List<Mutashabiha> _mutashabihat = [];
-  final ParaAyatModel _model;
-  ParaMutashabihat(this._para, this._model, {super.key});
+  ParaMutashabihatArgs args;
+  ParaMutashabihat(this.args, {super.key});
 
   /// Import the mutashabihat from assets
   Future<List<Mutashabiha>> _importParaMutashabihat() async {
     _mutashabihat.clear();
-    _mutashabihat.addAll(await importParaMutashabihat(_para));
+    _mutashabihat.addAll(await importParaMutashabihat(args.para));
     return _mutashabihat;
   }
 
@@ -60,7 +61,7 @@ class ParaMutashabihat extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Mutashabihat for ${paraText()} ${_para + 1}"),
+        title: Text("Mutashabihat for ${paraText()} ${args.para + 1}"),
       ),
       body: FutureBuilder(
         future: _importParaMutashabihat(),
@@ -79,9 +80,10 @@ class ParaMutashabihat extends StatelessWidget {
                 selectionMode: false,
                 onGotoMutashabiha: (int ayah) {
                   final page = getPageForAyah(ayah, Settings.instance.mushaf);
-                  Navigator.of(
-                    context,
-                  ).pushNamed(goToPageModal, arguments: [_model, page]);
+                  Navigator.of(context).pushNamed(
+                    goToPageModal,
+                    arguments: ReadOnlyQuranPageArgs(args.model, page),
+                  );
                 },
               );
             },

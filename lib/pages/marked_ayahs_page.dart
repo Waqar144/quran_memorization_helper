@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:quran_memorization_helper/models/ayah_selection_model.dart';
 import 'package:quran_memorization_helper/models/ayat.dart';
+import 'package:quran_memorization_helper/models/routing.dart';
 import 'package:quran_memorization_helper/models/settings.dart';
 import 'package:quran_memorization_helper/pages/page_constants.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
@@ -140,9 +141,10 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
 
   void onGotoMutashabiha(int ayah) {
     final page = getPageForAyah(ayah, Settings.instance.mushaf);
-    Navigator.of(
-      context,
-    ).pushNamed(goToPageModal, arguments: [widget.model, page]);
+    Navigator.of(context).pushNamed(
+      goToPageModal,
+      arguments: ReadOnlyQuranPageArgs(widget.model, page),
+    );
   }
 
   @override

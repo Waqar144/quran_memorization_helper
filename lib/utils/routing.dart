@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:quran_memorization_helper/models/ayat.dart';
 import 'package:quran_memorization_helper/models/quiz.dart';
+import 'package:quran_memorization_helper/models/routing.dart';
 import 'package:quran_memorization_helper/pages/main_page.dart';
 import 'package:quran_memorization_helper/pages/page_constants.dart';
 import 'package:quran_memorization_helper/pages/settings_page.dart';
@@ -28,8 +29,7 @@ MaterialPageRoute handleRoute(RouteSettings settings) {
         ),
         // ParaMutashabihat
         paraMutashabihatPage => ParaMutashabihat(
-          (settings.arguments as List)[0] as int,
-          (settings.arguments as List)[1] as ParaAyatModel,
+          settings.arguments as ParaMutashabihatArgs,
         ),
         markedAyahsPage => MarkedAyahsPage(
           settings.arguments as Map<String, dynamic>,
@@ -39,8 +39,7 @@ MaterialPageRoute handleRoute(RouteSettings settings) {
           model: settings.arguments as ParaAyatModel,
         ),
         goToPageModal => ReadOnlyQuranPage(
-          (settings.arguments as List)[0] as ParaAyatModel,
-          (settings.arguments as List)[1] as int,
+          settings.arguments as ReadOnlyQuranPageArgs,
         ),
         // MainPage is the default
         _ => const MainPage(),

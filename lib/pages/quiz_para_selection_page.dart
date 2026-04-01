@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quran_memorization_helper/models/quiz.dart';
+import 'package:quran_memorization_helper/models/routing.dart';
 import 'package:quran_memorization_helper/models/settings.dart';
 
 class QuizParaSelectionPage extends StatelessWidget {

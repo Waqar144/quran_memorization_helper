@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:quran_memorization_helper/models/routing.dart';
 import 'package:quran_memorization_helper/widgets/read_quran.dart';
-import 'package:quran_memorization_helper/models/ayat.dart';
 
 class ReadOnlyQuranPage extends StatelessWidget {
-  final ParaAyatModel _model;
-  final int page;
+  final ReadOnlyQuranPageArgs args;
 
-  const ReadOnlyQuranPage(this._model, this.page, {super.key});
+  const ReadOnlyQuranPage(this.args, {super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
       body: ReadQuranWidget(
-        _model,
-        pageController: PageController(initialPage: page, keepPage: false),
+        args.model,
+        pageController: PageController(initialPage: args.page, keepPage: false),
         verticalScrollResetFn: () {},
         pageChangedCallback: (_) {},
       ),

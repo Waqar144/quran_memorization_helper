@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:quran_memorization_helper/models/routing.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:async';
@@ -527,9 +528,10 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
             mutashabiha: mutashabihat[index],
             onGotoMutashabiha: (int ayah) {
               final page = getPageForAyah(ayah, Settings.instance.mushaf);
-              Navigator.of(
-                context,
-              ).pushNamed(goToPageModal, arguments: [widget.model, page]);
+              Navigator.of(context).pushNamed(
+                goToPageModal,
+                arguments: ReadOnlyQuranPageArgs(widget.model, page),
+              );
             },
           );
         },

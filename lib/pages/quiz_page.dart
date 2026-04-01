@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quran_memorization_helper/models/routing.dart';
 import 'dart:math';
 import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
