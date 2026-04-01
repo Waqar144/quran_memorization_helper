@@ -23,6 +23,7 @@ import 'package:quran_memorization_helper/quran_data/page_layout_types.dart'
 import 'package:quran_memorization_helper/utils/utils.dart';
 import 'package:quran_memorization_helper/widgets/mutashabiha_ayat_list_item.dart';
 import 'package:quran_memorization_helper/widgets/tap_and_longpress_gesture_recognizer.dart';
+import 'package:quran_memorization_helper/pages/page_constants.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/gestures.dart';
@@ -522,7 +523,15 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
         separatorBuilder: (ctx, index) => const Divider(height: 1),
         itemCount: mutashabihat.length,
         itemBuilder: (ctx, index) {
-          return MutashabihaAyatListItem(mutashabiha: mutashabihat[index]);
+          return MutashabihaAyatListItem(
+            mutashabiha: mutashabihat[index],
+            onGotoMutashabiha: (int ayah) {
+              final page = getPageForAyah(ayah, Settings.instance.mushaf);
+              Navigator.of(
+                context,
+              ).pushNamed(goToPageModal, arguments: [widget.model, page]);
+            },
+          );
         },
       );
     }

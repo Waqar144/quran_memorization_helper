@@ -41,12 +41,14 @@ class MutashabihaAyatListItem extends StatelessWidget {
   final VoidCallback? onLongPress;
   final VoidCallback? onTap;
   final VoidCallback? onGoto;
+  final Function(int) onGotoMutashabiha;
   final bool selectionMode;
   final bool isSelected;
 
   const MutashabihaAyatListItem({
     super.key,
     required this.mutashabiha,
+    required this.onGotoMutashabiha,
     this.onLongPress,
     this.onTap,
     this.onGoto,
@@ -54,7 +56,8 @@ class MutashabihaAyatListItem extends StatelessWidget {
     this.selectionMode = false,
   });
 
-  List<Widget> _buildMatches(ThemeData theme) {
+  List<Widget> _buildMatches(BuildContext context) {
+    final theme = Theme.of(context);
     List<Widget> widgets = [];
     final isIndoPk = isIndoPak(Settings.instance.mushaf);
     widgets.add(const Divider(height: 2));
@@ -81,6 +84,12 @@ class MutashabihaAyatListItem extends StatelessWidget {
             children: [
               Text(
                 "${surahNameForIdx(m.surahIdx)}:${m.surahAyahIndexesString()} - ${paraText()}: ${m.paraNumber()}",
+              ),
+              IconButton(
+                icon: const Icon(Icons.open_in_new),
+                onPressed: () {
+                  onGotoMutashabiha(m.ayahIdx);
+                },
               ),
             ],
           ),
@@ -121,7 +130,7 @@ class MutashabihaAyatListItem extends StatelessWidget {
             IconButton(onPressed: onGoto, icon: const Icon(Icons.shortcut)),
         ],
       ),
-      children: _buildMatches(Theme.of(context)),
+      children: _buildMatches(context),
     );
   }
 }

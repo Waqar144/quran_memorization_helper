@@ -5,3 +5,4 @@ const String mutashabihatPage = 'MutashabihatPage';
 const String paraMutashabihatPage = 'ParaMutashabihatPage';
 const String markedAyahsPage = 'MarkedAyahsPage';
 const String bookmarksPage = 'BookmarksPage';
+const String goToPageModal = 'GoToPageModal';

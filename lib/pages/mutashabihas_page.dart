@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:quran_memorization_helper/models/ayat.dart';
 import 'package:quran_memorization_helper/models/settings.dart';
+import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
 import 'page_constants.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'package:quran_memorization_helper/widgets/mutashabiha_ayat_list_item.dart';
@@ -7,7 +9,9 @@ import 'package:quran_memorization_helper/utils/utils.dart';
 
 /// The page where you select the para for which the mutashabihat will be displayed
 class MutashabihatPage extends StatelessWidget {
-  const MutashabihatPage({super.key});
+  final ParaAyatModel _model;
+
+  const MutashabihatPage(this._model, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +33,7 @@ class MutashabihatPage extends StatelessWidget {
             onTap: () {
               Navigator.of(
                 context,
-              ).pushNamed(paraMutashabihatPage, arguments: index);
+              ).pushNamed(paraMutashabihatPage, arguments: [index, _model]);
             },
           );
         },
@@ -42,7 +46,8 @@ class MutashabihatPage extends StatelessWidget {
 class ParaMutashabihat extends StatelessWidget {
   final int _para;
   final List<Mutashabiha> _mutashabihat = [];
-  ParaMutashabihat(this._para, {super.key});
+  final ParaAyatModel _model;
+  ParaMutashabihat(this._para, this._model, {super.key});
 
   /// Import the mutashabihat from assets
   Future<List<Mutashabiha>> _importParaMutashabihat() async {
@@ -72,6 +77,12 @@ class ParaMutashabihat extends StatelessWidget {
                 key: ObjectKey(index),
                 mutashabiha: data[index],
                 selectionMode: false,
+                onGotoMutashabiha: (int ayah) {
+                  final page = getPageForAyah(ayah, Settings.instance.mushaf);
+                  Navigator.of(
+                    context,
+                  ).pushNamed(goToPageModal, arguments: [_model, page]);
+                },
               );
             },
           );

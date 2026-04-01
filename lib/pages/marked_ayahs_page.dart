@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:quran_memorization_helper/models/ayah_selection_model.dart';
 import 'package:quran_memorization_helper/models/ayat.dart';
 import 'package:quran_memorization_helper/models/settings.dart';
+import 'package:quran_memorization_helper/pages/page_constants.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
 import 'package:quran_memorization_helper/utils/utils.dart';
@@ -137,6 +138,13 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
     );
   }
 
+  void onGotoMutashabiha(int ayah) {
+    final page = getPageForAyah(ayah, Settings.instance.mushaf);
+    Navigator.of(
+      context,
+    ).pushNamed(goToPageModal, arguments: [widget.model, page]);
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -161,6 +169,7 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
               onLongPress: _enterMultiselectMode,
               onTap: _onTap,
               onGotoAyah: _onGotoAyah,
+              onGotoMutashabiha: onGotoMutashabiha,
             );
           },
         ),
