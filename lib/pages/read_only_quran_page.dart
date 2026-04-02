@@ -10,7 +10,11 @@ class ReadOnlyQuranPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      bottomNavigationBar: BottomAppBar(
+        padding: EdgeInsets.zero,
+        height: kToolbarHeight,
+        child: AppBar(),
+      ),
       body: ReadQuranWidget(
         args.model,
         pageController: PageController(initialPage: args.page, keepPage: false),
