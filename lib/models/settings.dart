@@ -49,8 +49,14 @@ class Settings extends ChangeNotifier {
 
   void changeFixedLayoutFont(int dir) {
     if (dir > 0) {
+      if (_fixedLayoutFontSize > 48) {
+        return;
+      }
       _fixedLayoutFontSize += 0.4;
     } else {
+      if (_fixedLayoutFontSize < 12) {
+        return;
+      }
       _fixedLayoutFontSize -= 0.4;
     }
 
@@ -153,6 +159,11 @@ class Settings extends ChangeNotifier {
 
     _fixedLayoutFontSize =
         json["fixedLayoutFontSize"] ?? _defaultTextFontSize();
+    if (_fixedLayoutFontSize < 12) {
+      _fixedLayoutFontSize = _defaultTextFontSize();
+    } else if (_fixedLayoutFontSize > 48) {
+      _defaultTextFontSize();
+    }
 
     if (currentReadingPara != null && oldCurrentReadingPage != null) {
       int start = paraStartPage(currentReadingPara - 1, _mushaf);
