@@ -15,11 +15,16 @@ class ReadOnlyQuranPage extends StatelessWidget {
         height: kToolbarHeight,
         child: AppBar(),
       ),
-      body: ReadQuranWidget(
-        args.model,
-        pageController: PageController(initialPage: args.page, keepPage: false),
-        verticalScrollResetFn: () {},
-        pageChangedCallback: (_) {},
+      body: SafeArea(
+        child: ReadQuranWidget(
+          args.model,
+          pageController: PageController(
+            initialPage: args.page,
+            keepPage: false,
+          ),
+          verticalScrollResetFn: () {},
+          pageChangedCallback: (_) {},
+        ),
       ),
     );
   }
