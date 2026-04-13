@@ -8,37 +8,13 @@ import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/pages.dart';
 import 'package:quran_memorization_helper/quran_data/quran_text.dart';
 import 'package:quran_memorization_helper/quran_data/surahs.dart';
+import 'package:quran_memorization_helper/widgets/my_orientation_build.dart';
 import 'package:quran_memorization_helper/widgets/read_quran.dart';
 import 'package:quran_memorization_helper/widgets/search_dialog.dart';
 import 'package:quran_memorization_helper/widgets/surah_list_view.dart';
 import 'package:quran_memorization_helper/widgets/para_list_view.dart';
 import 'package:quran_memorization_helper/utils/utils.dart';
 import 'package:flutter/services.dart' show LogicalKeyboardKey;
-
-class MyOrientationBuilder extends StatelessWidget {
-  const MyOrientationBuilder({super.key, required this.builder});
-
-  final OrientationWidgetBuilder builder;
-
-  Widget _buildWithConstraints(
-    BuildContext context,
-    BoxConstraints constraints,
-  ) {
-    // If the constraints are fully unbounded (i.e., maxWidth and maxHeight are
-    // both infinite), we prefer Orientation.portrait because its more common to
-    // scroll vertically then horizontally.
-    final Orientation orientation =
-        constraints.maxWidth > (constraints.maxHeight * 1.2)
-            ? Orientation.landscape
-            : Orientation.portrait;
-    return builder(context, orientation);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(builder: _buildWithConstraints);
-  }
-}
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
