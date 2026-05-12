@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:quran_memorization_helper/models/quiz.dart';
 import 'package:quran_memorization_helper/models/routing.dart';
 import 'package:quran_memorization_helper/models/settings.dart';
+import 'package:quran_memorization_helper/widgets/title_app_bar.dart';
 
 class QuizParaSelectionPage extends StatelessWidget {
   final ValueNotifier<List<int>> _selectedParas = ValueNotifier([]);
@@ -20,15 +21,12 @@ class QuizParaSelectionPage extends StatelessWidget {
     ).pop(QuizCreationArgs(_selectedParas.value, _quizMode.value));
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final isIndoPk = isIndoPak(Settings.instance.mushaf);
-    return Scaffold(
-      appBar: AppBar(
-        title:
-            isIndoPk
-                ? const Text("Select Paras For Quiz")
-                : const Text("Select Juz For Quiz"),
+  BottomAppBar bottomBar(BuildContext context) {
+    return BottomAppBar(
+      padding: EdgeInsets.zero,
+      height: kToolbarHeight,
+      child: AppBar(
+        scrolledUnderElevation: 0,
         actions: [
           IconButton(
             icon: const Icon(Icons.check),
@@ -36,32 +34,19 @@ class QuizParaSelectionPage extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isIndoPk = isIndoPak(Settings.instance.mushaf);
+    return Scaffold(
+      appBar: TitleOnlyAppBar(
+        isIndoPk ? "Select Paras For Quiz" : "Select Juz For Quiz",
+      ),
+      bottomNavigationBar: bottomBar(context),
       body: Column(
         children: [
-          ListTile(
-            title: const Text("Quiz Mode"),
-            trailing: ValueListenableBuilder(
-              valueListenable: _quizMode,
-              builder: (context, mode, _) {
-                return DropdownButton(
-                  items: [
-                    for (final s in QuizMode.values)
-                      DropdownMenuItem(
-                        value: s,
-                        child: Text(_quizModes[s.index]),
-                      ),
-                  ],
-                  value: mode,
-                  onChanged: (QuizMode? s) {
-                    if (s != null) {
-                      _quizMode.value = s;
-                    }
-                  },
-                );
-              },
-            ),
-          ),
-          const Divider(thickness: 2),
           // Para List
           Expanded(
             child: ValueListenableBuilder(
@@ -93,6 +78,30 @@ class QuizParaSelectionPage extends StatelessWidget {
                         }
                       },
                     );
+                  },
+                );
+              },
+            ),
+          ),
+          const Divider(thickness: 2),
+          ListTile(
+            title: const Text("Quiz Mode"),
+            trailing: ValueListenableBuilder(
+              valueListenable: _quizMode,
+              builder: (context, mode, _) {
+                return DropdownButton(
+                  items: [
+                    for (final s in QuizMode.values)
+                      DropdownMenuItem(
+                        value: s,
+                        child: Text(_quizModes[s.index]),
+                      ),
+                  ],
+                  value: mode,
+                  onChanged: (QuizMode? s) {
+                    if (s != null) {
+                      _quizMode.value = s;
+                    }
                   },
                 );
               },

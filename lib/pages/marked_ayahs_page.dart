@@ -8,6 +8,7 @@ import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
 import 'package:quran_memorization_helper/utils/utils.dart';
 import 'package:quran_memorization_helper/widgets/ayat_and_mutashabiha_list_view.dart';
+import 'package:quran_memorization_helper/widgets/title_app_bar.dart';
 
 class MarkedAyahsPage extends StatefulWidget {
   final ParaAyatModel model;
@@ -96,10 +97,7 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
 
   AppBar buildAppbar() {
     return AppBar(
-      title: Text(
-        "Marked ayahs for ${paraText()} $_currentPara",
-        style: TextStyle(fontSize: 18),
-      ),
+      scrolledUnderElevation: 0,
       actions:
           _multipleSelectMode
               ? [
@@ -157,21 +155,28 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
         }
       },
       child: Scaffold(
-        appBar: buildAppbar(),
+        appBar: TitleOnlyAppBar("Marked ayahs for ${paraText()} $_currentPara"),
+        bottomNavigationBar: BottomAppBar(
+          padding: EdgeInsets.zero,
+          height: kToolbarHeight,
+          child: buildAppbar(),
+        ),
         body: FutureBuilder<void>(
           future: _loadDataFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState != ConnectionState.done) {
               return const SizedBox.shrink();
             }
-            return AyatAndMutashabihaListView(
-              ayahAndMutashabihat,
-              selectionState: _selectionState,
-              selectionMode: _multipleSelectMode,
-              onLongPress: _enterMultiselectMode,
-              onTap: _onTap,
-              onGotoAyah: _onGotoAyah,
-              onGotoMutashabiha: onGotoMutashabiha,
+            return SafeArea(
+              child: AyatAndMutashabihaListView(
+                ayahAndMutashabihat,
+                selectionState: _selectionState,
+                selectionMode: _multipleSelectMode,
+                onLongPress: _enterMultiselectMode,
+                onTap: _onTap,
+                onGotoAyah: _onGotoAyah,
+                onGotoMutashabiha: onGotoMutashabiha,
+              ),
             );
           },
         ),
