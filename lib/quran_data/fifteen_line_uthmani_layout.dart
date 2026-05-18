@@ -444,7 +444,7 @@ const List<Page> pages15Uthmani = [
     Line(185, 5),
     Line(186, 4),
     Line(186, 12),
-    Line(187, 6),
+    Line(187, 5),
   ]),
   Page(27, [
     Line(188, 0),

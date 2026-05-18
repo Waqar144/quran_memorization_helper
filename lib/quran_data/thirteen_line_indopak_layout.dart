@@ -1,4 +1,4 @@
-import 'page_layout_types.dart';
+import 'package:quran_memorization_helper/quran_data/page_layout_types.dart';
 
 const List<Page> pages13Indopak = [
   Page(1, [
@@ -12101,7 +12101,7 @@ const List<Page> pages13Indopak = [
     Line(5508, 2),
     Line(5510, 2),
     Line(5512, 1),
-    Line(5513, 2),
+    Line(5514, 3),
     Line(5517, 2),
     Line(5519, 1),
     Line(5521, 1),
