@@ -63,6 +63,16 @@ int getPageForAyah(int ayahIndex, Mushaf mushaf) {
         lastPage.lines.firstWhere((l) => l.ayahIdx >= 0).ayahIdx;
     if (ayahIndex >= firstAyahOfPage) {
       resultPage = lastPage.pageNum;
+      if (isIndoPak(mushaf)) {
+        resultPage -= 1;
+      }
+    }
+  }
+
+  if (resultPage > 0) {
+    final pageBefore = resultPage - 1;
+    if (pages[pageBefore].lines.last.ayahIdx == ayahIndex) {
+      return pageBefore;
     }
   }
 
