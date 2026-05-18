@@ -997,10 +997,7 @@ class _PageWidgetState extends State<PageWidget> {
                       : null,
               style: TextStyle(
                 inherit: true,
-                color:
-                    isIndoPk
-                        ? themeData.textTheme.bodyMedium?.color
-                        : Colors.black,
+                color: themeData.textTheme.bodyMedium?.color,
                 backgroundColor:
                     hasRukuMarker
                         ? (darkMode
