@@ -5,6 +5,7 @@ import 'package:quran_memorization_helper/models/quiz.dart';
 import 'package:quran_memorization_helper/models/routing.dart';
 import 'package:quran_memorization_helper/pages/main_page.dart';
 import 'package:quran_memorization_helper/pages/page_constants.dart';
+import 'package:quran_memorization_helper/pages/search_result_page.dart';
 import 'package:quran_memorization_helper/pages/settings_page.dart';
 import 'package:quran_memorization_helper/pages/quiz_para_selection_page.dart';
 import 'package:quran_memorization_helper/pages/quiz_page.dart';
@@ -41,6 +42,7 @@ MaterialPageRoute handleRoute(RouteSettings settings) {
         goToPageModal => ReadOnlyQuranPage(
           settings.arguments as ReadOnlyQuranPageArgs,
         ),
+        openSearchPage => QuranSearchPage(settings.arguments as String),
         // MainPage is the default
         _ => const MainPage(),
       };

@@ -153,8 +153,42 @@ class MainPageState extends State<MainPage>
     }
   }
 
+  void _openSearchPage() async {
+    final String? res = await showDialog<String>(
+      context: context,
+      builder: (context) {
+        String searchInput = '';
+        return AlertDialog(
+          title: const Text('Search'),
+          content: TextField(
+            autofocus: true,
+            decoration: const InputDecoration(hintText: 'Enter search term...'),
+            onChanged: (value) => searchInput = value,
+            onSubmitted: (value) => Navigator.pop(context, value),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, searchInput),
+              child: const Text('Search'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (res != null && res.isNotEmpty && mounted) {
+      print('User search: $res');
+      Navigator.pushNamed(context, openSearchPage, arguments: res);
+    }
+  }
+
   Widget buildThreeDotMenu() {
     final Map<String, VoidCallback> actions = {
+      'Search': _openSearchPage,
       'Take Quiz': _openQuizParaSelectionPage,
       'Show Marked Ayahs': _openMarkedAyahsPage,
       'Bookmarks': _openBookmarksPage,

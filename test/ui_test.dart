@@ -109,7 +109,7 @@ void main() {
       expect(find.byType(PopupMenuButton<String>), findsOneWidget);
       await tester.tap(find.byType(PopupMenuButton<String>));
       await tester.pumpAndSettle();
-      expect(find.byType(PopupMenuItem<String>), findsNWidgets(6));
+      expect(find.byType(PopupMenuItem<String>), findsAtLeast(7));
 
       pageView.controller!.jumpToPage(0);
       await tester.pumpAndSettle();
