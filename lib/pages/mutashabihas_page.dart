@@ -47,7 +47,7 @@ class MutashabihatPage extends StatelessWidget {
 /// This is the page that shows the mutashabihat list
 class ParaMutashabihat extends StatelessWidget {
   final List<Mutashabiha> _mutashabihat = [];
-  ParaMutashabihatArgs args;
+  final ParaMutashabihatArgs args;
   ParaMutashabihat(this.args, {super.key});
 
   /// Import the mutashabihat from assets

@@ -4,7 +4,6 @@ import 'package:quran_memorization_helper/models/ayat.dart';
 import 'package:quran_memorization_helper/models/routing.dart';
 import 'package:quran_memorization_helper/models/settings.dart';
 import 'package:quran_memorization_helper/pages/page_constants.dart';
-import 'package:quran_memorization_helper/models/quiz.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/pages.dart';
 import 'package:quran_memorization_helper/quran_data/quran_text.dart';
