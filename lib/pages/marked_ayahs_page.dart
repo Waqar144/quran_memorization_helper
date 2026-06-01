@@ -7,7 +7,8 @@ import 'package:quran_memorization_helper/pages/page_constants.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
 import 'package:quran_memorization_helper/utils/utils.dart';
-import 'package:quran_memorization_helper/widgets/ayat_and_mutashabiha_list_view.dart';
+import 'package:quran_memorization_helper/widgets/ayat_list_item.dart';
+import 'package:quran_memorization_helper/widgets/mutashabiha_ayat_list_item.dart';
 import 'package:quran_memorization_helper/widgets/title_app_bar.dart';
 
 class MarkedAyahsPage extends StatefulWidget {
@@ -145,6 +146,33 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
     );
   }
 
+  Widget _listItemForIndex(int index) {
+    if (ayahAndMutashabihat[index].ayat != null) {
+      final Ayat ayat = ayahAndMutashabihat[index].ayat!;
+      return AyatListItem(
+        key: ObjectKey(ayat),
+        ayah: ayat,
+        onLongPress: _enterMultiselectMode,
+        onGoto: () => _onGotoAyah(ayat.ayahIdx),
+        onTap: () => _onTap(ayat.ayahIdx),
+        selectionMode: _multipleSelectMode,
+        isSelected: _selectionState.isSelected(index),
+      );
+    } else {
+      final Mutashabiha mutashabiha = ayahAndMutashabihat[index].mutashabiha!;
+      return MutashabihaAyatListItem(
+        key: ObjectKey(mutashabiha),
+        mutashabiha: mutashabiha,
+        onLongPress: _enterMultiselectMode,
+        onGoto: () => _onGotoAyah(mutashabiha.src.ayahIdx),
+        onTap: () => _onTap(mutashabiha.src.ayahIdx),
+        onGotoMutashabiha: onGotoMutashabiha,
+        selectionMode: _multipleSelectMode,
+        isSelected: _selectionState.isSelected(index),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -168,14 +196,18 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
               return const SizedBox.shrink();
             }
             return SafeArea(
-              child: AyatAndMutashabihaListView(
-                ayahAndMutashabihat,
-                selectionState: _selectionState,
-                selectionMode: _multipleSelectMode,
-                onLongPress: _enterMultiselectMode,
-                onTap: _onTap,
-                onGotoAyah: _onGotoAyah,
-                onGotoMutashabiha: onGotoMutashabiha,
+              child: ListView.separated(
+                separatorBuilder:
+                    (BuildContext context, int index) => const Divider(
+                      indent: 8,
+                      endIndent: 8,
+                      color: Colors.grey,
+                      height: 2,
+                    ),
+                itemCount: ayahAndMutashabihat.length,
+                itemBuilder: (context, index) {
+                  return _listItemForIndex(index);
+                },
               ),
             );
           },
