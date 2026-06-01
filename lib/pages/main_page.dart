@@ -180,8 +180,11 @@ class MainPageState extends State<MainPage>
     );
 
     if (res != null && res.isNotEmpty && mounted) {
-      print('User search: $res');
-      Navigator.pushNamed(context, openSearchPage, arguments: res);
+      Navigator.pushNamed(
+        context,
+        openSearchPage,
+        arguments: QuranSearchPageArgs(searchTerm: res, model: _paraModel),
+      );
     }
   }
 

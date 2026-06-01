@@ -41,7 +41,9 @@ MaterialPageRoute handleRoute(RouteSettings settings) {
         goToPageModal => ReadOnlyQuranPage(
           settings.arguments as ReadOnlyQuranPageArgs,
         ),
-        openSearchPage => QuranSearchPage(settings.arguments as String),
+        openSearchPage => QuranSearchPage(
+          settings.arguments as QuranSearchPageArgs,
+        ),
         // MainPage is the default
         _ => const MainPage(),
       };

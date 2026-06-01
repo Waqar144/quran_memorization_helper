@@ -20,3 +20,10 @@ class ReadOnlyQuranPageArgs {
 
   ReadOnlyQuranPageArgs(this.model, this.page);
 }
+
+class QuranSearchPageArgs {
+  final ParaAyatModel model;
+  final String searchTerm;
+
+  QuranSearchPageArgs({required this.searchTerm, required this.model});
+}

@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:quran_memorization_helper/models/routing.dart';
+import 'package:quran_memorization_helper/models/settings.dart';
+import 'package:quran_memorization_helper/pages/page_constants.dart';
+import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
 import 'package:quran_memorization_helper/quran_data/quran_text.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'package:quran_memorization_helper/widgets/ayat_list_item.dart';
@@ -11,9 +15,9 @@ class _SearchMatch {
 }
 
 class QuranSearchPage extends StatefulWidget {
-  final String _searchTerm;
+  final QuranSearchPageArgs args;
 
-  const QuranSearchPage(this._searchTerm, {super.key});
+  const QuranSearchPage(this.args, {super.key});
 
   @override
   State<QuranSearchPage> createState() => _QuranSearchPageState();
@@ -85,14 +89,26 @@ class _QuranSearchPageState extends State<QuranSearchPage> {
   @override
   void initState() {
     super.initState();
-    searchTerm = normalizeSearchTerm(widget._searchTerm);
+    searchTerm = normalizeSearchTerm(widget.args.searchTerm);
     _searchFuture = _loadAndSearch();
+  }
+
+  void onGotoResult(int ayahIndex) {
+    final page = getPageForAyah(ayahIndex, Settings.instance.mushaf);
+    Navigator.of(context).pushNamed(
+      goToPageModal,
+      arguments: ReadOnlyQuranPageArgs(widget.args.model, page),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Search")),
+      bottomNavigationBar: BottomAppBar(
+        padding: EdgeInsets.zero,
+        height: kToolbarHeight,
+        child: AppBar(title: const Text("Search")),
+      ),
       body: SafeArea(
         child: FutureBuilder<List<_SearchMatch>>(
           future: _searchFuture,
@@ -122,7 +138,11 @@ class _QuranSearchPageState extends State<QuranSearchPage> {
                 );
 
                 return Card(
-                  child: AyatListItem(ayah: ayah, showSurahAyahIndex: true),
+                  child: AyatListItem(
+                    ayah: ayah,
+                    showSurahAyahIndex: true,
+                    onGoto: () => onGotoResult(result.ayahIndex),
+                  ),
                 );
               },
             );
