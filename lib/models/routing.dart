@@ -24,6 +24,11 @@ class ReadOnlyQuranPageArgs {
 class QuranSearchPageArgs {
   final ParaAyatModel model;
   final String searchTerm;
+  final bool wholeWord;
 
-  QuranSearchPageArgs({required this.searchTerm, required this.model});
+  QuranSearchPageArgs({
+    required this.searchTerm,
+    required this.model,
+    required this.wholeWord,
+  });
 }

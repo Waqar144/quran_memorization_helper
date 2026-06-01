@@ -58,6 +58,8 @@ class _QuranSearchPageState extends State<QuranSearchPage> {
 
     if (searchTerm.isEmpty) return [];
 
+    final bool wholeWord = widget.args.wholeWord;
+
     final ayahCount = QuranText.instance.ayahCount();
     final List<_SearchMatch> matches = [];
     for (int i = 0; i < ayahCount; i++) {
@@ -67,6 +69,27 @@ class _QuranSearchPageState extends State<QuranSearchPage> {
       while (true) {
         final matchPos = ayahText.indexOf(searchTerm, startSearchPos);
         if (matchPos == -1) break;
+
+        // bool debug = ayahText.contains("");
+
+        if (wholeWord && matchPos > 0 && ayahText[matchPos - 1] != '\u200c') {
+          break;
+        }
+        // if (debug) {
+        //   print("Passed 1");
+        // }
+
+        if (wholeWord &&
+            matchPos + searchTerm.length < ayahText.length &&
+            ayahText[matchPos + searchTerm.length] != '\u200c') {
+          break;
+        }
+
+        // if (debug) {
+        //   print(
+        //     "Passed 2 ${ayahText.length < matchPos + searchTerm.length} --- ${ayahText.length} ---- ${matchPos} --- ${searchTerm.length}",
+        //   );
+        // }
 
         // Count spaces before matchPos to find the 0-based word index
         int currentWordIndex = 0;
@@ -107,7 +130,20 @@ class _QuranSearchPageState extends State<QuranSearchPage> {
       bottomNavigationBar: BottomAppBar(
         padding: EdgeInsets.zero,
         height: kToolbarHeight,
-        child: AppBar(title: const Text("Search")),
+        child: AppBar(
+          title: const Text("Search"),
+          actions: [
+            // IconButton(
+            //   icon: const Icon(Icons.refresh),
+            //   onPressed: () {
+            //     print("Resetting");
+            //     setState(() {
+            //       _searchFuture = _loadAndSearch();
+            //     });
+            //   },
+            // ),
+          ],
+        ),
       ),
       body: SafeArea(
         child: FutureBuilder<List<_SearchMatch>>(

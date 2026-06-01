@@ -9,6 +9,7 @@ import 'package:quran_memorization_helper/quran_data/pages.dart';
 import 'package:quran_memorization_helper/quran_data/quran_text.dart';
 import 'package:quran_memorization_helper/quran_data/surahs.dart';
 import 'package:quran_memorization_helper/widgets/read_quran.dart';
+import 'package:quran_memorization_helper/widgets/search_dialog.dart';
 import 'package:quran_memorization_helper/widgets/surah_list_view.dart';
 import 'package:quran_memorization_helper/widgets/para_list_view.dart';
 import 'package:quran_memorization_helper/utils/utils.dart';
@@ -153,37 +154,26 @@ class MainPageState extends State<MainPage>
   }
 
   void _openSearchPage() async {
-    final String? res = await showDialog<String>(
+    final SearchDialogResult? result = await showDialog(
       context: context,
-      builder: (context) {
-        String searchInput = '';
-        return AlertDialog(
-          title: const Text('Search'),
-          content: TextField(
-            autofocus: true,
-            decoration: const InputDecoration(hintText: 'Enter search term...'),
-            onChanged: (value) => searchInput = value,
-            onSubmitted: (value) => Navigator.pop(context, value),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, searchInput),
-              child: const Text('Search'),
-            ),
-          ],
-        );
-      },
+      builder: (context) => const SearchDialog(),
     );
 
-    if (res != null && res.isNotEmpty && mounted) {
+    if (result != null && mounted) {
+      final String term = result.term;
+      if (term.isEmpty) {
+        return;
+      }
+      final bool wholeWord = result.wholeWord;
+
       Navigator.pushNamed(
         context,
         openSearchPage,
-        arguments: QuranSearchPageArgs(searchTerm: res, model: _paraModel),
+        arguments: QuranSearchPageArgs(
+          searchTerm: term,
+          model: _paraModel,
+          wholeWord: wholeWord,
+        ),
       );
     }
   }
