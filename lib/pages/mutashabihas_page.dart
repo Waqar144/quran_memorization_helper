@@ -77,7 +77,6 @@ class ParaMutashabihat extends StatelessWidget {
               return MutashabihaAyatListItem(
                 key: ObjectKey(index),
                 mutashabiha: data[index],
-                selectionMode: false,
                 onGotoMutashabiha: (int ayah) {
                   final page = getPageForAyah(ayah, Settings.instance.mushaf);
                   Navigator.of(context).pushNamed(

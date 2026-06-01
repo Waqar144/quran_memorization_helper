@@ -14,11 +14,13 @@ class AyatListItem extends StatefulWidget {
     this.isSelected = false,
     this.selectionMode = false,
     this.showSurahAyahIndex = true,
+    this.onSelectedChanged,
   });
 
   final VoidCallback? onLongPress;
   final VoidCallback? onTap;
   final VoidCallback? onGoto;
+  final Function(bool?)? onSelectedChanged;
   final bool selectionMode;
   final bool showSurahAyahIndex;
   final bool isSelected;
@@ -29,46 +31,44 @@ class AyatListItem extends StatefulWidget {
 }
 
 class _AyatListItemState extends State<AyatListItem> {
-  void _longPress() {
-    assert(widget.onLongPress != null);
-    widget.onLongPress!();
-  }
-
-  VoidCallback? _getLongPressCallback() {
-    if (widget.onLongPress != null && !widget.selectionMode) {
-      return _longPress;
-    }
-    return null;
-  }
-
   @override
   Widget build(BuildContext context) {
     final isIndoPk = isIndoPak(Settings.instance.mushaf);
-    return ListTile(
-      leading:
-          widget.selectionMode
-              ? Icon(
-                widget.isSelected
-                    ? Icons.check_box
-                    : Icons.check_box_outline_blank,
-              )
-              : null,
-      title: RichText(
-        text: TextSpan(
-          children: textSpansForAyah(widget.ayah),
-          style: TextStyle(
-            color: Theme.of(context).textTheme.bodyMedium?.color,
-            fontFamily: getQuranFont(),
-            fontSize: Settings.instance.fontSize.toDouble(),
-            letterSpacing: 0,
-            wordSpacing: Settings.wordSpacing,
-            height: isIndoPk ? 1.7 : null,
-          ),
+
+    final text = RichText(
+      text: TextSpan(
+        children: textSpansForAyah(widget.ayah),
+        style: TextStyle(
+          color: Theme.of(context).textTheme.bodyMedium?.color,
+          fontFamily: getQuranFont(),
+          fontSize: Settings.instance.fontSize.toDouble(),
+          letterSpacing: 0,
+          wordSpacing: Settings.wordSpacing,
+          height: isIndoPk ? 1.7 : null,
         ),
-        softWrap: true,
-        textAlign: TextAlign.right,
-        textDirection: TextDirection.rtl,
       ),
+      softWrap: true,
+      textAlign: TextAlign.right,
+      textDirection: TextDirection.rtl,
+    );
+
+    if (widget.selectionMode) {
+      if (widget.onSelectedChanged == null) {
+        throw "Expected an onSelectedChanged handler";
+      }
+      return CheckboxListTile(
+        value: widget.isSelected,
+        onChanged: widget.onSelectedChanged,
+        title: text,
+        subtitle:
+            widget.showSurahAyahIndex
+                ? Text(widget.ayah.surahAyahText())
+                : null,
+      );
+    }
+
+    return ListTile(
+      title: text,
       subtitle: Row(
         children: [
           if (widget.showSurahAyahIndex) Text(widget.ayah.surahAyahText()),
@@ -79,8 +79,8 @@ class _AyatListItemState extends State<AyatListItem> {
             ),
         ],
       ),
-      onLongPress: _getLongPressCallback(),
-      onTap: widget.selectionMode ? widget.onTap : null,
+      onLongPress: widget.onLongPress,
+      onTap: widget.onTap,
     );
   }
 }

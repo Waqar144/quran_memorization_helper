@@ -27,9 +27,9 @@ void main() {
       ),
     ]);
 
-    sel.toggle(0);
+    sel.setSelected(0, true);
     expect(sel.isSelected(0), true);
-    sel.toggle(0);
+    sel.setSelected(0, false);
     expect(sel.isSelected(0), false);
 
     sel.selectAll();

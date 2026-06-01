@@ -71,11 +71,6 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
     });
   }
 
-  void _onTap(int ayahIndex) {
-    _selectionState.toggle(ayahIndex);
-    setState(() {});
-  }
-
   void _onGotoAyah(int ayahIndex) {
     int page = getPageForAyah(ayahIndex, Settings.instance.mushaf);
     Navigator.of(context).pop(page);
@@ -119,6 +114,10 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
               ]
               : [
                 IconButton(
+                  icon: Icon(Icons.select_all),
+                  onPressed: _enterMultiselectMode,
+                ),
+                IconButton(
                   tooltip: "Next ${paraText()}",
                   icon: const Icon(Icons.arrow_back),
                   onPressed: () {
@@ -147,14 +146,27 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
   }
 
   Widget _listItemForIndex(int index) {
-    if (ayahAndMutashabihat[index].ayat != null) {
-      final Ayat ayat = ayahAndMutashabihat[index].ayat!;
+    if (ayahAndMutashabihat[index].ayat != null || _multipleSelectMode) {
+      Ayat ayat = () {
+        Ayat? ayat = ayahAndMutashabihat[index].ayat;
+        if (ayat != null) {
+          return ayat;
+        }
+        assert(_multipleSelectMode);
+        return ayahAndMutashabihat[index].mutashabiha!.src;
+      }();
+
       return AyatListItem(
         key: ObjectKey(ayat),
         ayah: ayat,
-        onLongPress: _enterMultiselectMode,
         onGoto: () => _onGotoAyah(ayat.ayahIdx),
-        onTap: () => _onTap(ayat.ayahIdx),
+        onSelectedChanged: (bool? newValue) {
+          if (newValue != null) {
+            setState(() {
+              _selectionState.setSelected(ayat.ayahIdx, newValue);
+            });
+          }
+        },
         selectionMode: _multipleSelectMode,
         isSelected: _selectionState.isSelected(index),
       );
@@ -163,12 +175,8 @@ class _MarkedAyahsPageState extends State<MarkedAyahsPage> {
       return MutashabihaAyatListItem(
         key: ObjectKey(mutashabiha),
         mutashabiha: mutashabiha,
-        onLongPress: _enterMultiselectMode,
         onGoto: () => _onGotoAyah(mutashabiha.src.ayahIdx),
-        onTap: () => _onTap(mutashabiha.src.ayahIdx),
         onGotoMutashabiha: onGotoMutashabiha,
-        selectionMode: _multipleSelectMode,
-        isSelected: _selectionState.isSelected(index),
       );
     }
   }

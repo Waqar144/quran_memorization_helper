@@ -42,8 +42,6 @@ class MutashabihaAyatListItem extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onGoto;
   final Function(int) onGotoMutashabiha;
-  final bool selectionMode;
-  final bool isSelected;
 
   const MutashabihaAyatListItem({
     super.key,
@@ -52,8 +50,6 @@ class MutashabihaAyatListItem extends StatelessWidget {
     this.onLongPress,
     this.onTap,
     this.onGoto,
-    this.isSelected = false,
-    this.selectionMode = false,
   });
 
   List<Widget> _buildMatches(BuildContext context) {
@@ -100,23 +96,9 @@ class MutashabihaAyatListItem extends StatelessWidget {
     return widgets;
   }
 
-  Widget? _getLeadingWidget() {
-    if (selectionMode) {
-      return IconButton(
-        icon: Icon(
-          isSelected ? Icons.check_box : Icons.check_box_outline_blank,
-        ),
-        onPressed: onTap,
-      );
-    } else {
-      return null;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return ExpansionTile(
-      leading: _getLeadingWidget(),
       title: _AyatListItemWithMetadata(
         mutashabiha.src,
         onLongPress: onLongPress,

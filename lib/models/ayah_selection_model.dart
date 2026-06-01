@@ -12,12 +12,12 @@ class AyahSelectionState {
             : (ayahIdx: a.mutashabiha!.src.ayahIdx, selected: false);
       }, growable: false);
 
-  void toggle(int ayahIndex) {
+  void setSelected(int ayahIndex, bool newValue) {
     int found = _selection.indexWhere((e) => e.ayahIdx == ayahIndex);
     while (found != -1) {
       _selection[found] = (
         ayahIdx: _selection[found].ayahIdx,
-        selected: !_selection[found].selected,
+        selected: newValue,
       );
       found = _selection.indexWhere((e) => e.ayahIdx == ayahIndex, found + 1);
     }
