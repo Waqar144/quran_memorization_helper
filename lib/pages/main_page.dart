@@ -246,9 +246,9 @@ class MainPageState extends State<MainPage>
   }
 
   Future<void> _goToPage(int page, bool animate) async {
-    int x = page;
+    // int x = page;
     page = mapToDualModePage(page);
-    print("mapped to : $x => $page");
+    // print("mapped to : $x => $page");
     try {
       if (animate) {
         await _pageController.animateToPage(
