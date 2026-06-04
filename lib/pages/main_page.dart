@@ -30,7 +30,7 @@ class MainPageState extends State<MainPage>
   final ScrollController _scrollController = ScrollController();
   late final TabController _drawerTabController;
   late final AppBarModel _appBarModel;
-  late PageController _pageController;
+  PageController _pageController = PageController(initialPage: 0);
   Mushaf _currentFontStyle = Mushaf.Indopak16Line;
   late final Future<void> _initialLoadFuture;
 
@@ -449,47 +449,75 @@ class MainPageState extends State<MainPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor:
-          Theme.of(context).brightness == Brightness.dark ? Colors.black : null,
-      body: SafeArea(
-        child: FutureBuilder<void>(
-          future: _initialLoadFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return Center(child: const CircularProgressIndicator());
-            }
-            return CallbackShortcuts(
-              bindings: _shortcutBindings(),
-              child: Focus(
-                autofocus: true,
-                child: MyOrientationBuilder(
-                  builder: (context, orientation) {
-                    final oldWasDualPage =
-                        Settings.instance.temporaryState.dualPage;
-                    Settings.instance.temporaryState.dualPage =
-                        orientation == Orientation.landscape;
+    return MyOrientationBuilder(
+      builder: (context, orientation) {
+        // Update state
+        final oldWasDualPage = Settings.instance.temporaryState.dualPage;
+        Settings.instance.temporaryState.dualPage =
+            orientation == Orientation.landscape;
 
-                    if (oldWasDualPage !=
-                        Settings.instance.temporaryState.dualPage) {
-                      reinitPageController();
-                    }
+        if (oldWasDualPage != Settings.instance.temporaryState.dualPage) {
+          reinitPageController();
+        }
 
-                    return ReadQuranWidget(
-                      _paraModel,
-                      pageController: _pageController,
-                      verticalScrollResetFn: _resetVerticalScrollToZero,
-                      pageChangedCallback: _saveScrollPosition,
-                      orientation: orientation,
-                    );
-                  },
-                ),
+        final bgColor =
+            Theme.of(context).brightness == Brightness.dark
+                ? Colors.black
+                : null;
+
+        if (Settings.instance.temporaryState.dualPage) {
+          return Scaffold(
+            backgroundColor: bgColor,
+            body: SafeArea(
+              child: Row(
+                children: [
+                  Expanded(child: buildQuranWidget(Orientation.landscape)),
+                  _buildVerticalAppBar(),
+                ],
               ),
-            );
-          },
-        ),
-      ),
-      bottomNavigationBar: _bottomAppBar(),
+            ),
+          );
+        }
+
+        // Single page mode
+        return Scaffold(
+          backgroundColor: bgColor,
+          body: SafeArea(child: buildQuranWidget(Orientation.portrait)),
+          bottomNavigationBar: _bottomAppBar(),
+        );
+      },
+    );
+  }
+
+  Widget buildQuranWidget(Orientation orientation) {
+    return FutureBuilder<void>(
+      future: _initialLoadFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return Center(child: const CircularProgressIndicator());
+        }
+        return CallbackShortcuts(
+          bindings: _shortcutBindings(),
+          child: Focus(
+            autofocus: true,
+            child: ReadQuranWidget(
+              _paraModel,
+              pageController: _pageController,
+              verticalScrollResetFn: _resetVerticalScrollToZero,
+              pageChangedCallback: _saveScrollPosition,
+              orientation: Orientation.landscape,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildVerticalAppBar() {
+    return Container(
+      width: kToolbarHeight,
+      color: Theme.of(context).colorScheme.surface,
+      child: Column(children: [..._appBarActions().reversed]),
     );
   }
 }
