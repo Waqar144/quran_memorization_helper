@@ -1151,7 +1151,7 @@ class _PageWidgetState extends State<PageWidget> {
       reflowMode: false,
     );
     // dont try to space first two pages
-    int firstTwo = Settings.instance.mushaf == Mushaf.Indopak16Line ? 3 : 2;
+    int firstTwo = isIndoPak(Settings.instance.mushaf) ? 3 : 2;
     final wordSpacing =
         widget.pageNumber < firstTwo
             ? 1.0
