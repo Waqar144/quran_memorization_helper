@@ -1188,11 +1188,7 @@ class _PageWidgetState extends State<PageWidget> {
               surahForAyah(_getLastLineAyah()),
               arabic: true,
             ).name,
-            style: TextStyle(
-              fontSize: 16,
-              fontFamily: getQuranFont(),
-              letterSpacing: 0,
-            ),
+            style: TextStyle(fontFamily: getQuranFont(), letterSpacing: 0),
           ),
           Expanded(
             child:
@@ -1209,7 +1205,6 @@ class _PageWidgetState extends State<PageWidget> {
             child: Text(
               (widget.pageNumber + 1).toString(),
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 12),
             ),
           ),
           const Spacer(),
@@ -1217,11 +1212,7 @@ class _PageWidgetState extends State<PageWidget> {
             getParaNameForIndex(
               paraForPage(widget.pageIndex, Settings.instance.mushaf),
             ),
-            style: TextStyle(
-              fontSize: 16,
-              fontFamily: getQuranFont(),
-              letterSpacing: 0,
-            ),
+            style: TextStyle(fontFamily: getQuranFont(), letterSpacing: 0),
           ),
         ],
       ),
