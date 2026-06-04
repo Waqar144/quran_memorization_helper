@@ -36,6 +36,7 @@ class _QuranSearchPageState extends State<QuranSearchPage> {
       /* ltr */ 'ہ': 'ه', // Urdu Doachashmee/Heh -> Arabic Heh (U+0647)
       /* ltr */ 'ھ': 'ه',
       /*ltr */ 'ۃ': 'ة',
+      ' ': '\u200c', // convert space to non-joiner as that is how our text is
     };
 
     if (input.isEmpty) return input;
@@ -163,13 +164,22 @@ class _QuranSearchPageState extends State<QuranSearchPage> {
               return const Center(child: Text('No matches found'));
             }
 
+            final wordCount = widget.args.searchTerm.split(' ').length;
+
             return ListView.builder(
               itemCount: results.length,
               itemBuilder: (context, index) {
                 final result = results[index];
+
+                final wordIndexes = List.generate(
+                  wordCount,
+                  (idx) => result.wordIndex + idx,
+                  growable: false,
+                );
+
                 final ayah = Ayat(
                   QuranText.instance.ayahText(result.ayahIndex),
-                  [result.wordIndex],
+                  wordIndexes,
                   ayahIdx: result.ayahIndex,
                 );
 
