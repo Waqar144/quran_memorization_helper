@@ -84,6 +84,8 @@ class MainPageState extends State<MainPage>
   }
 
   void _saveScrollPosition(int page) {
+    page = Settings.instance.temporaryState.dualPage ? page * 2 : page;
+
     Settings.instance.saveScrollPositionDelayed(page);
   }
 
@@ -95,9 +97,11 @@ class MainPageState extends State<MainPage>
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.paused) {
       if (!_pageController.hasClients) return;
-      await Settings.instance.saveScrollPosition(
-        _pageController.page?.floor() ?? 0,
-      );
+
+      int page = _pageController.page?.floor() ?? 0;
+      page = Settings.instance.temporaryState.dualPage ? page * 2 : page;
+
+      await Settings.instance.saveScrollPosition(page);
     }
   }
 
@@ -420,17 +424,25 @@ class MainPageState extends State<MainPage>
     );
   }
 
+  void reinitPageController() {
+    _pageController.dispose();
+
+    int page = Settings.instance.currentReadingPage;
+    if (Settings.instance.temporaryState.dualPage) {
+      page = mapToDualModePage(Settings.instance.currentReadingPage);
+    }
+
+    _pageController = PageController(initialPage: page);
+  }
+
   @override
   void didUpdateWidget(covariant MainPage oldWidget) {
     if (_pageController.initialPage != Settings.instance.currentReadingPage) {
       // This is called right before build(), e.g., when hot reloading or when the
       // widget is rebuilt because settings changed. Update the initialPage of the
       // widget so that we dont end up jumping somewhere else
-      _pageController.dispose();
-      print("didUpdateWidget: ${Settings.instance.currentReadingPage}");
-      _pageController = PageController(
-        initialPage: Settings.instance.currentReadingPage,
-      );
+      // print("didUpdateWidget: ${Settings.instance.currentReadingPage}");
+      reinitPageController();
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -453,18 +465,14 @@ class MainPageState extends State<MainPage>
                 autofocus: true,
                 child: MyOrientationBuilder(
                   builder: (context, orientation) {
-                    final oldSetting =
+                    final oldWasDualPage =
                         Settings.instance.temporaryState.dualPage;
                     Settings.instance.temporaryState.dualPage =
                         orientation == Orientation.landscape;
 
-                    if (oldSetting !=
+                    if (oldWasDualPage !=
                         Settings.instance.temporaryState.dualPage) {
-                      _pageController.dispose();
-                      final page = mapToDualModePage(
-                        Settings.instance.currentReadingPage,
-                      );
-                      _pageController = PageController(initialPage: page);
+                      reinitPageController();
                     }
 
                     return ReadQuranWidget(
