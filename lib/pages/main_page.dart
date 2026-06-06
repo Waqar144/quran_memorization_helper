@@ -234,7 +234,14 @@ class MainPageState extends State<MainPage>
           const PopupMenuDivider(),
           // Rest of the simple one tap actions
           ...actions.keys.map((String choice) {
-            return PopupMenuItem<String>(value: choice, child: Text(choice));
+            return PopupMenuItem<String>(
+              height:
+                  Settings.instance.temporaryState.dualPage
+                      ? 40
+                      : kMinInteractiveDimension,
+              value: choice,
+              child: Text(choice),
+            );
           }),
         ];
       },
@@ -353,7 +360,8 @@ class MainPageState extends State<MainPage>
         onPressed: () async {
           return await showModalBottomSheet(
             context: context,
-            scrollControlDisabledMaxHeightRatio: 0.6,
+            scrollControlDisabledMaxHeightRatio:
+                Settings.instance.temporaryState.dualPage ? 0.8 : 0.6,
             builder: (context) {
               return SizedBox(
                 width: MediaQuery.sizeOf(context).width - 32.0,

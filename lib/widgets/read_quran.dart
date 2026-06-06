@@ -561,7 +561,8 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
 
     return await showModalBottomSheet(
       context: context,
-      scrollControlDisabledMaxHeightRatio: 0.7,
+      scrollControlDisabledMaxHeightRatio:
+          Settings.instance.temporaryState.dualPage ? 0.8 : 0.6,
       builder: (context) {
         return SizedBox(
           width: MediaQuery.sizeOf(context).width,
