@@ -96,7 +96,9 @@ double _availableHeight(BuildContext context) {
   final double top = (viewPadding.top / dpr) + mqPadding.top;
   final double bottom = (viewPadding.bottom / dpr) + mqPadding.bottom;
 
-  final appBarHeight = kToolbarHeight;
+  final dualPage = Settings.instance.temporaryState.dualPage;
+
+  final appBarHeight = dualPage ? 0 : kToolbarHeight;
   final padding = top + bottom + appBarHeight;
 
   // dont go below 200, we will scroll if below
@@ -1178,17 +1180,23 @@ class _PageWidgetState extends State<PageWidget> {
     throw "Did not find any ayahs!!";
   }
 
-  Widget _pageTopBorder() {
+  Widget _pageTopBorder(double height) {
+    final fontSize = Theme.of(context).textTheme.bodySmall?.fontSize;
     return SizedBox(
-      height: 24,
+      height: height,
       child: Row(
         children: [
+          const SizedBox(width: 4),
           Text(
             surahDataForIdx(
               surahForAyah(_getLastLineAyah()),
               arabic: true,
             ).name,
-            style: TextStyle(fontFamily: getQuranFont(), letterSpacing: 0),
+            style: TextStyle(
+              fontFamily: getQuranFont(),
+              letterSpacing: 0,
+              fontSize: fontSize,
+            ),
           ),
           Expanded(
             child:
@@ -1205,6 +1213,7 @@ class _PageWidgetState extends State<PageWidget> {
             child: Text(
               (widget.pageNumber + 1).toString(),
               textAlign: TextAlign.center,
+              style: TextStyle(fontSize: fontSize),
             ),
           ),
           const Spacer(),
@@ -1212,8 +1221,13 @@ class _PageWidgetState extends State<PageWidget> {
             getParaNameForIndex(
               paraForPage(widget.pageIndex, Settings.instance.mushaf),
             ),
-            style: TextStyle(fontFamily: getQuranFont(), letterSpacing: 0),
+            style: TextStyle(
+              fontFamily: getQuranFont(),
+              letterSpacing: 0,
+              fontSize: fontSize,
+            ),
           ),
+          const SizedBox(width: 4),
         ],
       ),
     );
@@ -1406,12 +1420,15 @@ class _PageWidgetState extends State<PageWidget> {
       Mushaf.Indopak13Line => 13,
     };
 
+    final double topBorderHeight = 16.0;
+
     final double height =
         _availableHeight(context) -
         ( /*divider between lines(1px)*/ numPageLines +
             2 + // some extra space
-            /*topborder=*/ 24);
-    final double rowHeight = max((height / numPageLines).floorToDouble(), 10);
+            /*topborder=*/ topBorderHeight);
+
+    final double rowHeight = max((height / numPageLines), 10.0);
     final double rowWidth = MediaQuery.sizeOf(context).width;
     const double padding = 4;
     return Padding(
@@ -1420,7 +1437,7 @@ class _PageWidgetState extends State<PageWidget> {
         physics: const ClampingScrollPhysics(),
         children: [
           // Top border
-          _pageTopBorder(),
+          _pageTopBorder(topBorderHeight),
           // Divider
           if (Settings.instance.reflowMode)
             const Divider(color: Colors.grey, height: 1),
