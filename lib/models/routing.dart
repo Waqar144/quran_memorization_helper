@@ -17,8 +17,13 @@ class ParaMutashabihatArgs {
 class ReadOnlyQuranPageArgs {
   final ParaAyatModel model;
   final int page;
+  final List<int> ayahsToHighlight;
 
-  ReadOnlyQuranPageArgs(this.model, this.page);
+  ReadOnlyQuranPageArgs(
+    this.model,
+    this.page, {
+    this.ayahsToHighlight = const [],
+  });
 }
 
 class QuranSearchPageArgs {

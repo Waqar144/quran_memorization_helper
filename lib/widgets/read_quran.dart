@@ -88,6 +88,20 @@ TextStyle _mutStyle(bool dark) {
   return _mutStyleLight;
 }
 
+TextStyle _highlightStyle(bool dark) {
+  final TextStyle _highlihtStyleLight = TextStyle(
+    inherit: true,
+    backgroundColor: Colors.yellow.shade300,
+  );
+
+  if (dark) {
+    return _highlihtStyleLight.copyWith(
+      backgroundColor: Colors.yellow.withAlpha(80),
+    );
+  }
+  return _highlihtStyleLight;
+}
+
 double _availableHeight(BuildContext context) {
   // top,bottom padding, will include notch and stuff
   final mqPadding = MediaQuery.paddingOf(context);
@@ -357,6 +371,7 @@ class ReadQuranWidget extends StatefulWidget {
   final VoidCallback verticalScrollResetFn;
   final Function(int) pageChangedCallback;
   final Orientation orientation;
+  final List<int> ayahsToHighlight;
 
   const ReadQuranWidget(
     this.model, {
@@ -365,6 +380,7 @@ class ReadQuranWidget extends StatefulWidget {
     required this.verticalScrollResetFn,
     required this.pageChangedCallback,
     required this.orientation,
+    this.ayahsToHighlight = const [],
   });
 
   @override
@@ -698,6 +714,16 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
     if (index >= _pages.length || index < 0) {
       return const SizedBox.shrink();
     }
+
+    List<int>? ayahsToHighlight;
+    if (widget.ayahsToHighlight.isNotEmpty) {
+      ayahsToHighlight =
+          _pages[index].lines
+              .where((line) => widget.ayahsToHighlight.contains(line.ayahIdx))
+              .map((line) => line.ayahIdx)
+              .toList();
+    }
+
     return PageWidget(
       index,
       _pages[index].pageNum,
@@ -714,6 +740,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
           widget.model.addBookmark(index);
         }
       },
+      ayahsToHighlight: ayahsToHighlight,
     );
   }
 
@@ -794,6 +821,7 @@ class PageWidget extends StatefulWidget {
   final Stream<int> repaintStream;
   final bool Function() isBookmarked;
   final void Function() onToggleBookmark;
+  final List<int>? ayahsToHighlight;
 
   const PageWidget(
     this.pageIndex,
@@ -805,6 +833,7 @@ class PageWidget extends StatefulWidget {
     required this.repaintStream,
     required this.isBookmarked,
     required this.onToggleBookmark,
+    required this.ayahsToHighlight,
     super.key,
   });
 
@@ -1074,6 +1103,15 @@ class _PageWidgetState extends State<PageWidget> {
         } else if (isMutashabihaAyat) {
           style = _mutStyle(darkMode);
         }
+
+        if (widget.ayahsToHighlight?.contains(a.ayahIndex) ?? false) {
+          if (style != null) {
+            style = style.merge(_highlightStyle(darkMode));
+          } else {
+            style = _highlightStyle(darkMode);
+          }
+        }
+
         // word
         spans.add(TextSpan(recognizer: tapHandler, text: w, style: style));
         // space

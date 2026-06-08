@@ -121,7 +121,11 @@ class _QuranSearchPageState extends State<QuranSearchPage> {
     final page = getPageForAyah(ayahIndex, Settings.instance.mushaf);
     Navigator.of(context).pushNamed(
       goToPageModal,
-      arguments: ReadOnlyQuranPageArgs(widget.args.model, page),
+      arguments: ReadOnlyQuranPageArgs(
+        widget.args.model,
+        page,
+        ayahsToHighlight: [ayahIndex],
+      ),
     );
   }
 

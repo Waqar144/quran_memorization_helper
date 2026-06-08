@@ -25,6 +25,7 @@ class ReadOnlyQuranPage extends StatelessWidget {
             return ReadQuranWidget(
               args.model,
               orientation: orientation,
+              ayahsToHighlight: args.ayahsToHighlight,
               pageController: PageController(
                 initialPage: args.page,
                 keepPage: false,
