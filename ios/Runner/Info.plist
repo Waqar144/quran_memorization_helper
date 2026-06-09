@@ -57,5 +57,9 @@
 		<true/>
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>The file picker in the app requires this permission however the app does not access the photo library.</string>
+		<key>NSCameraUsageDescription</key>
+		<string>The file picker in the app requires this permission however the app does not access the camera.</string>
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string>This location data is not used by the app but required by one of the libraries.</string>
 	</dict>
 </plist>
