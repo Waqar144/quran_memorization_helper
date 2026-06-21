@@ -6,7 +6,7 @@ import 'package:quran_memorization_helper/quran_data/pages.dart';
 class AppBarModel {
   final ParaAyatModel model;
   bool _inLongPress = false;
-  Future<void> Function(int page, bool animate) goToPage;
+  Future<void> Function(int page, {required bool animate}) goToPage;
 
   AppBarModel(this.model, this.goToPage);
 
@@ -46,7 +46,7 @@ class AppBarModel {
       nextPage = 0;
       animate = false;
     }
-    goToPage(nextPage, animate);
+    goToPage(nextPage, animate: animate);
   }
 
   void previousPage(int? currentPage) {
@@ -63,14 +63,14 @@ class AppBarModel {
       final mushaf = Settings.instance.mushaf;
       previousPage = pageCount(mushaf);
     }
-    goToPage(previousPage, animate);
+    goToPage(previousPage, animate: animate);
   }
 
   void nextPara(int currentPage) {
     final mushaf = Settings.instance.mushaf;
     final current = paraForPage(currentPage, mushaf);
     int page = current == 29 ? 0 : paraStartPage(current + 1, mushaf);
-    goToPage(page, false);
+    goToPage(page, animate: false);
   }
 
   void previousPara(int currentPage) {
@@ -78,7 +78,7 @@ class AppBarModel {
     final current = paraForPage(currentPage, mushaf);
     int juz = current == 0 ? 29 : current - 1;
     int page = paraStartPage(juz, mushaf);
-    goToPage(page, false);
+    goToPage(page, animate: false);
   }
 
   Future<void> longPressFwdBackButton(int currentPage, bool fwd) async {
@@ -91,7 +91,7 @@ class AppBarModel {
 
     while (currentPage < totalPages && currentPage >= 0) {
       if (_inLongPress == false) break;
-      await goToPage(currentPage * multiplier, true);
+      await goToPage(currentPage * multiplier, animate: true);
       currentPage += offset;
     }
   }

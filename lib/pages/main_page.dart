@@ -6,8 +6,10 @@ import 'package:quran_memorization_helper/models/settings.dart';
 import 'package:quran_memorization_helper/pages/page_constants.dart';
 import 'package:quran_memorization_helper/quran_data/ayat.dart';
 import 'package:quran_memorization_helper/quran_data/pages.dart';
+import 'package:quran_memorization_helper/quran_data/para_bounds.dart';
 import 'package:quran_memorization_helper/quran_data/quran_text.dart';
 import 'package:quran_memorization_helper/quran_data/surahs.dart';
+import 'package:quran_memorization_helper/widgets/go_to_surah_ayah_list_view.dart';
 import 'package:quran_memorization_helper/widgets/my_orientation_build.dart';
 import 'package:quran_memorization_helper/widgets/read_quran.dart';
 import 'package:quran_memorization_helper/widgets/search_dialog.dart';
@@ -39,7 +41,7 @@ class MainPageState extends State<MainPage>
 
   @override
   void initState() {
-    _drawerTabController = TabController(length: 2, vsync: this);
+    _drawerTabController = TabController(length: 3, vsync: this);
     _initialLoadFuture = _load();
 
     _currentFontStyle = Settings.instance.mushaf;
@@ -145,7 +147,7 @@ class MainPageState extends State<MainPage>
             )
             as int?;
     if (page != null) {
-      _goToPage(page, false);
+      _goToPage(page, animate: false);
     }
   }
 
@@ -154,7 +156,7 @@ class MainPageState extends State<MainPage>
         await Navigator.pushNamed(context, bookmarksPage, arguments: _paraModel)
             as int?;
     if (res != null) {
-      _goToPage(res, false);
+      _goToPage(res, animate: false);
     }
   }
 
@@ -252,11 +254,11 @@ class MainPageState extends State<MainPage>
     if (surahIndex >= 0 && surahIndex < 114) {
       final mushaf = Settings.instance.mushaf;
       int jumpToPage = surahStartPage(surahIndex, mushaf);
-      _goToPage(jumpToPage, false);
+      _goToPage(jumpToPage, animate: false);
     }
   }
 
-  Future<void> _goToPage(int page, bool animate) async {
+  Future<void> _goToPage(int page, {required bool animate}) async {
     // int x = page;
     page = mapToDualModePage(page);
     // print("mapped to : $x => $page");
@@ -288,7 +290,11 @@ class MainPageState extends State<MainPage>
           height: 48,
           child: TabBar(
             controller: _drawerTabController,
-            tabs: [Tab(text: paraText()), Tab(text: "Surah")],
+            tabs: [
+              Tab(text: paraText()),
+              Tab(text: "Surah"),
+              Tab(text: "Ayah"),
+            ],
           ),
         ),
         Expanded(
@@ -300,7 +306,7 @@ class MainPageState extends State<MainPage>
                 currentParaIdx: currentParaIdx,
                 onParaTapped: (int idx) {
                   final mushaf = Settings.instance.mushaf;
-                  _goToPage(paraStartPage(idx, mushaf), false);
+                  _goToPage(paraStartPage(idx, mushaf), animate: false);
                   Navigator.of(context).pop();
                 },
               ),
@@ -308,6 +314,14 @@ class MainPageState extends State<MainPage>
                 currentPage: _pageController.page?.floor() ?? 0,
                 onSurahTapped: (int idx) {
                   _onSurahTapped(idx);
+                  Navigator.of(context).pop();
+                },
+              ),
+              GotoSurahAyahListView(
+                currentPage: _pageController.page?.floor() ?? 0,
+                onGoToAyah: (int ayahIdx) {
+                  int page = getPageForAyah(ayahIdx, Settings.instance.mushaf);
+                  _goToPage(page, animate: false);
                   Navigator.of(context).pop();
                 },
               ),
@@ -328,7 +342,8 @@ class MainPageState extends State<MainPage>
           () => _appBarModel.nextPage,
       const SingleActivator(LogicalKeyboardKey.pageUp):
           () => _appBarModel.previousPage,
-      const SingleActivator(LogicalKeyboardKey.home): () => _goToPage(0, false),
+      const SingleActivator(LogicalKeyboardKey.home):
+          () => _goToPage(0, animate: false),
       const SingleActivator(LogicalKeyboardKey.end): () {
         _appBarModel.nextPara(_pageController.page?.round() ?? 0);
         _appBarModel.previousPage(_pageController.page?.round());

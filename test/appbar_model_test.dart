@@ -12,11 +12,11 @@ void main() {
   ParaAyatModel model = ParaAyatModel();
   int resultPage = -1;
 
-  Future<void> testGoToPage(int page, bool animate) async {
+  Future<void> testGoToPage(int page, {required bool animate}) async {
     resultPage = page;
   }
 
-  Future<void> testGoToPageAnimated(int page, bool animate) async {
+  Future<void> testGoToPageAnimated(int page, {required bool animate}) async {
     await Future.delayed(const Duration(milliseconds: 120), () {});
     resultPage = page;
   }
