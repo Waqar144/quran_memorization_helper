@@ -7,7 +7,7 @@ import 'package:quran_memorization_helper/models/settings.dart';
 int lastSurah = 0;
 double? lastScrollPosition;
 
-class SurahListView extends StatelessWidget {
+class SurahListView extends StatefulWidget {
   final int currentPage;
   final void Function(int) onSurahTapped;
   const SurahListView({
@@ -17,15 +17,29 @@ class SurahListView extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final mushaf = Settings.instance.mushaf;
-    final isIndoPk = isIndoPak(mushaf);
-    int currentSurah = surahForPage(currentPage, mushaf);
-    double surahScrollTo =
-        lastScrollPosition != null && lastSurah == currentSurah
-            ? lastScrollPosition!
-            : 48 * currentSurah.toDouble();
-    final surahListScrollController = ScrollController(
+  State<SurahListView> createState() => _SurahListViewState();
+}
+
+class _SurahListViewState extends State<SurahListView> {
+  late final ScrollController surahListScrollController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    int currentSurah = surahForPage(
+      widget.currentPage,
+      Settings.instance.mushaf,
+    );
+
+    double surahScrollTo;
+    if (lastScrollPosition != null && lastSurah == currentSurah) {
+      surahScrollTo = lastScrollPosition!;
+    } else {
+      surahScrollTo = 48 * currentSurah.toDouble();
+    }
+
+    surahListScrollController = ScrollController(
       initialScrollOffset: surahScrollTo,
       keepScrollOffset: false,
     );
@@ -33,6 +47,22 @@ class SurahListView extends StatelessWidget {
       lastScrollPosition = surahListScrollController.offset;
     });
     lastSurah = currentSurah;
+  }
+
+  @override
+  void dispose() {
+    surahListScrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final mushaf = Settings.instance.mushaf;
+    final isIndoPk = isIndoPak(mushaf);
+    int currentSurah = surahForPage(
+      widget.currentPage,
+      Settings.instance.mushaf,
+    );
 
     return ListView.builder(
       controller: surahListScrollController,
@@ -80,7 +110,7 @@ class SurahListView extends StatelessWidget {
             ),
             selected: currentSurah == index,
             selectedTileColor: Theme.of(context).highlightColor,
-            onTap: () => onSurahTapped(index),
+            onTap: () => widget.onSurahTapped(index),
           ),
         );
       },

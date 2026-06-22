@@ -36,6 +36,12 @@ class _GotoSurahAyahListViewState extends State<GotoSurahAyahListView> {
   }
 
   @override
+  void dispose() {
+    wheelScrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final mushaf = Settings.instance.mushaf;
 

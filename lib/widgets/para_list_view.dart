@@ -6,8 +6,9 @@ import 'package:quran_memorization_helper/utils/utils.dart';
 
 int lastPara = 0;
 double? lastScrollPosition;
+const double itemHeight = 48.0;
 
-class ParaListView extends StatelessWidget {
+class ParaListView extends StatefulWidget {
   final int currentParaIdx;
   final void Function(int) onParaTapped;
   final ParaAyatModel model;
@@ -18,25 +19,38 @@ class ParaListView extends StatelessWidget {
     super.key,
   });
 
-  double _getInitialScrollPosition(BuildContext context) {
-    if (lastScrollPosition != null && lastPara == currentParaIdx) {
+  @override
+  State<ParaListView> createState() => _ParaListViewState();
+}
+
+class _ParaListViewState extends State<ParaListView> {
+  late final ScrollController paraListScrollController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    paraListScrollController = ScrollController(
+      initialScrollOffset: _getInitialScrollPosition(),
+      keepScrollOffset: false,
+    );
+    paraListScrollController.addListener(() {
+      lastScrollPosition = paraListScrollController.offset;
+    });
+    lastPara = widget.currentParaIdx;
+  }
+
+  @override
+  void dispose() {
+    paraListScrollController.dispose();
+    super.dispose();
+  }
+
+  double _getInitialScrollPosition() {
+    if (lastScrollPosition != null && lastPara == widget.currentParaIdx) {
       return lastScrollPosition!;
     }
-
-    int maxVisibleItems =
-        ((MediaQuery.sizeOf(context).height - (48 + 4)) / 48).floor();
-    const totalParas = 30;
-    final maxScrollablePara =
-        totalParas -
-        maxVisibleItems; // if we scroll to the bottom, this para is visible at top
-
-    int paraScrollTo = 0;
-    if (currentParaIdx > 8 && currentParaIdx < 20) {
-      paraScrollTo = 48 * (currentParaIdx - 3);
-    } else if (currentParaIdx > maxScrollablePara) {
-      paraScrollTo = 48 * maxScrollablePara;
-    }
-    return paraScrollTo.toDouble();
+    return widget.currentParaIdx * itemHeight;
   }
 
   Widget paraListItem(int index, int count, BuildContext context) {
@@ -81,8 +95,8 @@ class ParaListView extends StatelessWidget {
             ),
           ],
         ),
-        onTap: () => onParaTapped(index),
-        selected: currentParaIdx == index,
+        onTap: () => widget.onParaTapped(index),
+        selected: widget.currentParaIdx == index,
         selectedTileColor: Theme.of(context).highlightColor,
       ),
     );
@@ -90,22 +104,14 @@ class ParaListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final paraListScrollController = ScrollController(
-      initialScrollOffset: _getInitialScrollPosition(context),
-      keepScrollOffset: false,
-    );
-    paraListScrollController.addListener(() {
-      lastScrollPosition = paraListScrollController.offset;
-    });
-    lastPara = currentParaIdx;
-    final counts = model.markedAyahCountsByPara();
+    final counts = widget.model.markedAyahCountsByPara();
 
     return ListView.builder(
       key: const PageStorageKey("para_list_view"),
       controller: paraListScrollController,
       scrollDirection: Axis.vertical,
       itemCount: 30,
-      itemExtent: 48,
+      itemExtent: itemHeight,
       itemBuilder: (context, index) {
         return paraListItem(index, counts[index], context);
       },

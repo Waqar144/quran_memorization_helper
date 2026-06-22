@@ -58,6 +58,9 @@ class MainPageState extends State<MainPage>
     _paraModel.dispose();
     WidgetsBinding.instance.removeObserver(this);
     Settings.instance.removeListener(_onSettingsChanged);
+    _scrollController.dispose();
+    _drawerTabController.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
