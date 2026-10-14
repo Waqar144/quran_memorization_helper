@@ -843,6 +843,9 @@ class PageWidget extends StatefulWidget {
 
 class _PageWidgetState extends State<PageWidget> {
   StreamSubscription<int>? _subscription;
+  // Recognizers attached to the text spans of the last build, they must be
+  // disposed by us
+  final List<GestureRecognizer> _recognizers = [];
 
   // These variables are used to optimize ayah portion lookup in the
   // full ayah text
@@ -861,8 +864,16 @@ class _PageWidgetState extends State<PageWidget> {
 
   @override
   void dispose() {
+    _disposeRecognizers();
     super.dispose();
     _subscription?.cancel();
+  }
+
+  void _disposeRecognizers() {
+    for (final r in _recognizers) {
+      r.dispose();
+    }
+    _recognizers.clear();
   }
 
   Widget _getBism(TextStyle style, double rowHeight) {
@@ -987,6 +998,11 @@ class _PageWidgetState extends State<PageWidget> {
     return wordIndex;
   }
 
+  T _addRecognizer<T extends GestureRecognizer>(T recognizer) {
+    _recognizers.add(recognizer);
+    return recognizer;
+  }
+
   List<TextSpan> _buildLineSpans(
     Line line,
     int lineIdx,
@@ -1040,11 +1056,6 @@ class _PageWidgetState extends State<PageWidget> {
         }
 
         int wordIdx = i;
-        final tapHandler = TapAndLongPressGestureRecognizer(
-          onTap: () => widget.onAyahTapped(a.ayahIndex, wordIdx, false),
-          onLongPress: () => widget.onAyahTapped(a.ayahIndex, wordIdx, true),
-        );
-
         TextStyle? style;
 
         if (w.contains("\u06dd")) {
@@ -1073,8 +1084,10 @@ class _PageWidgetState extends State<PageWidget> {
               text: hasRukuMarker ? " $w" : w,
               recognizer:
                   hasRukuMarker
-                      ? (TapGestureRecognizer()
-                        ..onTap = () => _onRukuTapped(a.ayahIndex))
+                      ? _addRecognizer(
+                        TapGestureRecognizer()
+                          ..onTap = () => _onRukuTapped(a.ayahIndex),
+                      )
                       : null,
               style: TextStyle(
                 inherit: true,
@@ -1111,6 +1124,13 @@ class _PageWidgetState extends State<PageWidget> {
             style = _highlightStyle(darkMode);
           }
         }
+
+        final tapHandler = _addRecognizer(
+          TapAndLongPressGestureRecognizer(
+            onTap: () => widget.onAyahTapped(a.ayahIndex, wordIdx, false),
+            onLongPress: () => widget.onAyahTapped(a.ayahIndex, wordIdx, true),
+          ),
+        );
 
         // word
         spans.add(TextSpan(recognizer: tapHandler, text: w, style: style));
@@ -1453,6 +1473,9 @@ class _PageWidgetState extends State<PageWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // The spans from the previous build are being replaced
+    _disposeRecognizers();
+
     final numPageLines = switch (Settings.instance.mushaf) {
       Mushaf.Indopak16Line => 16,
       Mushaf.Indopak15Line || Mushaf.Uthmani15Line => 15,
