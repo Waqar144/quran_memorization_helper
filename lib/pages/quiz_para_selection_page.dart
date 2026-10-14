@@ -4,12 +4,24 @@ import 'package:quran_memorization_helper/models/routing.dart';
 import 'package:quran_memorization_helper/models/settings.dart';
 import 'package:quran_memorization_helper/widgets/title_app_bar.dart';
 
-class QuizParaSelectionPage extends StatelessWidget {
+class QuizParaSelectionPage extends StatefulWidget {
+  const QuizParaSelectionPage({super.key});
+
+  @override
+  State<QuizParaSelectionPage> createState() => _QuizParaSelectionPageState();
+}
+
+class _QuizParaSelectionPageState extends State<QuizParaSelectionPage> {
   final ValueNotifier<List<int>> _selectedParas = ValueNotifier([]);
   final List<String> _quizModes = ["Next Ayah", "Ayah End", "Mix"];
   final ValueNotifier<QuizMode> _quizMode = ValueNotifier(QuizMode.nextAyah);
 
-  QuizParaSelectionPage({super.key});
+  @override
+  void dispose() {
+    _selectedParas.dispose();
+    _quizMode.dispose();
+    super.dispose();
+  }
 
   void _onDone(BuildContext context) {
     if (_selectedParas.value.isEmpty) {
