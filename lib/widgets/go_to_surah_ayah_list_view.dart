@@ -44,6 +44,7 @@ class _GotoSurahAyahListViewState extends State<GotoSurahAyahListView> {
   void dispose() {
     wheelScrollController.dispose();
     surahScrollController.dispose();
+    currentSelectedSurah.dispose();
     super.dispose();
   }
 
