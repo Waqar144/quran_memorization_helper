@@ -21,6 +21,7 @@ class GotoSurahAyahListView extends StatefulWidget {
 class _GotoSurahAyahListViewState extends State<GotoSurahAyahListView> {
   final currentSelectedSurah = ValueNotifier<int>(0);
   late final FixedExtentScrollController wheelScrollController;
+  late final ScrollController surahScrollController;
   int currentSelectedSurahAyah = 0;
 
   @override
@@ -32,12 +33,17 @@ class _GotoSurahAyahListViewState extends State<GotoSurahAyahListView> {
     wheelScrollController = FixedExtentScrollController(
       keepScrollOffset: false,
     );
+    surahScrollController = ScrollController(
+      initialScrollOffset: 48 * currentSelectedSurah.value.toDouble(),
+      keepScrollOffset: false,
+    );
     super.initState();
   }
 
   @override
   void dispose() {
     wheelScrollController.dispose();
+    surahScrollController.dispose();
     super.dispose();
   }
 
@@ -84,13 +90,9 @@ class _GotoSurahAyahListViewState extends State<GotoSurahAyahListView> {
 
   Widget _buildSurahList(Mushaf mushaf, int currentSurah) {
     final isIndoPk = isIndoPak(mushaf);
-    double surahScrollTo = 48 * currentSurah.toDouble();
 
     return ListView.builder(
-      controller: ScrollController(
-        initialScrollOffset: surahScrollTo,
-        keepScrollOffset: false,
-      ),
+      controller: surahScrollController,
       scrollDirection: Axis.vertical,
       itemCount: 114,
       itemExtent: 48,
