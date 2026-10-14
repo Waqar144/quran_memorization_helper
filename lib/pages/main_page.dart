@@ -78,6 +78,9 @@ class MainPageState extends State<MainPage>
     if (ok) {
       int jumpToPage = Settings.instance.currentReadingPage;
       try {
+        // The PageView is only built after loading, so the initial
+        // controller was never attached
+        _pageController.dispose();
         _pageController = PageController(initialPage: jumpToPage);
         _appBarModel = AppBarModel(_paraModel, _goToPage);
       } catch (e) {
