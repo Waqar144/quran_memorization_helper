@@ -433,6 +433,7 @@ class _ReadQuranWidget extends State<ReadQuranWidget>
   void dispose() {
     widget.model.removeListener(onModelChanged);
     Settings.instance.removeListener(clearCachedTranslation);
+    _repaintNotifier.close();
     super.dispose();
     WakelockPlus.disable();
   }
@@ -865,8 +866,8 @@ class _PageWidgetState extends State<PageWidget> {
   @override
   void dispose() {
     _disposeRecognizers();
-    super.dispose();
     _subscription?.cancel();
+    super.dispose();
   }
 
   void _disposeRecognizers() {
