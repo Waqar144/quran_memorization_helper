@@ -8,6 +8,9 @@ jobs:
     # Only run this job if the branch name starts with 'release/'
     name: android store release
     runs-on: ubuntu-latest
+    permissions:
+      # Needed to create GitHub releases and upload APKs to them
+      contents: write
     env:
       # Setup env variables that will be used throughout the workflow
       JAVA_VERSION: 21.0
@@ -16,6 +19,7 @@ jobs:
       KEYSTORE_PATH: android/upload-keystore.jks
       KEY_PROPS_PATH: android/key.properties
       SERVICE_ACCOUNT_PATH: store_credentials.json
+      APK_DIR: build/app/outputs/flutter-apk
     steps:
       # Checkout repository codebase
       - name: Checkout the code
@@ -66,6 +70,35 @@ jobs:
         with:
           name: aab-stores
           path: ${{ env.AAB_PATH }}
+
+      # Build per-ABI release APKs for the GitHub release
+      - name: Build apks
+        run: |
+          flutter build apk --release --split-per-abi
+
+      # Create (or update) the GitHub release for the current pubspec version
+      # and upload the APKs to it. The tag is the plain version (e.g. 1.8.3),
+      # matching what bump_version.sh creates; if the tag hasn't been pushed
+      # yet, it is created at the commit this workflow ran on.
+      - name: Upload apks to GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | sed 's/^version: //' | cut -d '+' -f 1)
+          mkdir -p release-apks
+          for apk in ${{ env.APK_DIR }}/app-*-release.apk; do
+            abi=$(basename "$apk" | sed -E 's/^app-(.*)-release\.apk$/\1/')
+            cp "$apk" "release-apks/quran_revision_companion-${VERSION}-${abi}.apk"
+          done
+          ls -l release-apks
+          if gh release view "$VERSION" > /dev/null 2>&1; then
+            gh release upload "$VERSION" release-apks/*.apk --clobber
+          else
+            gh release create "$VERSION" release-apks/*.apk \
+              --title "$VERSION" \
+              --target "${{ github.sha }}" \
+              --generate-notes
+          fi
 
       # Deploy bundle to Google Play internal testing
       - name: Deploy to Play Store (Internal testing)
